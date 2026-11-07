@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">SafeRoute</string>
+    <string name="slogan_text">Cùng bạn về nhà an toàn</string>
+    <string name="btn_start">Bắt đầu</string>
+
+    <!-- Đăng nhập -->
+    <string name="title_login">Đăng nhập</string>
+    <string name="label_email">Email</string>
+    <string name="hint_email">example@email.com</string>
+    <string name="label_password">Mật khẩu</string>
+    <string name="hint_password">••••••••</string>
+    <string name="action_forgot_password">Quên mật khẩu?</string>
+    <string name="btn_login">ĐĂNG NHẬP</string>
+    <string name="prompt_no_account">Chưa có tài khoản? </string>
+    <string name="action_register_link">Đăng ký</string>
+    <string name="divider_or_login">Hoặc đăng nhập với</string>
+
+    <!-- Đăng ký -->
+    <string name="title_register">Đăng ký</string>
+    <string name="label_fullname">Họ và tên</string>
+    <string name="hint_fullname">Nguyễn Văn A</string>
+    <string name="label_confirm_password">Xác nhận mật khẩu</string>
+    <string name="btn_register">ĐĂNG KÝ</string>
+    <string name="prompt_has_account">Đã có tài khoản? </string>
+    <string name="action_login_link">Đăng nhập</string>
+    <string name="divider_or_register">Hoặc đăng ký với</string>
+
+    <!-- My Reports -->
+    <string name="title_my_reports">Báo cáo của tôi</string>
+    <string name="subtitle_my_reports">Theo dõi trạng thái xử lý các điểm cảnh báo</string>
+    <string name="tab_all">Tất cả</string>
+    <string name="tab_pending">Chờ xác minh</string>
+    <string name="tab_verified">Đã xác minh</string>
+    <string name="tab_rejected">Từ chối</string>
+    <string name="empty_my_reports">Bạn chưa có báo cáo nào</string>
+    <string name="btn_new_report">Tạo báo cáo mới</string>
+
+    <!-- Report Detail & Voting -->
+    <string name="title_report_detail">Chi tiết báo cáo</string>
+    <string name="header_timeline">Lịch sử xử lý</string>
+    <string name="header_community_vote">Ý kiến từ cộng đồng</string>
+    <string name="community_vote_desc">Bạn có quan sát thấy nguy cơ này ngoài thực tế không?</string>
+    <string name="vote_support">Có dấu hiệu hư hỏng ngoài thực tế</string>
+    <string name="vote_oppose">Không thấy tại vị trí được báo</string>
+    <string name="vote_unsure">Chưa thể xác định</string>
+    <string name="btn_send_vote">Gửi ý kiến cộng đồng</string>
+    <string name="vote_disclaimer">Lưu ý: Ý kiến cộng đồng là dữ liệu hỗ trợ, KHÔNG thay thế quyết định của người kiểm duyệt. Báo cáo không tự động chuyển thành VERIFIED.</string>
+
+    <!-- Reviewer -->
+    <string name="title_reviewer_workspace">Khu vực kiểm duyệt</string>
+    <string name="subtitle_reviewer_workspace">Quyết định dựa trên bằng chứng, không dựa duy nhất vào confidence AI.</string>
+    <string name="tab_review_pending">Chờ duyệt</string>
+    <string name="tab_review_history">Lịch sử duyệt</string>
+    <string name="btn_verify">Xác minh</string>
+    <string name="btn_reject">Từ chối</string>
+    <string name="reject_reason_title">Lý do từ chối (Bắt buộc)</string>
+    <string name="reject_reason_hint">Viết lý do cụ thể để lưu nhật ký kiểm toán...</string>
+    <string name="warning_reviewer_invariants">Người xét duyệt phải kiểm tra ảnh và bối cảnh. AI confidence không tự tạo trạng thái VERIFIED.</string>
+
+    <!-- Thông báo lỗi / trạng thái -->
+    <string name="err_empty_fields">Vui lòng điền đầy đủ thông tin</string>
+    <string name="err_invalid_email">Email không đúng định dạng</string>
+    <string name="err_password_short">Mật khẩu tối thiểu 6 ký tự</string>
+    <string name="err_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="msg_login_success">Đăng nhập thành công</string>
+    <string name="msg_register_success">Đăng ký tài khoản thành công</string>
+    <string name="msg_vote_success">Đã ghi nhận ý kiến của bạn!</string>
+    <string name="msg_review_verified">Đã chuyển trạng thái sang VERIFIED</string>
+    <string name="msg_review_rejected">Đã chuyển trạng thái sang REJECTED</string>
+</resources>

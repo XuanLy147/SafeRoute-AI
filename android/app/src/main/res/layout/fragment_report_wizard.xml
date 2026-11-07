@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Top Bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Quay lại"
+                android:src="@android:drawable/ic_menu_revert" />
+
+            <TextView
+                android:id="@+id/tvReportTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:fontFamily="sans-serif-medium"
+                android:text="Báo cáo nguy cơ"
+                android:textColor="@color/text_title"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btnOpenReports"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Báo cáo của tôi"
+                android:src="@android:drawable/ic_menu_recent_history" />
+
+            <ImageButton
+                android:id="@+id/btnOpenProfile"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Hồ sơ cá nhân"
+                android:src="@android:drawable/ic_menu_myplaces" />
+
+            <ImageButton
+                android:id="@+id/btnOpenReview"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Khu vực reviewer"
+                android:src="@android:drawable/ic_menu_edit"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Image Container with Overlay -->
+        <FrameLayout
+            android:id="@+id/containerImage"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@drawable/bg_edit_text">
+
+            <!-- Empty Placeholder -->
+            <LinearLayout
+                android:id="@+id/layoutPlaceholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📷"
+                    android:textSize="36sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="Chụp ảnh hoặc chọn từ máy"
+                    android:textColor="@color/text_body"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Ảnh rõ mặt đường để AI phân tích tốt nhất"
+                    android:textColor="@color/text_hint"
+                    android:textSize="12sp" />
+            </LinearLayout>
+
+            <!-- Selected Image -->
+            <ImageView
+                android:id="@+id/imgPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="Ảnh mặt đường"
+                android:scaleType="centerCrop"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <!-- Bounding Box Overlay -->
+            <com.comeforfood.saferoute.feature.report.BoundingBoxOverlayView
+                android:id="@+id/bboxOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+        <!-- Photo Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnPickGallery"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginEnd="6dp"
+                android:layout_weight="1"
+                android:text="Thư viện ảnh"
+                android:textAllCaps="false"
+                android:textColor="@color/brand_primary"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/brand_primary" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSimulateAi"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="6dp"
+                android:layout_weight="1"
+                android:backgroundTint="@color/brand_primary"
+                android:text="Mô phỏng AI"
+                android:textAllCaps="false"
+                android:textColor="@color/white"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+
+        <!-- AI Result Box -->
+        <LinearLayout
+            android:id="@+id/cardAiResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_edit_text"
+            android:orientation="vertical"
+            android:padding="14dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvAiTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:text="Chưa kết nối AI"
+                android:textColor="@color/brand_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvAiDetectionSummary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Kết quả mô phỏng chỉ dùng để xem trước giao diện."
+                android:textColor="@color/text_title"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvAiDisclaimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="⚠️ AI chỉ gợi ý nhãn ban đầu. Bạn có quyền xác nhận hoặc chỉnh sửa nhãn bên dưới."
+                android:textColor="@color/text_label"
+                android:textSize="11.5sp" />
+        </LinearLayout>
+
+        <!-- GPS Location Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Vị trí ghi nhận"
+            android:textColor="@color/text_label"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edit_text"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📍"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/tvCoordinates"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="Đ. Võ Văn Kiệt, Quận 5 (10.7542, 106.6631)"
+                android:textColor="@color/text_body"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/btnAdjustPin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đổi ghim"
+                android:textColor="@color/brand_primary"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Category Selector -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Loại hư hỏng (Xác nhận của bạn)"
+            android:textColor="@color/text_label"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipD40"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="D40 · Ổ gà" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipD00"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="D00 · Nứt dọc" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipD10"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="D10 · Nứt ngang" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipD20"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="D20 · Nứt mạng nhện" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipRepair"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vết sửa chữa" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipFlood"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ngập nước (Thủ công)" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipObstacle"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Vật cản (Thủ công)" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Severity Selector -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Mức độ nghiêm trọng"
+            android:textColor="@color/text_label"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupSeverity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSevLow"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhẹ" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSevMedium"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Trung bình" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSevHigh"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nghiêm trọng" />
+        </com.google.android.material.chip.ChipGroup>
+
+        <!-- Description -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Mô tả hiện trường (không bắt buộc)"
+            android:textColor="@color/text_label"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/etDescription"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_edit_text"
+            android:gravity="top|start"
+            android:hint="Ví dụ: Ổ gà sâu gần lề đường, có đọng nước..."
+            android:inputType="textMultiLine"
+            android:padding="12dp"
+            android:textColor="@color/text_title"
+            android:textColorHint="@color/text_hint"
+            android:textSize="13sp" />
+
+        <!-- Status notice -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="ℹ️ Báo cáo sẽ có trạng thái CHỜ XÁC MINH (PENDING_VERIFICATION) và hiển thị cho cộng đồng góp ý."
+            android:textColor="@color/text_hint"
+            android:textSize="11.5sp" />
+
+        <!-- Submit Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitReport"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="24dp"
+            android:backgroundTint="@color/brand_primary"
+            android:fontFamily="sans-serif-medium"
+            android:text="GỬI BÁO CÁO"
+            android:textColor="@color/white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:elevation="4dp" />
+
+    </LinearLayout>
+</ScrollView>

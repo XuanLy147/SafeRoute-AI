@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_screen"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Quay lại"
+            android:src="@android:drawable/ic_menu_revert" />
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Hồ sơ cá nhân"
+            android:textColor="@color/text_title"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/sectionBackBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSectionBack"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="← Hồ sơ"
+            android:textAllCaps="false" />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/profileContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="18dp"
+                    app:strokeColor="@color/divider_color"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="18dp">
+
+                        <TextView
+                            android:id="@+id/tvFullName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Người dùng SafeRoute"
+                            android:textColor="@color/text_title"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvEmail"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="user@example.com"
+                            android:textColor="@color/text_label"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:id="@+id/tvRole"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_badge_info"
+                            android:padding="7dp"
+                            android:text="Vai trò: USER"
+                            android:textColor="@color/color_info"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnMyReports"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="16dp"
+                    android:text="Lịch sử báo cáo"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnSettings"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Cài đặt"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPrivacy"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Quyền riêng tư"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnFeedback"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:text="Góp ý về báo cáo"
+                    android:textAllCaps="false"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnReviewer"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="8dp"
+                    android:backgroundTint="@color/brand_primary"
+                    android:text="Khu vực reviewer"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/settingsContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_badge_info"
+                    android:padding="10dp"
+                    android:text="Một số tùy chọn chỉ là giao diện; chưa được lưu vào máy chủ."
+                    android:textColor="@color/color_info"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="Thông báo trạng thái báo cáo"
+                    android:textColor="@color/text_body" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Thông báo cập nhật cộng đồng"
+                    android:textColor="@color/text_body" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/privacyContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@drawable/bg_badge_info"
+                    android:padding="10dp"
+                    android:text="Vị trí và ảnh chỉ nên được dùng cho mục đích ghi nhận báo cáo theo chính sách đã công bố."
+                    android:textColor="@color/color_info"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchLocationConsent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:text="Cho phép dùng vị trí khi tạo báo cáo"
+                    android:textColor="@color/text_body" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Bạn vẫn có thể chọn ghim thủ công nếu không cấp quyền GPS. Cài đặt này hiện chỉ minh họa và chưa được lưu."
+                    android:textColor="@color/text_label"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </FrameLayout>
+    </ScrollView>
+</LinearLayout>
