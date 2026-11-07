@@ -6,7 +6,12 @@ from app.modules.routing.fixtures import FIXTURE_DESTINATION, FIXTURE_ORIGIN
 client = TestClient(app)
 
 
-def test_routing_compare_success():
+def test_routing_compare_success(monkeypatch):
+    from app.modules.routing.adapter import GoogleRoutesAdapter
+    from app.modules.routing.fixtures import FIXTURE_GOOGLE_ROUTES_TWO_CANDIDATES
+
+    candidates = GoogleRoutesAdapter().parse_routes_response(FIXTURE_GOOGLE_ROUTES_TWO_CANDIDATES)
+    monkeypatch.setattr(GoogleRoutesAdapter, "compute_routes", lambda *a, **kw: candidates)
     """Kiểm tra gọi POST /api/v1/routes/compare trả về 200 OK kèm danh sách tuyến và đề xuất an toàn."""
     payload = {
         "origin": FIXTURE_ORIGIN,

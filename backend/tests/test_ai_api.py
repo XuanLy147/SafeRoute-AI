@@ -1,4 +1,6 @@
 import io
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 from fastapi.testclient import TestClient
 
@@ -22,14 +24,15 @@ def test_checkpoint_checksum_valid():
     assert ai_service._verify_checksum() is True
 
 
-def test_ai_detect_with_blank_image_returns_empty_detections():
+def test_ai_detect_with_blank_image_returns_empty_detections(monkeypatch):
+    model = Mock()
+    model.predict.return_value = [SimpleNamespace(boxes=[])]
+    monkeypatch.setattr(ai_service, "model", model)
+    monkeypatch.setattr(ai_service, "checksum_valid", True)
     """Quy tắc an toàn AI: Khi ảnh không phát hiện nguy cơ, server trả về detections: [] và HTTP 200 OK."""
     image_file = io.BytesIO(VALID_PNG_BYTES)
 
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("normal_road.png", image_file, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("normal_road.png", image_file, "image/png")})
     assert response.status_code == 200
     data = response.json()
     assert "model_version" in data
@@ -38,14 +41,19 @@ def test_ai_detect_with_blank_image_returns_empty_detections():
     assert data["detections"] == []
 
 
-def test_ai_detect_with_hazard_image_returns_detections():
+def test_ai_detect_with_hazard_image_returns_detections(monkeypatch):
+    box = Mock()
+    box.cls.__getitem__ = Mock(return_value=Mock(item=Mock(return_value=3)))
+    box.conf.__getitem__ = Mock(return_value=Mock(item=Mock(return_value=0.88)))
+    box.xyxyn.__getitem__ = Mock(return_value=Mock(tolist=Mock(return_value=[0.1, 0.2, 0.7, 0.8])))
+    model = Mock()
+    model.predict.return_value = [SimpleNamespace(boxes=[box])]
+    monkeypatch.setattr(ai_service, "model", model)
+    monkeypatch.setattr(ai_service, "checksum_valid", True)
     """Kiểm tra cấu trúc detection item trả về: class_code, class_name, confidence, bbox."""
     image_file = io.BytesIO(VALID_PNG_BYTES)
 
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("pothole_d40.png", image_file, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("pothole_d40.png", image_file, "image/png")})
     assert response.status_code == 200
     data = response.json()
     assert data["model_version"] in ("SafeRoute-YOLOv12s-v1.1", "MOCK_FOR_DEV-v1.0")
@@ -54,29 +62,24 @@ def test_ai_detect_with_hazard_image_returns_detections():
     first_det = data["detections"][0]
     assert first_det["class_code"] == "D40"
     assert first_det["class_name"] == "Pothole"
+    assert first_det["bbox"] == [0.1, 0.2, 0.7, 0.8]
     assert 0.0 <= first_det["confidence"] <= 1.0
     assert len(first_det["bbox"]) == 4
 
 
 def test_ai_detect_invalid_mime_type_returns_400():
     txt_file = io.BytesIO(b"not an image")
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("malicious.sh", txt_file, "text/x-sh")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("malicious.sh", txt_file, "text/x-sh")})
     assert response.status_code == 400
-    assert "Định dạng file không hợp lệ" in response.json()["detail"]
+    assert "Invalid or truncated image" in response.json()["detail"]
 
 
 def test_ai_detect_magic_bytes_mismatch_returns_400():
     """Kiểm tra bảo mật: Khai báo image/png nhưng gửi text payload -> Magic bytes mismatch -> 400."""
     fake_png = io.BytesIO(b"This is plain text pretending to be PNG")
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("fake.png", fake_png, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("fake.png", fake_png, "image/png")})
     assert response.status_code == 400
-    assert "Magic bytes mismatch" in response.json()["detail"]
+    assert "Invalid or truncated image" in response.json()["detail"]
 
 
 def test_ai_detect_corrupted_image_stream_returns_400():
@@ -84,13 +87,10 @@ def test_ai_detect_corrupted_image_stream_returns_400():
     corrupted_png = b"\x89PNG\r\n\x1a\n" + b"Corrupted broken trailing data without IHDR or IEND"
     image_file = io.BytesIO(corrupted_png)
 
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("corrupt.png", image_file, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("corrupt.png", image_file, "image/png")})
     assert response.status_code == 400
     detail = response.json()["detail"]
-    assert "Dữ liệu ảnh không hợp lệ" in detail or "hỏng" in detail or "giải mã" in detail
+    assert detail == "Invalid or truncated image"
 
 
 def test_ai_detect_oversized_image_returns_413():
@@ -98,12 +98,9 @@ def test_ai_detect_oversized_image_returns_413():
     large_payload = b"\x89PNG\r\n\x1a\n" + b"0" * (6 * 1024 * 1024)
     image_file = io.BytesIO(large_payload)
 
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("large.png", image_file, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("large.png", image_file, "image/png")})
     assert response.status_code == 413
-    assert "vượt quá giới hạn cho phép" in response.json()["detail"]
+    assert "Image exceeds byte limit" in response.json()["detail"]
 
 
 def test_ai_production_blocks_silent_heuristic_fallback(monkeypatch):
@@ -113,9 +110,6 @@ def test_ai_production_blocks_silent_heuristic_fallback(monkeypatch):
 
     image_file = io.BytesIO(VALID_PNG_BYTES)
 
-    response = client.post(
-        "/api/v1/ai/detect",
-        files={"file": ("pothole_d40.png", image_file, "image/png")}
-    )
+    response = client.post("/api/v1/ai/detect", files={"file": ("pothole_d40.png", image_file, "image/png")})
     assert response.status_code == 503
-    assert "AI Inference Engine chưa sẵn sàng" in response.json()["detail"]
+    assert "AI model unavailable" in response.json()["detail"]

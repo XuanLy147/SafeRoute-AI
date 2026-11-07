@@ -7,19 +7,18 @@ from app.models.entities import ReportStatus, UserRole
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def user_header():
-    token = create_access_token(
-        data={"sub": "1", "role": UserRole.USER.value, "email": "user@saferoute.ai"}
-    )
+    token = create_access_token(data={"sub": "1", "role": UserRole.USER.value, "email": "user@saferoute.ai"})
     return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.fixture
 def reviewer_header():
-    token = create_access_token(
-        data={"sub": "2", "role": UserRole.REVIEWER.value, "email": "reviewer@saferoute.ai"}
-    )
+    token = create_access_token(data={"sub": "2", "role": UserRole.REVIEWER.value, "email": "reviewer@saferoute.ai"})
     return {"Authorization": f"Bearer {token}"}
+
 
 @pytest.fixture
 def created_report_id(user_header):
@@ -35,6 +34,7 @@ def created_report_id(user_header):
         headers=user_header,
     )
     return res.json()["id"]
+
 
 def test_community_vote_and_duplicate_prevention(user_header, created_report_id):
     """
@@ -68,13 +68,12 @@ def test_community_vote_and_duplicate_prevention(user_header, created_report_id)
     if detail_res.status_code == 200:
         assert detail_res.json()["status"] == ReportStatus.PENDING_VERIFICATION.value
 
+
 def test_vote_with_tv2_vote_type_contract(created_report_id):
     """
     Nhiệm vụ 2: Kiểm tra tương thích contract TV2 Android (trường vote_type).
     """
-    token = create_access_token(
-        data={"sub": "99", "role": UserRole.USER.value, "email": "tv2_user@saferoute.ai"}
-    )
+    token = create_access_token(data={"sub": "99", "role": UserRole.USER.value, "email": "tv2_user@saferoute.ai"})
     vote_res = client.post(
         f"/api/v1/reports/{created_report_id}/votes",
         json={"vote_type": "SUPPORT", "note": "Gửi từ Android Retrofit của TV2"},
@@ -83,6 +82,7 @@ def test_vote_with_tv2_vote_type_contract(created_report_id):
     assert vote_res.status_code == 201
     assert vote_res.json()["vote"] == "SUPPORT"
     assert vote_res.json()["vote_type"] == "SUPPORT"
+
 
 def test_user_cannot_verify_report_returns_403(user_header, created_report_id):
     """
@@ -95,6 +95,7 @@ def test_user_cannot_verify_report_returns_403(user_header, created_report_id):
     )
     assert res.status_code == 403
     assert "Truy cập bị từ chối" in res.json()["detail"]
+
 
 def test_reviewer_must_provide_reason(reviewer_header, created_report_id):
     """
@@ -109,6 +110,7 @@ def test_reviewer_must_provide_reason(reviewer_header, created_report_id):
     data = res.json()
     detail_str = str(data.get("detail", ""))
     assert "reason" in detail_str or "String should have at least 5 characters" in detail_str
+
 
 def test_reviewer_verifies_report_with_audit_log(reviewer_header, created_report_id):
     """

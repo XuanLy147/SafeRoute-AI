@@ -28,6 +28,8 @@ backend_dir = Path(__file__).resolve().parent.parent
 if str(backend_dir) not in sys.path:
     sys.path.insert(0, str(backend_dir))
 
+from pydantic import ValidationError
+
 from app.modules.routing.adapter import GoogleRoutesAdapter
 from app.modules.routing.exceptions import (
     InvalidCoordinatesError,
@@ -61,11 +63,11 @@ from app.modules.routing.service import (
     RiskAssessmentStatus,
     RoutingService,
 )
-from pydantic import ValidationError
 
 # ==============================================================================
 # 1. Polyline & Geometry Tests (Original 484721d)
 # ==============================================================================
+
 
 def test_polyline_decode_and_encode_roundtrip():
     """Verify roundtrip fidelity of polyline encoding and decoding."""
@@ -138,6 +140,7 @@ def test_route_candidate_to_geojson():
 # 2. Coordinate Validation Tests (Original 484721d)
 # ==============================================================================
 
+
 def test_coordinate_validation_out_of_bounds():
     """Verify out-of-bounds coordinates raise InvalidCoordinatesError or ValidationError."""
     with pytest.raises(ValidationError):
@@ -158,6 +161,7 @@ def test_identical_origin_and_destination():
 # ==============================================================================
 # 3. Google Routes Response Parsing & Normalization Tests (Original 484721d)
 # ==============================================================================
+
 
 def test_parse_routes_two_candidates():
     """Verify normalization of two candidate routes from Google Routes API."""
@@ -215,6 +219,7 @@ def test_parse_duration_formats():
 # ==============================================================================
 # 4. Error Handling Tests (Original 484721d)
 # ==============================================================================
+
 
 def test_compute_routes_missing_api_key():
     """Verify missing API key raises RouteServiceAuthError."""
@@ -304,6 +309,7 @@ def test_compute_routes_no_route_found_raises_404():
 # ==============================================================================
 # 5. RoutingService Integration Tests (Original 484721d Preserved)
 # ==============================================================================
+
 
 class MockRiskScorer:
     """Mock TV4 Risk Scorer for testing contract integration."""
@@ -571,11 +577,14 @@ def test_service_risk_scorer_exception_handling():
 # 6. Additional Hardened Regression Tests (BUG-01 through BUG-05)
 # ==============================================================================
 
+
 def test_regression_bug01_single_route_risk_unavailable():
     """BUG-01: When risk is unavailable on a single route, never falsely claim 0 hazards."""
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Đ. Trần Hưng Đạo", distance_meters=2950, duration_seconds=450, polyline="dummy")
+        RouteCandidate(
+            id="route_1", summary="Đ. Trần Hưng Đạo", distance_meters=2950, duration_seconds=450, polyline="dummy"
+        )
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=None)
@@ -597,12 +606,19 @@ def test_regression_bug01_single_route_risk_zero_hazards():
     """BUG-01 Contrast: When risk is assessed and genuinely has 0 hazards, state zero hazards."""
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Đ. Trần Hưng Đạo", distance_meters=2950, duration_seconds=450, polyline="dummy")
+        RouteCandidate(
+            id="route_1", summary="Đ. Trần Hưng Đạo", distance_meters=2950, duration_seconds=450, polyline="dummy"
+        )
     ]
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
         "route_1": RouteRiskScore(
-            score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Không có nguy cơ"
+            score=0.0,
+            level="LOW",
+            hazards_count=0,
+            verified_hazards_count=0,
+            pending_hazards_count=0,
+            reason="Không có nguy cơ",
         )
     }
 
@@ -648,13 +664,24 @@ def test_regression_bug02_partial_risk_never_claims_lowest_risk():
     """
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Tuyến Có Điểm Risk", distance_meters=3200, duration_seconds=500, polyline="p1"),
-        RouteCandidate(id="route_2", summary="Tuyến Thiếu Điểm Risk", distance_meters=2800, duration_seconds=420, polyline="p2"),
+        RouteCandidate(
+            id="route_1", summary="Tuyến Có Điểm Risk", distance_meters=3200, duration_seconds=500, polyline="p1"
+        ),
+        RouteCandidate(
+            id="route_2", summary="Tuyến Thiếu Điểm Risk", distance_meters=2800, duration_seconds=420, polyline="p2"
+        ),
     ]
 
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
-        "route_1": RouteRiskScore(score=2.0, level="MEDIUM", hazards_count=2, verified_hazards_count=1, pending_hazards_count=1, reason="2 nguy cơ")
+        "route_1": RouteRiskScore(
+            score=2.0,
+            level="MEDIUM",
+            hazards_count=2,
+            verified_hazards_count=1,
+            pending_hazards_count=1,
+            reason="2 nguy cơ",
+        )
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -679,15 +706,33 @@ def test_regression_bug03_no_sentinel_999_with_scores_above_999():
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
         RouteCandidate(id="route_high", summary="High Risk", distance_meters=3000, duration_seconds=500, polyline="p1"),
-        RouteCandidate(id="route_999", summary="Exact 999 Risk", distance_meters=3000, duration_seconds=500, polyline="p2"),
+        RouteCandidate(
+            id="route_999", summary="Exact 999 Risk", distance_meters=3000, duration_seconds=500, polyline="p2"
+        ),
         RouteCandidate(id="route_zero", summary="Zero Risk", distance_meters=3000, duration_seconds=500, polyline="p3"),
     ]
 
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
-        "route_high": RouteRiskScore(score=1500.0, level="HIGH", hazards_count=100, verified_hazards_count=100, pending_hazards_count=0, reason="Cực nguy hiểm"),
-        "route_999": RouteRiskScore(score=999.0, level="HIGH", hazards_count=50, verified_hazards_count=50, pending_hazards_count=0, reason="999 điểm"),
-        "route_zero": RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="0 điểm"),
+        "route_high": RouteRiskScore(
+            score=1500.0,
+            level="HIGH",
+            hazards_count=100,
+            verified_hazards_count=100,
+            pending_hazards_count=0,
+            reason="Cực nguy hiểm",
+        ),
+        "route_999": RouteRiskScore(
+            score=999.0,
+            level="HIGH",
+            hazards_count=50,
+            verified_hazards_count=50,
+            pending_hazards_count=0,
+            reason="999 điểm",
+        ),
+        "route_zero": RouteRiskScore(
+            score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="0 điểm"
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -702,7 +747,9 @@ def test_regression_bug03_no_sentinel_999_with_scores_above_999():
     # route_999 vs route_high (999.0 vs 1500.0)
     mock_adapter.compute_routes.return_value = [
         RouteCandidate(id="route_high", summary="High Risk", distance_meters=3000, duration_seconds=500, polyline="p1"),
-        RouteCandidate(id="route_999", summary="Exact 999 Risk", distance_meters=3000, duration_seconds=500, polyline="p2"),
+        RouteCandidate(
+            id="route_999", summary="Exact 999 Risk", distance_meters=3000, duration_seconds=500, polyline="p2"
+        ),
     ]
     response2 = service.compare_routes(
         origin=LatLng(latitude=10.7725, longitude=106.6980),
@@ -724,8 +771,12 @@ def test_regression_bug03_deterministic_tie_breaking():
 
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
-        "route_1": RouteRiskScore(score=3.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="3.0"),
-        "route_2": RouteRiskScore(score=3.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="3.0"),
+        "route_1": RouteRiskScore(
+            score=3.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="3.0"
+        ),
+        "route_2": RouteRiskScore(
+            score=3.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="3.0"
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -750,9 +801,15 @@ def test_regression_bug04_extra_risk_keys_detected():
 
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
-        "route_1": RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="1"),
-        "route_2": RouteRiskScore(score=2.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="2"),
-        "route_UNKNOWN_EXTRA": RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Ghost"),
+        "route_1": RouteRiskScore(
+            score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="1"
+        ),
+        "route_2": RouteRiskScore(
+            score=2.0, level="MEDIUM", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="2"
+        ),
+        "route_UNKNOWN_EXTRA": RouteRiskScore(
+            score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Ghost"
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -785,7 +842,9 @@ def test_regression_invalid_no_matching_candidate_ids():
     mock_scorer = MagicMock()
     # Scorer returns only a ghost route ID, none of the candidate IDs exist
     mock_scorer.evaluate_by_id.return_value = {
-        "route_GHOST_1": RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Ghost"),
+        "route_GHOST_1": RouteRiskScore(
+            score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Ghost"
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -811,12 +870,16 @@ def test_regression_invalid_single_candidate_route():
     """
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=300, polyline="p1"),
+        RouteCandidate(
+            id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=300, polyline="p1"
+        ),
     ]
 
     mock_scorer = MagicMock()
     mock_scorer.evaluate_by_id.return_value = {
-        "route_FOREIGN": RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="Foreign"),
+        "route_FOREIGN": RouteRiskScore(
+            score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="Foreign"
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -866,8 +929,12 @@ def test_regression_bug04_duplicate_candidate_ids_raises_value_error():
     """BUG-04: Reject duplicate candidate IDs to prevent key collision and undefined mapping."""
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Tuyến Trùng 1", distance_meters=3000, duration_seconds=500, polyline="p1"),
-        RouteCandidate(id="route_1", summary="Tuyến Trùng 2", distance_meters=2800, duration_seconds=450, polyline="p2"),
+        RouteCandidate(
+            id="route_1", summary="Tuyến Trùng 1", distance_meters=3000, duration_seconds=500, polyline="p1"
+        ),
+        RouteCandidate(
+            id="route_1", summary="Tuyến Trùng 2", distance_meters=2800, duration_seconds=450, polyline="p2"
+        ),
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=None)
@@ -900,8 +967,22 @@ def test_regression_tv4_keyed_facade_order_independence():
     mock_scorer = MagicMock()
     del mock_scorer.evaluate_routes
     mock_scorer.evaluate_by_id.return_value = {
-        "route_beta": RouteRiskScore(score=7.0, level="HIGH", hazards_count=5, verified_hazards_count=5, pending_hazards_count=0, reason="Beta risk"),
-        "route_alpha": RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="Alpha risk"),
+        "route_beta": RouteRiskScore(
+            score=7.0,
+            level="HIGH",
+            hazards_count=5,
+            verified_hazards_count=5,
+            pending_hazards_count=0,
+            reason="Beta risk",
+        ),
+        "route_alpha": RouteRiskScore(
+            score=1.0,
+            level="LOW",
+            hazards_count=1,
+            verified_hazards_count=1,
+            pending_hazards_count=0,
+            reason="Alpha risk",
+        ),
     }
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -943,9 +1024,20 @@ def test_regression_list_scorer_extra_items_marked_invalid():
     del mock_scorer.evaluate_by_id
     # evaluate_routes returns 3 items for 2 candidates → contract violation
     mock_scorer.evaluate_routes.return_value = [
-        RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A"),
-        RouteRiskScore(score=2.0, level="LOW", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="B"),
-        RouteRiskScore(score=3.0, level="MEDIUM", hazards_count=3, verified_hazards_count=3, pending_hazards_count=0, reason="EXTRA"),
+        RouteRiskScore(
+            score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A"
+        ),
+        RouteRiskScore(
+            score=2.0, level="LOW", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="B"
+        ),
+        RouteRiskScore(
+            score=3.0,
+            level="MEDIUM",
+            hazards_count=3,
+            verified_hazards_count=3,
+            pending_hazards_count=0,
+            reason="EXTRA",
+        ),
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -983,8 +1075,12 @@ def test_regression_list_scorer_exact_count_marked_available():
     # Remove evaluate_by_id to force evaluate_routes path (list interface)
     del mock_scorer.evaluate_by_id
     mock_scorer.evaluate_routes.return_value = [
-        RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A risk"),
-        RouteRiskScore(score=5.0, level="HIGH", hazards_count=5, verified_hazards_count=5, pending_hazards_count=0, reason="B risk"),
+        RouteRiskScore(
+            score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A risk"
+        ),
+        RouteRiskScore(
+            score=5.0, level="HIGH", hazards_count=5, verified_hazards_count=5, pending_hazards_count=0, reason="B risk"
+        ),
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -1009,14 +1105,23 @@ def test_regression_zero_score_with_pending_hazards_single_route():
     """
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=400, polyline="p1"),
+        RouteCandidate(
+            id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=400, polyline="p1"
+        ),
     ]
 
     mock_scorer = MagicMock()
     del mock_scorer.evaluate_by_id
     # score=0 but hazards present (pending multiplier = 0 excluded them)
     mock_scorer.evaluate_routes.return_value = [
-        RouteRiskScore(score=0.0, level="LOW", hazards_count=3, verified_hazards_count=0, pending_hazards_count=3, reason="All pending"),
+        RouteRiskScore(
+            score=0.0,
+            level="LOW",
+            hazards_count=3,
+            verified_hazards_count=0,
+            pending_hazards_count=3,
+            reason="All pending",
+        ),
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -1053,15 +1158,33 @@ def test_regression_zero_score_with_pending_hazards_multiple_routes():
     """
     mock_adapter = MagicMock()
     mock_adapter.compute_routes.return_value = [
-        RouteCandidate(id="route_A", summary="Tuyến A - Không nguy cơ", distance_meters=3000, duration_seconds=400, polyline="pA"),
-        RouteCandidate(id="route_B", summary="Tuyến B - Pending only", distance_meters=2500, duration_seconds=300, polyline="pB"),
+        RouteCandidate(
+            id="route_A", summary="Tuyến A - Không nguy cơ", distance_meters=3000, duration_seconds=400, polyline="pA"
+        ),
+        RouteCandidate(
+            id="route_B", summary="Tuyến B - Pending only", distance_meters=2500, duration_seconds=300, polyline="pB"
+        ),
     ]
 
     mock_scorer = MagicMock()
     del mock_scorer.evaluate_by_id
     mock_scorer.evaluate_routes.return_value = [
-        RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="A no hazard"),
-        RouteRiskScore(score=0.0, level="LOW", hazards_count=5, verified_hazards_count=0, pending_hazards_count=5, reason="B all pending"),
+        RouteRiskScore(
+            score=0.0,
+            level="LOW",
+            hazards_count=0,
+            verified_hazards_count=0,
+            pending_hazards_count=0,
+            reason="A no hazard",
+        ),
+        RouteRiskScore(
+            score=0.0,
+            level="LOW",
+            hazards_count=5,
+            verified_hazards_count=0,
+            pending_hazards_count=5,
+            reason="B all pending",
+        ),
     ]
 
     service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
@@ -1095,6 +1218,4 @@ def test_regression_zero_score_with_pending_hazards_multiple_routes():
     assert "Chưa ghi nhận nguy cơ mặt đường nào" not in reason, (
         "route_B has 5 pending hazards — must not claim no hazards recorded"
     )
-    assert "bằng 0 theo chính sách" in reason, (
-        "Must explain score=0 is due to scoring policy, not absence of hazards"
-    )
+    assert "bằng 0 theo chính sách" in reason, "Must explain score=0 is due to scoring policy, not absence of hazards"

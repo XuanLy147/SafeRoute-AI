@@ -6,19 +6,23 @@ from unittest.mock import Mock
 import pytest
 from sqlalchemy.dialects import postgresql
 
+from app.models.entities import ReportStatus
 from app.modules.risk.postgis_adapter import PostgisRiskAdapter, RiskIntegrationError, nearby_statement, route_geojson
 from app.modules.risk.scoring import RiskPolicy
-from app.models.entities import ReportStatus
 
 
 def candidate(id_="a", coordinates=None):
-    return SimpleNamespace(id=id_, coordinates=coordinates if coordinates is not None else [(10.0, 106.0), (10.01, 106.0)])
+    return SimpleNamespace(
+        id=id_, coordinates=coordinates if coordinates is not None else [(10.0, 106.0), (10.01, 106.0)]
+    )
 
 
 def adapter(rows=()):
     session = Mock()
     session.execute.return_value.mappings.return_value = rows
-    return PostgisRiskAdapter(session, RiskPolicy("MOCK_FOR_DEV", {"HIGH": 4}, 0), radius_m=50, medium_min=2, high_min=8)
+    return PostgisRiskAdapter(
+        session, RiskPolicy("MOCK_FOR_DEV", {"HIGH": 4}, 0), radius_m=50, medium_min=2, high_min=8
+    )
 
 
 def row(route="a", id_=1, status=ReportStatus.VERIFIED):
@@ -47,7 +51,9 @@ def test_id_join_preserves_order_with_empty_route():
 
 
 def test_duplicate_reports_and_status_counts():
-    scorer = adapter([row(), row(), row(id_=2, status=ReportStatus.PENDING_VERIFICATION), row(id_=3, status=ReportStatus.REJECTED)])
+    scorer = adapter(
+        [row(), row(), row(id_=2, status=ReportStatus.PENDING_VERIFICATION), row(id_=3, status=ReportStatus.REJECTED)]
+    )
     result = scorer.evaluate_routes([candidate()])[0]
     assert result.score == 4
     assert (result.hazards_count, result.verified_hazards_count, result.pending_hazards_count) == (2, 1, 1)
@@ -59,7 +65,9 @@ def test_conflicting_report_snapshot():
         adapter([row(), row(status=ReportStatus.REJECTED)]).evaluate_routes([candidate()])
 
 
-@pytest.mark.parametrize("coordinates", [[], [(10,106)], [(10,106),(10,106)], [(91,106),(10,106)], [(10,float('nan')),(10,106)]])
+@pytest.mark.parametrize(
+    "coordinates", [[], [(10, 106)], [(10, 106), (10, 106)], [(91, 106), (10, 106)], [(10, float("nan")), (10, 106)]]
+)
 def test_invalid_geometry(coordinates):
     with pytest.raises(RiskIntegrationError):
         adapter().evaluate_routes([candidate(coordinates=coordinates)])
@@ -92,14 +100,17 @@ def test_missing_score_rejected():
 def test_real_tv5_schema_and_service_accept_adapter():
     from app.modules.routing.schemas import LatLng, RouteCandidate
     from app.modules.routing.service import RoutingService
-    candidates = [RouteCandidate(id=id_, distance_meters=100, duration_seconds=10,
-                                 polyline="fixture", coordinates=[(10,106),(10.01,106)])
-                  for id_ in ("a", "b")]
+
+    candidates = [
+        RouteCandidate(
+            id=id_, distance_meters=100, duration_seconds=10, polyline="fixture", coordinates=[(10, 106), (10.01, 106)]
+        )
+        for id_ in ("a", "b")
+    ]
     google = Mock()
     google.compute_routes.return_value = candidates
     service = RoutingService(adapter=google, risk_scorer=adapter([row("b")]))
-    response = service.compare_routes(LatLng(latitude=10, longitude=106),
-                                      LatLng(latitude=10.01, longitude=106))
+    response = service.compare_routes(LatLng(latitude=10, longitude=106), LatLng(latitude=10.01, longitude=106))
     assert [(r.id, r.risk.score) for r in response.routes] == [("a", 0), ("b", 4)]
 
 

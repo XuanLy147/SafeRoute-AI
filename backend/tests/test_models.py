@@ -21,6 +21,7 @@ def test_enums_defined_correctly():
     assert VoteType.OPPOSE.value == "OPPOSE"
     assert VoteType.UNSURE.value == "UNSURE"
 
+
 def test_user_model_instantiation():
     user = User(
         email="test@saferoute.ai",
@@ -30,12 +31,14 @@ def test_user_model_instantiation():
     assert user.email == "test@saferoute.ai"
     assert user.role == UserRole.USER
 
+
 def test_make_point_lon_lat_order():
     # Lat: 10.762622, Lon: 106.660172
     lat = 10.762622
     lon = 106.660172
     pt = make_point(longitude=lon, latitude=lat)
     assert "POINT(106.660172 10.762622)" in str(pt)
+
 
 def test_risk_weight_model():
     rw = RiskWeight(

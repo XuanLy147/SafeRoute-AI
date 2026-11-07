@@ -59,7 +59,13 @@ class RiskScoringTests(unittest.TestCase):
 
     def test_conflicting_snapshot_across_routes(self):
         with self.assertRaises(ValueError):
-            score_routes((RouteReports("a", (NearbyReport("x", "VERIFIED", "low"),)), RouteReports("b", (NearbyReport("x", "VERIFIED", "high"),))), self.policy)
+            score_routes(
+                (
+                    RouteReports("a", (NearbyReport("x", "VERIFIED", "low"),)),
+                    RouteReports("b", (NearbyReport("x", "VERIFIED", "high"),)),
+                ),
+                self.policy,
+            )
 
     def test_duplicate_route_rejected(self):
         with self.assertRaises(ValueError):

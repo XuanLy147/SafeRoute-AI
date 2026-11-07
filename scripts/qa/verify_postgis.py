@@ -83,13 +83,13 @@ def main():
                 inspector = inspect(conn)
                 tables = set(Base.metadata.tables)
                 assert len(tables) == 8 and tables <= set(inspector.get_table_names())
-                assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0001_initial_schema"
+                assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0002_image_owner_profile"
                 enums = {entry["name"]: entry["labels"] for entry in inspector.get_enums()}
                 assert enums["report_status_enum"] == ["PENDING_VERIFICATION", "VERIFIED", "REJECTED"]
                 assert enums["user_role_enum"] == ["USER", "REVIEWER", "ADMIN"]
                 assert enums["vote_type_enum"] == ["SUPPORT", "OPPOSE", "UNSURE"]
                 foreign_keys = sum(len(inspector.get_foreign_keys(table)) for table in tables)
-                assert foreign_keys == 8
+                assert foreign_keys == 9
                 idx = conn.scalar(text("SELECT indexdef FROM pg_indexes WHERE schemaname='public' AND indexname='idx_reports_location'"))
                 assert "USING gist (location)" in idx
                 typ = conn.scalar(text("SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='reports'::regclass AND a.attname='location'"))
@@ -101,9 +101,26 @@ def main():
                 })
                 differences = compare_metadata(context, Base.metadata)
                 assert not differences, repr(differences)
-                print("SCHEMA_PASS: 8 model tables, 8 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]", flush=True)
+                print("SCHEMA_PASS: 8 model tables, 9 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]", flush=True)
 
+        migrate("0001_initial_schema")
+        with engine.begin() as conn:
+            user_id = conn.scalar(text("INSERT INTO users(email,password_hash,role,created_at) VALUES ('migration@example.invalid','not-login','USER',now()) RETURNING id"))
+            report_id = conn.scalar(text("INSERT INTO reports(user_id,category_user,status,severity,location,observed_at) VALUES (:uid,'D40','PENDING_VERIFICATION','HIGH',ST_SetSRID(ST_MakePoint(106,10),4326),now()) RETURNING id"), {"uid":user_id})
+            conn.execute(text("INSERT INTO report_images(report_id,object_key,mime) VALUES (:rid,'legacy-image','image/png')"), {"rid":report_id})
         migrate("head")
+        with engine.connect() as conn:
+            assert conn.scalar(text("SELECT owner_id FROM report_images WHERE object_key='legacy-image'")) == user_id
+            assert conn.scalar(text("SELECT count(*) FROM reports WHERE id=:id"), {"id":report_id}) == 1
+        migrate("0001_initial_schema", "downgrade")
+        with engine.connect() as conn:
+            assert conn.scalar(text("SELECT count(*) FROM report_images WHERE object_key='legacy-image'")) == 1
+        migrate("head")
+        with engine.begin() as conn:
+            conn.execute(text("DELETE FROM report_images WHERE object_key='legacy-image'"))
+            conn.execute(text("DELETE FROM reports WHERE id=:id"), {"id":report_id})
+            conn.execute(text("DELETE FROM users WHERE id=:id"), {"id":user_id})
+        print("DATA_PRESERVATION_PASS: revision 0002 upgrade/downgrade/re-upgrade retains existing report/image", flush=True)
         verify_schema()
         migrate("base", "downgrade")
         with engine.connect() as conn:
