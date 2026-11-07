@@ -68,7 +68,7 @@ public class MapFlowFragment extends Fragment {
                     if(binding==null||request!=generation)return;
                     binding.flowBody.setText(places.isEmpty()?R.string.flow_search_empty:R.string.flow_search_body);
                     for(AddressSearch.Place place:places) {
-                        MaterialButton choice=new MaterialButton(requireContext());choice.setText(place.label);choice.setAllCaps(false);
+                        MaterialButton choice=(MaterialButton)getLayoutInflater().inflate(R.layout.item_navigation_action,results,false);choice.setText(place.label);choice.setAllCaps(false);
                         results.addView(choice,new LinearLayout.LayoutParams(-1,-2));
                         choice.setOnClickListener(v->host().openMapAt(place.point));
                     }
@@ -108,7 +108,7 @@ public class MapFlowFragment extends Fragment {
     private MainActivity host(){return(MainActivity)requireActivity();}
     private MaterialButton action(int text,String tag,Runnable run){return action(getString(text),tag,run);}
     private MaterialButton action(String text,String tag,Runnable run) {
-        MaterialButton b=new MaterialButton(requireContext());b.setText(text);b.setTag(tag);b.setAllCaps(false);
+        MaterialButton b=(MaterialButton)getLayoutInflater().inflate(R.layout.item_navigation_action,binding.flowActions,false);b.setText(text);b.setTag(tag);b.setAllCaps(false);
         LinearLayout.LayoutParams p=new LinearLayout.LayoutParams(-1,-2);p.topMargin=(int)(12*getResources().getDisplayMetrics().density);
         binding.flowActions.addView(b,p);b.setOnClickListener(v->run.run());return b;
     }

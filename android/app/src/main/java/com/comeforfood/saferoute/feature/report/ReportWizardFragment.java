@@ -44,12 +44,14 @@ public class ReportWizardFragment extends LocationAwareFragment {
         categories=getResources().getStringArray(R.array.report_categories);
         severities=getResources().getStringArray(R.array.report_severities);
         for(int i=0;i<categories.length;i++) {
-            RadioButton radio=new RadioButton(requireContext()); radio.setId(View.generateViewId()); radio.setText(categories[i]); radio.setMinHeight(dp(48));
-            binding.categoryOptions.addView(radio); if(i==draft.category()) radio.setChecked(true);
+            RadioButton radio=new RadioButton(requireContext()); radio.setId(View.generateViewId()); radio.setText(categories[i]); radio.setMinHeight(dp(48));radio.setBackgroundResource(R.drawable.bg_option);radio.setPadding(dp(12),dp(6),dp(12),dp(6));
+            android.widget.RadioGroup.LayoutParams optionParams=new android.widget.RadioGroup.LayoutParams(-1,-2);optionParams.bottomMargin=dp(4);
+            binding.categoryOptions.addView(radio,optionParams); if(i==draft.category()) radio.setChecked(true);
         }
         for(int i=0;i<severities.length;i++) {
-            RadioButton radio=new RadioButton(requireContext()); radio.setId(View.generateViewId()); radio.setText(severities[i]); radio.setMinHeight(dp(48));
-            binding.severityOptions.addView(radio); if(i==draft.severity()) radio.setChecked(true);
+            RadioButton radio=new RadioButton(requireContext()); radio.setId(View.generateViewId()); radio.setText(severities[i]); radio.setMinHeight(dp(48));radio.setBackgroundResource(R.drawable.bg_option);radio.setPadding(dp(12),dp(6),dp(12),dp(6));
+            android.widget.RadioGroup.LayoutParams optionParams=new android.widget.RadioGroup.LayoutParams(-1,-2);optionParams.bottomMargin=dp(4);
+            binding.severityOptions.addView(radio,optionParams); if(i==draft.severity()) radio.setChecked(true);
         }
         binding.categoryOptions.setOnCheckedChangeListener((group,id)->draft.category(group.indexOfChild(group.findViewById(id))));
         binding.severityOptions.setOnCheckedChangeListener((group,id)->draft.severity(group.indexOfChild(group.findViewById(id))));
@@ -139,6 +141,8 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.tvReportTitle.setText(titles[step]);
         binding.stepProgress.setText(getString(R.string.report_step,Math.max(1,Math.min(6,step))));
         binding.stepProgress.setVisibility(step==0||step==7?View.GONE:View.VISIBLE);
+        binding.wizardProgress.setVisibility(step==0||step==7?View.GONE:View.VISIBLE);binding.wizardProgress.setProgress(Math.max(0,Math.min(6,step)));
+        int imagePadding=draft.image()==null?dp(64):0;binding.imgPreview.setPadding(imagePadding,imagePadding,imagePadding,imagePadding);
         binding.btnUseImage.setVisibility(step==2?View.VISIBLE:View.GONE);
         binding.btnCamera.setVisibility(step==1?View.VISIBLE:View.GONE);
         binding.btnPickGallery.setText(step==2?R.string.report_change_image:R.string.report_gallery);

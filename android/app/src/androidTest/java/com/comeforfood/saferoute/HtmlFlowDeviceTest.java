@@ -77,7 +77,10 @@ public class HtmlFlowDeviceTest {
             click(R.id.btnStart);capture("flow-02-intro");
             click(R.id.introNext);click(R.id.introNext);click(R.id.introNext);capture("flow-03-permissions");
             click(R.id.introNext);capture("flow-04-login");
-            click(R.id.btnGuest);capture("flow-05-map");
+            click(R.id.tvGoToRegister);capture("visual-register");click(R.id.btnAuthBack);
+            click(R.id.btnGuest);SystemClock.sleep(3500);capture("flow-05-map");
+            click(R.id.routes);capture("visual-route-search");
+            onActivity(a -> a.openMap());onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());
             tab(R.id.nav_report);capture("flow-06-report-start");
             click(R.id.btnStartReport);capture("flow-07-photo-choice");
             onActivity(a -> {
@@ -108,9 +111,15 @@ public class HtmlFlowDeviceTest {
             SystemClock.sleep(1200);
             onActivity(a -> a.openSessionHome());onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());
             capture("flow-19-admin-dark-fixture");
+            onActivity(a -> a.openTv2Fragment(new com.comeforfood.saferoute.feature.auth.LoginFragment()));
+            onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());capture("visual-login-dark");
+            onActivity(a -> a.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE));
+            SystemClock.sleep(1500);
+            onActivity(a -> a.openTv2Fragment(new com.comeforfood.saferoute.feature.auth.RegisterFragment()));
+            onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());capture("visual-register-landscape");
         } finally {
             if(oldToken==null)session.clearSession();else session.saveSession(oldToken,oldEmail,oldRole,oldName);
-            onActivity(a -> {new androidx.lifecycle.ViewModelProvider(a).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();a.finish();});
+            onActivity(a -> {new androidx.lifecycle.ViewModelProvider(a).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();a.setRequestedOrientation(android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);a.finish();});
         }
     }
 }

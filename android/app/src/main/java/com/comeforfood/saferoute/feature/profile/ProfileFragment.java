@@ -50,17 +50,6 @@ public class ProfileFragment extends Fragment {
                 Tv2Navigation.navigate(this, R.id.action_profile_to_reviewer));
         binding.btnSettings.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.SETTINGS));
         binding.btnPrivacy.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.PRIVACY));
-        binding.btnSectionBack.setOnClickListener(v -> showSection(null));
-    }
-
-    private void showSection(@Nullable View section) {
-        if (binding == null) return;
-        binding.profileContent.setVisibility(section == null ? View.VISIBLE : View.GONE);
-        binding.settingsContent.setVisibility(section == binding.settingsContent ? View.VISIBLE : View.GONE);
-        binding.privacyContent.setVisibility(section == binding.privacyContent ? View.VISIBLE : View.GONE);
-        binding.sectionBackBar.setVisibility(section == null ? View.GONE : View.VISIBLE);
-        binding.tvTitle.setText(section == binding.settingsContent ? "Cài đặt"
-                : section == binding.privacyContent ? "Quyền riêng tư" : "Hồ sơ cá nhân");
     }
 
     @Override

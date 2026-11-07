@@ -5,10 +5,12 @@ colors:
   primary: "#2563EB"
   on-primary: "#FFFFFF"
   surface: "#FFFFFF"
-  background: "#F8FAFC"
+  background: "#FFFFFF"
   ink: "#0F172A"
-  muted: "#475569"
+  muted: "#596579"
   outline: "#CBD5E1"
+  input-surface: "#F7F8FA"
+  soft-line: "#E9EDF3"
   info: "#EFF6FF"
   on-info: "#1D4ED8"
   warning: "#92400E"
@@ -41,6 +43,9 @@ typography:
     fontSize: "14sp"
 rounded:
   card: "12dp"
+  map-panel: "16dp"
+  navigation-row: "14dp"
+  pill-control: "28dp"
 spacing:
   compact: "4dp"
   small: "8dp"
@@ -79,7 +84,7 @@ components:
 
 Smart Mobility Blue is the supplied visual direction. The implementation uses native Material Components, clear Vietnamese labels, pale backgrounds and blue actions to make recorded road conditions and route choices legible. This document preserves that incumbent system; it does not introduce a new identity.
 
-The screen hierarchy is practical and compact: a clear title, the relevant map or inputs, explicit status, then supporting details. Verification and selected-route state have both text and color cues. The documented system is extracted from source; device-level visual acceptance is still outstanding.
+The screen hierarchy is practical and compact: a clear title, the relevant map or inputs, explicit status, then supporting details. Verification and selected-route state have both text and color cues. The documented system is extracted from source. Native-device visual evidence and remaining limitations are recorded in docs/integration/frontend-visual-refresh.md.
 
 **Key Characteristics:**
 
@@ -87,6 +92,12 @@ The screen hierarchy is practical and compact: a clear title, the relevant map o
 - Blue actions, neutral surfaces and explicit semantic status.
 - Scrollable phone layouts with persistent, labeled navigation.
 - Flat outlined cards with visible selection.
+
+## Reference refresh (2026-11-07)
+
+The supplied welcome/login/register image defines the current presentation: white canvas, strong blue primary action, pale rounded inputs, centered authentication headings and a small smiling wheeled mark. The mark is a native vector reconstruction from the screenshot, not an original production logo asset or a claim of pixel identity. It is also used for the application icon.
+
+Shared styles live in `values/styles_polish.xml`; light/night input surfaces live in `colors_polish.xml`. Authentication uses a centered 440dp maximum content width and scrolls on short screens. Other screens reuse the same palette and control hierarchy: map search, report step indicators, account rows and reviewer/admin navigation. This pass does not connect any backend services.
 
 ## Colors
 
@@ -118,7 +129,7 @@ The phone app uses a vertical screen with one fragment container and a labeled b
 
 The screen inset is 20dp; cards use 16dp internal padding, with the extracted spacing steps for related content. Map action rows use 16dp horizontal padding and 8dp gaps. Buttons have a minimum height of 48dp; the comparison action is 56dp. Filter chips request minimum touch-target sizing and sit in a horizontal scroll region.
 
-The map overview is 300dp high in portrait and 220dp in landscape. Route picking uses 220dp; results use 240dp. These are observed sizes, not a tablet layout contract. Expanded-width navigation has not been implemented or accepted. Long translations, large font settings and small screens require native-device review.
+The map overview layout uses a rounded 260dp frame; existing runtime landscape sizing still applies. Route picking uses 220dp; results use 240dp. These are observed sizes, not a tablet layout contract. Expanded-width navigation has not been implemented or accepted. Long translations, large font settings and small screens require native-device review.
 
 ## Elevation & Depth
 
@@ -128,7 +139,7 @@ Report and route cards explicitly use zero elevation with an outline. A selected
 
 ## Shapes
 
-Both recurring cards use the documented card radius. Inputs, buttons, chips, switches and dialogs retain their native Material shapes; no custom shape override has been extracted for them. Route polylines have round caps, with selected/unselected widths of 6dp/4dp.
+Report/route cards retain their 12dp radius. Map/status panels use 16dp, navigation rows 14dp, primary/secondary buttons and authentication fields 28dp, and route inputs 24dp. Chips, switches and dialogs retain their native Material shapes. Route polylines have round caps, with selected/unselected widths of 6dp/4dp.
 
 ## Components
 
@@ -146,11 +157,11 @@ Report cards show title, type and verification, and open a native preview dialog
 
 ### Inputs / Fields
 
-Outlined TextInputLayout fields identify A and B. TextInputEditText accepts latitude, longitude and retains entered values. Coordinate validation uses field-level errors; helper text explains the expected decimal/comma format. GPS, swap and map-picking controls supplement typed coordinates. No address search or autocomplete is currently present.
+Outlined TextInputLayout fields identify A and B and accept a place name or address. Users confirm a geocoding result; coordinates remain separate from its display label. GPS, swap and map picking supplement address entry. Authentication uses visible labels, pale fields, password masking and native autofill hints.
 
 ### Navigation
 
-Four labeled Material bottom-navigation items represent map, routes, reports and profile. Map and routes are implemented; report/profile activation gives a snackbar and leaves the working destination selected. Result-toolbar Back and edit-points return through the activity back stack. Do not document the placeholder items as completed TV2 screens.
+Four labeled Material bottom-navigation items adapt to the session role. User destinations are map, report, my reports and account; routes open from the map. Reviewer destinations are overview, queue, history and map; admin destinations are overview, reports, audit and accounts. Selected destinations use a pale blue rounded background. Backend-dependent screens explicitly show unavailable/empty states; UI navigation does not establish backend integration or server authorization.
 
 ### Map and result states
 

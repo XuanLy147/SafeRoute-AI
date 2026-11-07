@@ -111,3 +111,11 @@ Cập nhật này thay thế trạng thái thiếu Maps key/nền Maps NOT_RUN �
 - Thay đổi đợt này ở working tree, chưa commit/push. [Ánh xạ và giới hạn từng nhóm màn](../integration/html-frontend-flow.md).
 
 - Lượt xác nhận cuối sau chỉnh UI: **PASS, OK (1 test), 42.737s**, log html-flow-device-confirm.log. Ảnh cuối ở android/build/reports/tv1/html-flow-confirm/; đã xem lại map, report start, admin sáng/tối. APK cuối cài và app thường đã mở lại. Không thay cài đặt hệ thống; session test được khôi phục và draft fixture đã xóa.
+
+## Làm mới giao diện theo ảnh — 2026-11-07
+
+- JVM **53/53 PASS**; APK/app-test build PASS; lint **0 errors, 159 warnings** (122 unused resources).
+- Xiaomi Android 13: HtmlFlowDeviceTest **PASS (1 test), 37.91s**, log `android/build/reports/tv1/visual-refresh-confirm.log`.
+- Kiểm tra native các màn welcome/auth/map/routing/report/account/reviewer/admin, sáng/tối và register ngang. Một đợt sửa sau ảnh đầu: radio full-width có khoảng cách, map route bo góc và autofill auth; ảnh cuối ở `visual-refresh-confirm/`.
+- Maps tiles tải thật; backend chưa kết nối. Chưa test TalkBack thủ công hay camera/upload/backend E2E trong lượt này. Fixture role/report chỉ dùng trong androidTest và được dọn/khôi phục.
+- APK cuối đã cài và app thường mở lại; thay đổi chưa commit/push. Xem [bàn giao giao diện](../integration/frontend-visual-refresh.md).

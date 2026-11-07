@@ -18,7 +18,7 @@
                         <com.google.android.material.chip.Chip android:id="@+id/chipUnsure" style="@style/Widget.MaterialComponents.Chip.Choice" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_community_feedback_15_text" android:checkable="true" />
                     </com.google.android.material.chip.ChipGroup>
                     <EditText android:id="@+id/etFeedback" android:layout_width="match_parent" android:layout_height="120dp" android:layout_marginTop="12dp" android:background="@drawable/bg_edit_text" android:gravity="top|start" android:hint="@string/tv2_community_feedback_16_hint" android:inputType="textMultiLine|textCapSentences" android:padding="12dp" android:textColor="@color/text_title" android:textColorHint="@color/text_hint" android:importantForAutofill="no" />
-                    <com.google.android.material.button.MaterialButton android:id="@+id/btnSendFeedback" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:backgroundTint="@color/brand_primary" android:text="@string/tv2_community_feedback_17_text" android:textAllCaps="false" app:cornerRadius="12dp" android:minHeight="48dp" />
+                    <com.google.android.material.button.MaterialButton android:id="@+id/btnSendFeedback" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:backgroundTint="@color/brand_primary" android:text="@string/tv2_community_feedback_17_text" android:textAllCaps="false" app:cornerRadius="28dp" android:minHeight="48dp"  android:letterSpacing="0"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>

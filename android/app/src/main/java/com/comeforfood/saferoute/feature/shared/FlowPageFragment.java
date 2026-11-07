@@ -103,12 +103,18 @@ public class FlowPageFragment extends Fragment {
     private void retry() {action(R.string.role_retry,"retry",()->Snackbar.make(binding.getRoot(),R.string.role_unavailable,Snackbar.LENGTH_LONG).show());}
     private MaterialButton link(Page page) {return action(page.title,page.name(),()->((MainActivity)requireActivity()).openFlow(page));}
     private MaterialButton action(int label,String tag,Runnable run) {
-        MaterialButton button=new MaterialButton(requireContext());button.setText(label);button.setTag(tag);button.setMinHeight(dp(48));button.setAllCaps(false);
-        if(!"decision".equals(tag)&&!"retry".equals(tag)){
-            button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.surface)));
-            button.setTextColor(requireContext().getColor(R.color.primary));button.setStrokeColor(android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.outline)));button.setStrokeWidth(dp(1));button.setElevation(0);
+        boolean primary="decision".equals(tag)||"retry".equals(tag);
+        MaterialButton button=primary?new MaterialButton(requireContext()):(MaterialButton)getLayoutInflater().inflate(R.layout.item_navigation_action,binding.flowActions,false);
+        button.setText(label);button.setTag(tag);button.setMinHeight(dp(primary?52:58));button.setAllCaps(false);
+        if(!primary) {
+            button.setIconResource(R.drawable.ic_chevron);button.setIconGravity(MaterialButton.ICON_GRAVITY_END);
+            button.setGravity(android.view.Gravity.START|android.view.Gravity.CENTER_VERTICAL);
+            button.setTextColor(requireContext().getColor(R.color.ink));
+            button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.input_surface)));
+            button.setIconTint(android.content.res.ColorStateList.valueOf(requireContext().getColor(R.color.muted)));
+            button.setStrokeWidth(0);button.setCornerRadius(dp(14));button.setStateListAnimator(null);button.setElevation(0);
         }
-        LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(-1,-2);params.topMargin=dp(12);
+        LinearLayout.LayoutParams params=new LinearLayout.LayoutParams(-1,-2);params.topMargin=dp(6);
         binding.flowActions.addView(button,params);button.setOnClickListener(v->run.run());return button;
     }
     private int dp(int n) {return(int)(n*getResources().getDisplayMetrics().density);}
