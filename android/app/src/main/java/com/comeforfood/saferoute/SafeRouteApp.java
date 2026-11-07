@@ -18,7 +18,7 @@ public class SafeRouteApp extends Application {
 
     private com.comeforfood.saferoute.feature.shared.Tv2Screens tv2Screens =
             new com.comeforfood.saferoute.feature.shared.Tv2Screens() {
-                @Override public androidx.fragment.app.Fragment report() { return new com.comeforfood.saferoute.feature.report.ReportWizardFragment(); }
+                @Override public androidx.fragment.app.Fragment report() { return com.comeforfood.saferoute.feature.report.ReportWizardFragment.forNavigation(); }
                 @Override public androidx.fragment.app.Fragment profile() { return new com.comeforfood.saferoute.feature.profile.ProfileFragment(); }
             };
     public com.comeforfood.saferoute.feature.shared.Tv2Screens getTv2Screens() { return tv2Screens; }

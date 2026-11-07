@@ -22,7 +22,9 @@ public class ReportDraft extends ViewModel {
     public String camera() { return state.get("camera"); }
     public void camera(String uri) { state.set("camera",uri); }
     public Point point() { Double lat=state.get("lat"),lon=state.get("lon"); return lat==null||lon==null?null:new Point(lat,lon); }
-    public void point(Point p) { state.set("lat",p.latitude);state.set("lon",p.longitude);state.set("confirmed",false); }
+    public void point(Point p) { state.set("lat",p.latitude);state.set("lon",p.longitude);state.remove("locationLabel");state.set("confirmed",false); }
+    public String locationLabel() { return state.get("locationLabel"); }
+    public void locationLabel(String value) { state.set("locationLabel",value); }
     public int category() { Integer v=state.get("category");return v==null?-1:v; }
     public void category(int v) { if(category()!=v)state.set("confirmed",false);state.set("category",v); }
     public int severity() { Integer v=state.get("severity");return v==null?1:v; }

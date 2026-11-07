@@ -20,7 +20,8 @@ public final class NetworkDataSource implements Tv1DataSource {
                 Hazard.Status status=Hazard.Status.valueOf(r.getStatus());
                 if(status==Hazard.Status.REJECTED)continue;
                 Hazard.Type type;
-                try { type=Hazard.Type.valueOf(r.getCategoryUser().toUpperCase(Locale.ROOT)); }
+                if("Nứt đường".equalsIgnoreCase(r.getCategoryUser())) type=Hazard.Type.CRACK;
+                else try { type=Hazard.Type.valueOf(r.getCategoryUser().toUpperCase(Locale.ROOT)); }
                 catch(IllegalArgumentException e) {type=Hazard.Type.MANUAL;}
                 result.add(new Hazard(r.getId(),r.getCategoryUser(),r.getDescription(),new Point(r.getLatitude(),r.getLongitude()),type,status));
             }

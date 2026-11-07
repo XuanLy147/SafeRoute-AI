@@ -9,9 +9,14 @@ public interface AddressSearch {
     final class Place {
         public final String label;
         public final Point point;
+        public final boolean streetAddress;
         public Place(String label, Point point) {
+            this(label, point, false);
+        }
+        public Place(String label, Point point, boolean streetAddress) {
             this.label = java.util.Objects.requireNonNull(label);
             this.point = java.util.Objects.requireNonNull(point);
+            this.streetAddress = streetAddress;
         }
     }
     enum Failure { UNAVAILABLE, NETWORK }
@@ -20,4 +25,8 @@ public interface AddressSearch {
         void failure(Failure error);
     }
     Tv1DataSource.Request search(String query, Callback callback);
+    default Tv1DataSource.Request reverse(Point point, Callback callback) {
+        callback.failure(Failure.UNAVAILABLE);
+        return () -> {};
+    }
 }
