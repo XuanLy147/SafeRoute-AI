@@ -101,7 +101,7 @@ public class LiveBackendDeviceTest {
             ui(a->a.findViewById(R.id.btnSimulateAi).performClick());
             waitFor(a->{TextView title=a.findViewById(R.id.tvAiTitle);return title!=null&&!title.getText().toString().contains("Đang phân tích");});
             ui(a->a.findViewById(R.id.btnManual).performClick());
-            ui(a->{((RadioButton)((RadioGroup)a.findViewById(R.id.categoryOptions)).getChildAt(3)).performClick();((EditText)a.findViewById(R.id.etDescription)).setText("Synthetic Android device integration input");a.findViewById(R.id.btnReview).performClick();});
+            ui(a->{((RadioButton)((RadioGroup)a.findViewById(R.id.categoryOptions)).getChildAt(1)).performClick();((EditText)a.findViewById(R.id.etDescription)).setText("Synthetic Android device integration input");a.findViewById(R.id.btnReview).performClick();});
             ui(a->{((CheckBox)a.findViewById(R.id.confirmReport)).setChecked(true);a.findViewById(R.id.btnSubmitReport).performClick();});
             waitFor(a->a.getSupportFragmentManager().findFragmentById(R.id.content) instanceof ReportDetailFragment);
             List<ReportDto.ReportResponse> mine=api.mine().execute().body();assertNotNull(mine);assertEquals(1,mine.size());String id=mine.get(0).getId();assertEquals("PENDING_VERIFICATION",mine.get(0).getStatus());assertNotNull(mine.get(0).getImageUrl());

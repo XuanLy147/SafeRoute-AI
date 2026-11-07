@@ -21,13 +21,30 @@ public final class MapsSupport {
     }
     public static void attach(Fragment owner, int containerId, Consumer<GoogleMap> ready) {
         try {
-        Fragment existing = owner.getChildFragmentManager().findFragmentById(containerId);
-        SupportMapFragment fragment = existing instanceof SupportMapFragment ? (SupportMapFragment) existing : SupportMapFragment.newInstance();
-        if (existing == null) owner.getChildFragmentManager().beginTransaction().replace(containerId, fragment).commitNow();
-        android.view.View ownerView = owner.requireView();
-        fragment.getMapAsync(map -> {
-            if (owner.getView() == ownerView) ready.accept(map);
-        });
+            Fragment existing = owner.getChildFragmentManager().findFragmentById(containerId);
+            SupportMapFragment fragment = existing instanceof SupportMapFragment ? (SupportMapFragment) existing : SupportMapFragment.newInstance();
+            if (existing == null) owner.getChildFragmentManager().beginTransaction().replace(containerId, fragment).commitNow();
+            android.view.View ownerView = owner.requireView();
+            fragment.getMapAsync(map -> {
+                if (owner.getView() == ownerView) {
+                    configureMapUi(map);
+                    ready.accept(map);
+                }
+            });
         } catch(RuntimeException error) { /* Keep the coordinate/list fallback when Maps cannot initialize. */ }
+    }
+    public static void configureMapUi(GoogleMap map) {
+        if (map == null) return;
+        try {
+            com.google.android.gms.maps.UiSettings ui = map.getUiSettings();
+            ui.setZoomControlsEnabled(true);
+            ui.setCompassEnabled(true);
+            ui.setScrollGesturesEnabled(true);
+            ui.setZoomGesturesEnabled(true);
+            ui.setRotateGesturesEnabled(true);
+            ui.setTiltGesturesEnabled(true);
+            ui.setScrollGesturesEnabledDuringRotateOrZoom(true);
+            ui.setMapToolbarEnabled(false);
+        } catch (Exception ignored) {}
     }
 }

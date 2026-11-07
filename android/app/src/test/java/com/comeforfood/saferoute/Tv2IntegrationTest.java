@@ -55,8 +55,11 @@ public class Tv2IntegrationTest {
         userFixture();
         tab(R.id.nav_report);
         assertTrue(activity.getSupportFragmentManager().findFragmentById(R.id.content) instanceof ReportWizardFragment);
-        assertEquals(activity.getString(R.string.report_location_missing),
-                ((TextView)activity.findViewById(R.id.tvCoordinates)).getText().toString());
+        assertEquals(1, new ViewModelProvider(activity).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).step());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.btnCamera).getVisibility());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.btnPickGallery).getVisibility());
+        assertEquals(View.VISIBLE, activity.findViewById(R.id.tvCoordinates).getVisibility());
+        assertEquals(View.GONE, activity.findViewById(R.id.mapHint).getVisibility());
         tab(R.id.nav_profile);
         assertTrue(activity.getSupportFragmentManager().findFragmentById(R.id.content) instanceof ProfileFragment);
         assertEquals("USER",
@@ -82,7 +85,8 @@ public class Tv2IntegrationTest {
     }
     @Test public void reportsStayEmptyUntilConnectedAndProfileTabMatchesDestination() {
         userFixture();
-        tab(R.id.nav_report); activity.findViewById(R.id.btnOpenReports).performClick(); settle();
+        tab(R.id.nav_report);
+        activity.openTv2Fragment(new com.comeforfood.saferoute.feature.reports.MyReportsFragment()); settle();
         assertEquals(View.VISIBLE, activity.findViewById(R.id.reportsUnavailable).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.reportPending).getVisibility());
         assertEquals(View.GONE, activity.findViewById(R.id.reportVerified).getVisibility());

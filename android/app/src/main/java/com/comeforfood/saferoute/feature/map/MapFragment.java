@@ -32,6 +32,7 @@ public class MapFragment extends LocationAwareFragment {
     private GoogleMap map;
     private final HazardMarkerRenderer markers = new HazardMarkerRenderer();
     private List<Hazard> visibleReports = Collections.emptyList();
+    private boolean hasUnreadNotification = true;
 
     @Nullable @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle saved) {
         binding = FragmentMapBinding.inflate(inflater, parent, false); return binding.getRoot();
@@ -44,6 +45,12 @@ public class MapFragment extends LocationAwareFragment {
         binding.categories.setOnCheckedStateChangeListener((group, checked) -> updateFilters());
         binding.verified.setOnCheckedChangeListener((button, checked) -> updateFilters());
         binding.refresh.setOnClickListener(v -> model.refreshReports());
+        binding.badgeNotification.setVisibility(hasUnreadNotification ? View.VISIBLE : View.GONE);
+        binding.btnNotification.setOnClickListener(v -> {
+            hasUnreadNotification = false;
+            binding.badgeNotification.setVisibility(View.GONE);
+            ((MainActivity) requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.NOTIFICATIONS);
+        });
         binding.routes.setOnClickListener(v -> ((MainActivity) requireActivity()).openRoutes(null));
         binding.location.setOnClickListener(v -> useLocation(location -> {
             Point point = new Point(location.getLatitude(), location.getLongitude());
@@ -67,11 +74,17 @@ public class MapFragment extends LocationAwareFragment {
             MapsSupport.attach(this, R.id.map, ready -> {
                 map = ready;
                 map.getUiSettings().setMyLocationButtonEnabled(false);
+                float density = getResources().getDisplayMetrics().density;
+                map.setPadding(0, Math.round(180 * density), 0, Math.round(130 * density));
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554, 106.6782), 13f));
                 if (getArguments()!=null && getArguments().containsKey("center.lat")) map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(getArguments().getDouble("center.lat"),getArguments().getDouble("center.lon")),16f));
                 map.setOnMapLoadedCallback(() -> { if (binding != null) binding.mapStatus.setText(R.string.map_ready); });
                 map.setOnMarkerClickListener(marker -> {
-                    if (marker.getTag() instanceof Hazard) { preview((Hazard) marker.getTag()); return true; }
+                    if (marker.getTag() instanceof Hazard) {
+                        map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()), 300, null);
+                        preview((Hazard) marker.getTag());
+                        return true;
+                    }
                     return false;
                 });
                 enableLocation();

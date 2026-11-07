@@ -3,6 +3,8 @@ package com.comeforfood.saferoute;
 import com.comeforfood.saferoute.feature.shared.Point;
 import com.comeforfood.saferoute.feature.map.Hazard;
 import com.comeforfood.saferoute.feature.map.HazardFilter;
+import com.comeforfood.saferoute.feature.report.ReportWizardFragment;
+import com.comeforfood.saferoute.feature.routing.AddressSearch;
 import com.comeforfood.saferoute.feature.routing.Route;
 import com.comeforfood.saferoute.feature.routing.RouteComparison;
 import com.comeforfood.saferoute.feature.routing.RouteGeometry;
@@ -36,6 +38,12 @@ public class RouteAndHazardTest {
     }
     @Test public void rejectsSwappedVietnamCoordinates() {
         assertThrows(IllegalArgumentException.class, () -> Point.parse("106.6782,10.7554"));
+    }
+    @Test public void broadReverseGeocodeDoesNotReplaceSelectedPlaceName() {
+        AddressSearch.Place city = new AddressSearch.Place("Thành phố Hồ Chí Minh, Việt Nam", a);
+        assertEquals("KTX SGU", ReportWizardFragment.preferredLocationLabel("KTX SGU", city));
+        AddressSearch.Place street = new AddressSearch.Place("273 An Dương Vương, TP. Hồ Chí Minh", a, true);
+        assertEquals(street.label, ReportWizardFragment.preferredLocationLabel("KTX SGU", street));
     }
     @Test public void identicalEndpointsDetected() { assertTrue(a.sameAs(new Point(10.75, 106.67))); assertFalse(a.sameAs(b)); }
     @Test public void decodeOfficialGoogleExample() {
@@ -86,10 +94,12 @@ public class RouteAndHazardTest {
     @Test public void crackAndStatusFiltersCompose() {
         List<Hazard> reports = Arrays.asList(hazard("a", Hazard.Type.D00, Hazard.Status.VERIFIED),
                 hazard("b", Hazard.Type.D10, Hazard.Status.PENDING_VERIFICATION),
+                hazard("generic-crack", Hazard.Type.CRACK, Hazard.Status.VERIFIED),
                 hazard("c", Hazard.Type.D40, Hazard.Status.VERIFIED),
                 hazard("d", Hazard.Type.REPAIR, Hazard.Status.VERIFIED));
         List<Hazard> filtered = HazardFilter.apply(reports, HazardFilter.Category.CRACKS, true);
-        assertEquals(1, filtered.size()); assertEquals("a", filtered.get(0).id);
+        assertEquals(2, filtered.size()); assertEquals("a", filtered.get(0).id);
+        assertEquals("generic-crack", filtered.get(1).id);
     }
     @Test public void repairRemainsATypeAndIsNotTreatedAsResolved() {
         assertEquals(1, HazardFilter.apply(Collections.singletonList(

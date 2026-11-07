@@ -53,27 +53,56 @@ public class MapFlowFragment extends Fragment {
         }
     }
     private void searchPage() {
-        binding.flowTitle.setText(R.string.flow_search_area);binding.flowBody.setText(R.string.flow_search_body);
-        EditText input=new EditText(requireContext());input.setId(R.id.areaQuery);input.setHint(R.string.flow_search_hint);
-        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT|android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);binding.flowActions.addView(input);
-        LinearLayout results=new LinearLayout(requireContext());results.setOrientation(LinearLayout.VERTICAL);
-        MaterialButton button=action(R.string.flow_search_action,"search",()->{
-            String query=input.getText().toString().trim();
-            if(query.isEmpty()){input.setError(getString(R.string.flow_search_hint));return;}
-            if(search!=null)search.cancel();long request=++generation;
-            results.removeAllViews();binding.flowBody.setText(R.string.flow_search_loading);
-            search=((SafeRouteApp)requireActivity().getApplication()).getAddressSearch().search(query,new AddressSearch.Callback(){
+        binding.flowTitle.setText(R.string.flow_search_area);
+        binding.flowBody.setText(R.string.flow_search_body);
+
+        EditText input = new EditText(requireContext());
+        input.setId(R.id.areaQuery);
+        input.setHint(R.string.flow_search_hint);
+        input.setBackgroundResource(R.drawable.bg_soft_input);
+        int padH = (int) (18 * getResources().getDisplayMetrics().density);
+        int padV = (int) (14 * getResources().getDisplayMetrics().density);
+        input.setPadding(padH, padV, padH, padV);
+        input.setTextColor(getResources().getColor(R.color.ink));
+        input.setHintTextColor(getResources().getColor(R.color.muted));
+        input.setTextSize(15f);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        input.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+        binding.flowActions.addView(input);
+
+        LinearLayout results = new LinearLayout(requireContext());
+        results.setOrientation(LinearLayout.VERTICAL);
+
+        MaterialButton button = (MaterialButton) getLayoutInflater().inflate(R.layout.item_primary_button, binding.flowActions, false);
+        button.setText(R.string.flow_search_action);
+        button.setTag("search");
+        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        p.topMargin = (int) (16 * getResources().getDisplayMetrics().density);
+        p.gravity = Gravity.CENTER_HORIZONTAL;
+        binding.flowActions.addView(button, p);
+
+        button.setOnClickListener(v -> {
+            String query = input.getText().toString().trim();
+            if (query.isEmpty()) { input.setError(getString(R.string.flow_search_hint)); return; }
+            if (search != null) search.cancel();
+            long request = ++generation;
+            results.removeAllViews();
+            binding.flowBody.setText(R.string.flow_search_loading);
+            search = ((SafeRouteApp) requireActivity().getApplication()).getAddressSearch().search(query, new AddressSearch.Callback() {
                 public void success(List<AddressSearch.Place> places) {
-                    if(binding==null||request!=generation)return;
-                    binding.flowBody.setText(places.isEmpty()?R.string.flow_search_empty:R.string.flow_search_body);
-                    for(AddressSearch.Place place:places) {
-                        MaterialButton choice=(MaterialButton)getLayoutInflater().inflate(R.layout.item_navigation_action,results,false);choice.setText(place.label);choice.setAllCaps(false);
-                        results.addView(choice,new LinearLayout.LayoutParams(-1,-2));
-                        choice.setOnClickListener(v->host().openMapAt(place.point));
+                    if (binding == null || request != generation) return;
+                    binding.flowBody.setText(places.isEmpty() ? R.string.flow_search_empty : R.string.flow_search_body);
+                    for (AddressSearch.Place place : places) {
+                        MaterialButton choice = (MaterialButton) getLayoutInflater().inflate(R.layout.item_navigation_action, results, false);
+                        choice.setText(place.label);
+                        choice.setAllCaps(false);
+                        results.addView(choice, new LinearLayout.LayoutParams(-1, -2));
+                        choice.setOnClickListener(v2 -> host().openMapAt(place.point));
                     }
                 }
-                public void failure(AddressSearch.Failure failure) {if(binding!=null&&request==generation)binding.flowBody.setText(R.string.flow_search_error);}
+                public void failure(AddressSearch.Failure failure) {
+                    if (binding != null && request == generation) binding.flowBody.setText(R.string.flow_search_error);
+                }
             });
         });
         binding.flowActions.addView(results);

@@ -29,9 +29,16 @@
 <string name="report_image_note">Ảnh cần rõ mặt đường. Tránh thông tin cá nhân không cần thiết.</string>
 <string name="report_gps_title">Xác nhận vị trí</string>
 <string name="report_gps_note">Bấm lên bản đồ hoặc kéo ghim để chọn vị trí. Bạn cũng có thể lấy vị trí hiện tại; không lấy GPS từ ảnh.</string>
-<string name="report_analyze">Xác nhận &amp; phân tích</string>
+<string name="report_manual_location_hint">Nhập số nhà, tên đường</string>
+<string name="report_location_or">Hoặc</string>
+<string name="report_analyze">Xác nhận</string>
+<string name="report_address_searching">Đang tìm địa chỉ…</string>
+<string name="report_address_choose">Chọn địa chỉ vị trí báo cáo</string>
+<string name="report_address_loading">Đang tìm địa chỉ…</string>
+<string name="report_address_unavailable">Chưa xác định được địa chỉ</string>
+<string name="report_location_address">Địa chỉ: %1$s</string>
 <string name="report_ai_title">Kết quả phân tích</string>
-<string name="report_manual">Chọn loại nguy cơ thủ công</string>
+<string name="report_manual">Nhận diện thủ công</string>
 <string name="report_type_title">Chỉnh loại nguy cơ</string>
 <string name="report_category_label">Loại nguy cơ</string>
 <string name="report_severity_label">Mức độ nghiêm trọng</string>
@@ -104,7 +111,7 @@
 <string name="flow_feedback">Góp ý báo cáo</string>
 <string name="flow_detail_missing">Báo cáo không còn trong danh sách hiện tại. Quay lại bản đồ và tải lại.</string>
 <string name="flow_account_home">Tài khoản của tôi</string>
-<string-array name="report_categories"><item>D00 · Nứt dọc</item><item>D10 · Nứt ngang</item><item>D20 · Nứt mạng nhện</item><item>D40 · Ổ gà</item><item>Repair · Vết sửa chữa</item><item>Ngập nước (thủ công)</item><item>Vật cản (thủ công)</item></string-array>
+<string-array name="report_categories"><item>Nứt đường</item><item>Ổ gà</item><item>Ngập nước</item><item>Vật cản</item></string-array>
 <string-array name="report_severities"><item>Nhẹ</item><item>Trung bình</item><item>Nghiêm trọng</item></string-array>
 <item type="id" name="nav_routes"/><item type="id" name="nav_role_home"/><item type="id" name="nav_role_reports"/><item type="id" name="nav_role_history"/><item type="id" name="nav_role_users"/>
 <item type="id" name="areaQuery"/><string name="tab_admin">Quản trị</string>

@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         if(session.isLoggedIn()&&!session.isVerified()){openRoot(new SessionGateFragment(),R.id.nav_profile);return;}
         if(session.isVerified() && pendingDestination!=0) {
             int destination=pendingDestination;pendingDestination=0;
-            if(destination==R.id.nav_report){openRoot(new ReportWizardFragment(),destination);return;}
+            if(destination==R.id.nav_report){openRoot(ReportWizardFragment.forNavigation(),destination);return;}
             if(destination==R.id.nav_my_reports){openRoot(new MyReportsFragment(),destination);return;}
         }
         if (session.isReviewerOrAdmin()) openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_HOME:FlowPageFragment.Page.REVIEW_HOME,R.id.nav_role_home);

@@ -8,7 +8,19 @@ android:layout_width="match_parent" android:layout_height="match_parent" android
 <TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:textAppearance="@style/Text.SafeRoute.Body" android:accessibilityLiveRegion="polite"/>
 <com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/retry" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:minHeight="48dp" android:text="@string/retry" android:letterSpacing="0"/>
 <TextView android:id="@+id/map_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="12dp" android:background="@drawable/bg_info_soft" android:textColor="@color/on_info" android:text="@string/map_unavailable_detail" android:textSize="14sp" android:visibility="gone"/>
-<androidx.fragment.app.FragmentContainerView android:id="@+id/map" android:layout_width="match_parent" android:layout_height="240dp" android:layout_marginTop="12dp" android:visibility="gone"/>
+<com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout
+    android:id="@+id/map_container"
+    android:layout_width="match_parent"
+    android:layout_height="380dp"
+    android:layout_marginTop="12dp"
+    android:background="@drawable/bg_soft_panel"
+    android:clipToOutline="true"
+    android:visibility="gone">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout>
 <TextView android:id="@+id/score_description" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:textAppearance="@style/Text.SafeRoute.Note" android:visibility="gone"/>
 <LinearLayout android:id="@+id/route_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginTop="16dp"/>
 <TextView android:id="@+id/caution" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/route_caution" android:textAppearance="@style/Text.SafeRoute.Note"/>

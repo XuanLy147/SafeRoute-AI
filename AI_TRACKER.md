@@ -128,3 +128,8 @@ IN_PROGRESS: reproduce stale form/photo/AI state after discard or failed reanaly
 ## Report draft follow-up result - 2026-11-08
 
 Local verification complete; no commit/push. Fixed R05 stale description/category/severity after discard, R06 same-URI photo not reloaded after discard, R07 stale AI editors/model/consent after failed reanalysis, R08 previous image remaining after unreadable replacement. Production scope: ReportWizardFragment only. Four failing reproductions now pass; 84 JVM tests, APK builds and lint PASS. Isolated Xiaomi E2E with USER/REVIEWER/ADMIN, live Maps/Routes and restart persistence PASS. Temporary services removed; real database/accounts not used for mutations. Backend unit suite unchanged and not rerun this round. See docs/qa/REPORT_DRAFT_REGRESSION_2026-11-08.md; camera/picker system gestures and EXIF coverage remain unverified.
+
+
+## Frontend UI merge - 2026-11-08
+
+Merged origin/frontend 9f49601 locally on integration/frontend-ui-preserve-fixes-20261108 after recovery checkpoint 5830b26. Preserved incoming UI and verified auth/RBAC/report fixes; resolved three conflicts, migrated saved category indices and cancelled stale address lookups on draft discard. 88 Android JVM tests, APK builds/lint, 208 backend tests + 12 subtests, Ruff/migrations/OpenAPI and isolated Xiaomi USER/REVIEWER/ADMIN E2E with live Maps/Routes and restart persistence PASS. New map screenshot inspected. No push; no live database/role mutations or backend service redeployment. Camera/picker gestures and EXIF remain unverified. See docs/integration/FRONTEND_UI_MERGE_2026-11-08.md.

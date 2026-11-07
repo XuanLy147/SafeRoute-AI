@@ -33,9 +33,11 @@ public class RouteSearchFragment extends LocationAwareFragment {
     private int searchGeneration;
     private com.comeforfood.saferoute.feature.shared.Tv1DataSource.Request addressRequest;
     private androidx.appcompat.app.AlertDialog addressDialog;
+
     @Nullable @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle saved) {
         binding = FragmentRouteSearchBinding.inflate(inflater, parent, false); return binding.getRoot();
     }
+
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle saved) {
         model = new ViewModelProvider(requireActivity()).get(Tv1ViewModel.class);
         if (saved != null) picking = saved.getString("picking", "A");
@@ -52,41 +54,92 @@ public class RouteSearchFragment extends LocationAwareFragment {
             public void afterTextChanged(Editable text) {}
         };
         binding.origin.addTextChangedListener(watcher); binding.destination.addTextChangedListener(watcher);
-        binding.swap.setOnClickListener(v -> {
-            cancelSearch(); model.swapEndpoints(); syncFields();
+
+        // Bấm/focus vào Điểm xuất phát A -> Thả xuống dropbox với dòng "Vị trí của tôi"
+        View.OnFocusChangeListener originFocus = binding.origin.getOnFocusChangeListener();
+        binding.origin.setOnFocusChangeListener((v, hasFocus) -> {
+            if (originFocus != null) originFocus.onFocusChange(v, hasFocus);
+            if (hasFocus) showOriginDropdown();
         });
+        binding.origin.setOnClickListener(v -> showOriginDropdown());
+        binding.originLayout.setOnClickListener(v -> showOriginDropdown());
+
+        // Bấm/focus vào Điểm đến B -> Thả xuống dropbox với dòng "Vị trí của tôi"
+        View.OnFocusChangeListener destFocus = binding.destination.getOnFocusChangeListener();
+        binding.destination.setOnFocusChangeListener((v, hasFocus) -> {
+            if (destFocus != null) destFocus.onFocusChange(v, hasFocus);
+            if (hasFocus) showDestinationDropdown();
+        });
+        binding.destination.setOnClickListener(v -> showDestinationDropdown());
+        binding.destinationLayout.setOnClickListener(v -> showDestinationDropdown());
+
+        // Chọn "Vị trí của tôi" ở dropbox Điểm xuất phát
         binding.location.setOnClickListener(v -> useLocation(location -> {
             Point point = new Point(location.getLatitude(), location.getLongitude());
             chooseEndpoint(true, getString(R.string.my_location), point);
+            if (binding != null) binding.originDropdownCard.setVisibility(View.GONE);
             if (map != null) map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(point), 15f));
         }));
-        binding.pickA.setOnClickListener(v -> pick("A")); binding.pickB.setOnClickListener(v -> pick("B"));
+
+        // Chọn "Vị trí của tôi" ở dropbox Điểm đến
+        binding.destinationLocation.setOnClickListener(v -> useLocation(location -> {
+            Point point = new Point(location.getLatitude(), location.getLongitude());
+            chooseEndpoint(false, getString(R.string.my_location), point);
+            if (binding != null) binding.destinationDropdownCard.setVisibility(View.GONE);
+            if (map != null) map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(point), 15f));
+        }));
+
+        // Nút đổi vị trí A và B
+        binding.swap.setOnClickListener(v -> {
+            cancelSearch(); model.swapEndpoints(); syncFields();
+        });
+
         binding.compare.setOnClickListener(v -> submit());
         binding.destination.setOnEditorActionListener((text, action, event) -> {
             if (action == EditorInfo.IME_ACTION_DONE) { submit(); return true; } return false;
         });
+
         boolean configured = MapsSupport.configured(requireContext());
-        binding.pickControls.setVisibility(configured ? View.VISIBLE : View.GONE);
-        binding.map.setVisibility(configured ? View.VISIBLE : View.GONE);
+        binding.mapContainer.setVisibility(configured ? View.VISIBLE : View.GONE);
         if (configured) {
-            binding.mapStatus.setText(R.string.map_connecting);
             MapsSupport.attach(this, R.id.map, ready -> {
                 map = ready;
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554, 106.6782), 13f));
                 map.setOnMapClickListener(point -> {
                     Point selected = new Point(point.latitude, point.longitude);
                     chooseEndpoint("A".equals(picking), getString(R.string.map_point_label, picking), selected);
-                    binding.mapStatus.setText(getString(R.string.point_chosen, picking));
                 });
-                pick(picking); renderEndpoints();
+                renderEndpoints();
             });
         }
+
+        if ("B".equals(picking)) {
+            showDestinationDropdown();
+        } else {
+            showOriginDropdown();
+        }
     }
-    private void pick(String label) {
-        picking = label;
-        binding.mapStatus.setText(getString(R.string.choose_point, label));
-        binding.pickA.setSelected("A".equals(label)); binding.pickB.setSelected("B".equals(label));
+
+    private void showOriginDropdown() {
+        picking = "A";
+        if (binding != null) {
+            binding.originDropdownCard.setVisibility(View.VISIBLE);
+            binding.destinationDropdownCard.setVisibility(View.GONE);
+            binding.originLabel.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary));
+            binding.destinationLabel.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.muted));
+        }
     }
+
+    private void showDestinationDropdown() {
+        picking = "B";
+        if (binding != null) {
+            binding.destinationDropdownCard.setVisibility(View.VISIBLE);
+            binding.originDropdownCard.setVisibility(View.GONE);
+            binding.destinationLabel.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.primary));
+            binding.originLabel.setTextColor(androidx.core.content.ContextCompat.getColor(requireContext(), R.color.muted));
+        }
+    }
+
     private void renderEndpoints() {
         if (map == null) return;
         if (aMarker != null) aMarker.remove();
@@ -97,6 +150,7 @@ public class RouteSearchFragment extends LocationAwareFragment {
         try { bMarker = map.addMarker(new MarkerOptions().position(MapsSupport.latLng(Point.parse(model.destination()))).title(getString(R.string.destination))); }
         catch (IllegalArgumentException ignored) {}
     }
+
     private void submit() {
         binding.originLayout.setError(null); binding.destinationLayout.setError(null);
         String aText = model.originText().trim(), bText = model.destinationText().trim();
@@ -112,9 +166,11 @@ public class RouteSearchFragment extends LocationAwareFragment {
         model.compare();
         ((MainActivity) requireActivity()).openResults();
     }
+
     private Point parse(String value) {
         try { return Point.parse(value); } catch (IllegalArgumentException ignored) { return null; }
     }
+
     private boolean validateText(String value, boolean first) {
         int error = 0;
         if (value.isEmpty()) error = R.string.address_required;
@@ -124,6 +180,7 @@ public class RouteSearchFragment extends LocationAwareFragment {
         if (error != 0) (first ? binding.originLayout : binding.destinationLayout).setError(getString(error));
         return error == 0;
     }
+
     private void syncFields() {
         updatingFields = true;
         binding.origin.setText(model.originText());
@@ -131,12 +188,14 @@ public class RouteSearchFragment extends LocationAwareFragment {
         updatingFields = false;
         renderEndpoints();
     }
+
     private void chooseEndpoint(boolean first, String label, Point point) {
         cancelSearch();
         model.selectEndpoint(first, label, point);
         syncFields();
         if (map != null) map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(point), 15f));
     }
+
     private void cancelSearch() {
         searchGeneration++;
         if (addressRequest != null) addressRequest.cancel();
@@ -148,6 +207,7 @@ public class RouteSearchFragment extends LocationAwareFragment {
             binding.compare.setEnabled(true);
         }
     }
+
     private void resolve(boolean first, String query) {
         cancelSearch();
         final int generation = searchGeneration;
@@ -191,10 +251,19 @@ public class RouteSearchFragment extends LocationAwareFragment {
             }
         });
     }
+
     @Override protected void onLocating(boolean loading) {
-        if (binding != null) { binding.location.setEnabled(!loading); binding.location.setText(loading ? R.string.locating : R.string.my_location); }
+        if (binding != null) {
+            binding.location.setEnabled(!loading);
+            binding.destinationLocation.setEnabled(!loading);
+            String text = getString(loading ? R.string.locating : R.string.my_location);
+            binding.originLocationText.setText(text);
+            binding.destinationLocationText.setText(text);
+        }
     }
+
     @Override public void onSaveInstanceState(@NonNull Bundle out) { super.onSaveInstanceState(out); out.putString("picking", picking); }
+
     @Override public void onDestroyView() {
         cancelSearch();
         if (aMarker != null) aMarker.remove();

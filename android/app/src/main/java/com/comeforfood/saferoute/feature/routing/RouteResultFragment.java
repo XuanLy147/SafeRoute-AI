@@ -48,7 +48,7 @@ public class RouteResultFragment extends Fragment {
         binding.routeList.removeAllViews();
         binding.loading.setVisibility(state.loading ? View.VISIBLE : View.GONE);
         binding.retry.setVisibility(state.loading ? View.GONE : View.VISIBLE);
-        binding.map.setVisibility(View.GONE); binding.mapStatus.setVisibility(View.GONE);
+        binding.mapContainer.setVisibility(View.GONE); binding.mapStatus.setVisibility(View.GONE);
         binding.scoreDescription.setVisibility(View.GONE);
         comparison = state.data;
         if (state.loading) { binding.status.setText(R.string.route_loading); return; }
@@ -71,7 +71,7 @@ public class RouteResultFragment extends Fragment {
         renderCards();
         binding.mapStatus.setVisibility(View.VISIBLE);
         if (MapsSupport.configured(requireContext())) {
-            binding.map.setVisibility(View.VISIBLE);
+            binding.mapContainer.setVisibility(View.VISIBLE);
             binding.mapStatus.setText(R.string.map_connecting);
             if (!mapAttached) {
                 mapAttached = true;
@@ -114,9 +114,9 @@ public class RouteResultFragment extends Fragment {
         Point a = null, b = null;
         try { a = Point.parse(model.origin()); b = Point.parse(model.destination()); } catch (IllegalArgumentException ignored) {}
         renderer.render(requireContext(), map, comparison, selected.id, a, b, this::select);
-        View mapView = binding.map;
+        View mapView = binding.mapContainer;
         mapView.post(() -> {
-            if (binding != null && binding.map == mapView && map != null && selected != null
+            if (binding != null && binding.mapContainer == mapView && map != null && selected != null
                     && mapView.getWidth() > 0 && mapView.getHeight() > 0)
                 renderer.fit(requireContext(), map, selected);
         });

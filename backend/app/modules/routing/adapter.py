@@ -43,7 +43,7 @@ class GoogleRoutesAdapter:
             timeout_seconds: Request timeout in seconds.
             client: Optional httpx.Client (for connection pooling or unit test injection).
         """
-        self.api_key = api_key or os.environ.get("GOOGLE_ROUTES_API_KEY", "")
+        self.api_key = api_key if api_key is not None else os.environ.get("GOOGLE_ROUTES_API_KEY", "")
         self.timeout_seconds = timeout_seconds
         self._client = client
 

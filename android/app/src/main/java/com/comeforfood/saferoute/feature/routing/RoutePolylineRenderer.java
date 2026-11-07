@@ -45,8 +45,12 @@ public final class RoutePolylineRenderer {
     public void fit(Context context, GoogleMap map, Route selected) {
         LatLngBounds.Builder bounds = LatLngBounds.builder();
         for (Point point : selected.points) bounds.include(MapsSupport.latLng(point));
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(),
-                Math.round(40 * context.getResources().getDisplayMetrics().density)));
+        int padding = Math.round(48 * context.getResources().getDisplayMetrics().density);
+        try {
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), padding), 400, null);
+        } catch (Exception e) {
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds.build(), padding));
+        }
     }
     public void clear() {
         for (Polyline line : polylines) line.remove();
