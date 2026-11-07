@@ -5,8 +5,8 @@ route comparison, and risk score integration with TV4/TV3/TV1.
 """
 
 from enum import Enum
-from typing import List, Optional, Tuple
-from pydantic import BaseModel, Field, field_validator
+
+from pydantic import BaseModel, Field
 
 
 class TravelMode(str, Enum):
@@ -41,11 +41,11 @@ class RouteCandidate(BaseModel):
     distance_meters: int = Field(..., ge=0, description="Total route distance in meters")
     duration_seconds: int = Field(..., ge=0, description="Estimated travel duration in seconds")
     polyline: str = Field(..., description="Google encoded polyline string")
-    coordinates: List[Tuple[float, float]] = Field(
+    coordinates: list[tuple[float, float]] = Field(
         default_factory=list,
         description="Decoded list of (latitude, longitude) coordinate pairs"
     )
-    warnings: List[str] = Field(default_factory=list, description="Navigation warnings from Google Routes")
+    warnings: list[str] = Field(default_factory=list, description="Navigation warnings from Google Routes")
 
     def to_geojson(self) -> dict:
         """Export coordinates as GeoJSON LineString [longitude, latitude] for PostGIS / TV4."""
@@ -72,7 +72,7 @@ class EvaluatedRoute(BaseModel):
     distance_meters: int
     duration_seconds: int
     polyline: str
-    risk: Optional[RouteRiskScore] = Field(
+    risk: RouteRiskScore | None = Field(
         default=None,
         description="Risk assessment from PostGIS hazard data; None if scoring service not configured"
     )
@@ -96,15 +96,15 @@ class RouteCompareResponse(BaseModel):
     origin: LatLng
     destination: LatLng
     travel_mode: TravelMode
-    routes: List[EvaluatedRoute] = Field(
+    routes: list[EvaluatedRoute] = Field(
         ...,
         description="List of real candidate routes. Exactly 1 if Google returns 1 route; 0 if unreachable."
     )
-    recommended_route_id: Optional[str] = Field(
+    recommended_route_id: str | None = Field(
         None,
         description="ID of the recommended route (lowest recorded risk). None if no routes exist."
     )
-    recommendation_reason: Optional[str] = Field(
+    recommendation_reason: str | None = Field(
         None,
         description="Explanation why this route is recommended based on recorded hazards."
     )
@@ -112,4 +112,13 @@ class RouteCompareResponse(BaseModel):
         default="Tuyến đường được đề xuất dựa trên các nguy cơ mặt đường đã ghi nhận trong hệ thống. SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối.",
         description="Legal and safety disclaimer required by SafeRoute AI business rules."
     )
+    risk_assessment_status: str | None = Field(
+        None,
+        description="Semantic status of hazard assessment: 'AVAILABLE', 'UNAVAILABLE', 'PARTIAL', 'INVALID'"
+    )
+    recommendation_basis: str | None = Field(
+        None,
+        description="Basis of recommendation: 'SAFETY_LOWEST_RISK', 'DURATION_ETA_ONLY', 'SINGLE_ROUTE'"
+    )
+
 

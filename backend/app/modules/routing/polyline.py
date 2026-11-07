@@ -5,10 +5,10 @@ Provides conversion between encoded strings, (lat, lon) coordinates,
 GeoJSON LineString (lon, lat order for PostGIS / TV4), and bounding boxes.
 """
 
-from typing import Dict, List, Tuple, Any
+from typing import Any
 
 
-def decode_polyline(polyline_str: str, precision: int = 5) -> List[Tuple[float, float]]:
+def decode_polyline(polyline_str: str, precision: int = 5) -> list[tuple[float, float]]:
     """Decode a Google Encoded Polyline string into a list of (latitude, longitude) tuples.
 
     Args:
@@ -21,7 +21,7 @@ def decode_polyline(polyline_str: str, precision: int = 5) -> List[Tuple[float, 
     if not polyline_str:
         return []
 
-    coordinates: List[Tuple[float, float]] = []
+    coordinates: list[tuple[float, float]] = []
     index = 0
     lat = 0
     lng = 0
@@ -71,7 +71,7 @@ def _encode_val(val: int) -> str:
     return "".join(chunks)
 
 
-def encode_polyline(coordinates: List[Tuple[float, float]], precision: int = 5) -> str:
+def encode_polyline(coordinates: list[tuple[float, float]], precision: int = 5) -> str:
     """Encode a list of (latitude, longitude) tuples into a Google Encoded Polyline string.
 
     Args:
@@ -85,7 +85,7 @@ def encode_polyline(coordinates: List[Tuple[float, float]], precision: int = 5) 
         return ""
 
     factor = 10 ** precision
-    output: List[str] = []
+    output: list[str] = []
     prev_lat = 0
     prev_lng = 0
 
@@ -103,7 +103,7 @@ def encode_polyline(coordinates: List[Tuple[float, float]], precision: int = 5) 
     return "".join(output)
 
 
-def calculate_bounds(coordinates: List[Tuple[float, float]]) -> Tuple[float, float, float, float]:
+def calculate_bounds(coordinates: list[tuple[float, float]]) -> tuple[float, float, float, float]:
     """Calculate the bounding box of a list of (latitude, longitude) points.
 
     Returns:
@@ -119,7 +119,7 @@ def calculate_bounds(coordinates: List[Tuple[float, float]]) -> Tuple[float, flo
     return (min(lats), min(lngs), max(lats), max(lngs))
 
 
-def to_geojson_linestring(coordinates: List[Tuple[float, float]]) -> Dict[str, Any]:
+def to_geojson_linestring(coordinates: list[tuple[float, float]]) -> dict[str, Any]:
     """Convert (latitude, longitude) points into a GeoJSON LineString geometry.
 
     CRITICAL NOTE (PostGIS contract):

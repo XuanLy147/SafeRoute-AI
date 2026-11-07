@@ -1,9 +1,11 @@
 """Route-specific exceptions for Google Routes API integration (TV5)."""
 
 
+
+
 class RoutingError(Exception):
     """Base exception for all routing errors."""
-    def __init__(self, message: str, status_code: int = 500, details: dict = None):
+    def __init__(self, message: str, status_code: int = 500, details: dict | None = None):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
@@ -12,7 +14,6 @@ class RoutingError(Exception):
 
 class RouteServiceError(RoutingError):
     """Generic error when upstream Google Routes API returns an error response."""
-    pass
 
 
 class InvalidCoordinatesError(RoutingError):

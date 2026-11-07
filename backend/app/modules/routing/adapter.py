@@ -5,8 +5,8 @@ with field mask, handles real calls, decodes geometry, and normalizes candidate 
 """
 
 import os
-import re
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import httpx
 
 from .exceptions import (
@@ -32,9 +32,9 @@ class GoogleRoutesAdapter:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
+        api_key: str | None = None,
         timeout_seconds: float = 10.0,
-        client: Optional[httpx.Client] = None,
+        client: httpx.Client | None = None,
     ):
         """Initialize adapter.
 
@@ -68,7 +68,7 @@ class GoogleRoutesAdapter:
         origin: LatLng,
         destination: LatLng,
         travel_mode: TravelMode = TravelMode.TWO_WHEELER,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Build Google Routes API v2 request body."""
         return {
             "origin": origin.to_google_location(),
@@ -93,12 +93,12 @@ class GoogleRoutesAdapter:
         if isinstance(duration_raw, str):
             clean = duration_raw.rstrip("s")
             try:
-                return int(round(float(clean)))
+                return round(float(clean))
             except ValueError:
                 pass
         return 0
 
-    def parse_routes_response(self, response_data: Dict[str, Any]) -> List[RouteCandidate]:
+    def parse_routes_response(self, response_data: dict[str, Any]) -> list[RouteCandidate]:
         """Normalize raw Google Routes API JSON into a list of RouteCandidate models.
 
         Args:
@@ -111,7 +111,7 @@ class GoogleRoutesAdapter:
         if not raw_routes:
             return []
 
-        candidates: List[RouteCandidate] = []
+        candidates: list[RouteCandidate] = []
         for idx, r in enumerate(raw_routes, start=1):
             route_id = f"route_{idx}"
             summary = r.get("description", "").strip() or f"Tuyến {idx}"
@@ -146,7 +146,7 @@ class GoogleRoutesAdapter:
         origin: LatLng,
         destination: LatLng,
         travel_mode: TravelMode = TravelMode.TWO_WHEELER,
-    ) -> List[RouteCandidate]:
+    ) -> list[RouteCandidate]:
         """Fetch and normalize real route candidates from Google Routes API.
 
         Args:
