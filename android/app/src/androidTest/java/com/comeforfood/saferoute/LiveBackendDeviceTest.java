@@ -30,8 +30,51 @@ import static org.junit.Assert.*;
  */
 @RunWith(AndroidJUnit4.class)
 public class LiveBackendDeviceTest {
-    private ActivityScenario<MainActivity> scenario;
-    private void ui(java.util.function.Consumer<MainActivity> action){scenario.onActivity(action::accept);InstrumentationRegistry.getInstrumentation().waitForIdleSync();}
+    /** Xiaomi may block ActivityScenario's synchronous activity launch. This opt-in
+     * harness uses the same lifecycle-observed foreground launch as DeviceAuditBridgeTest. */
+    private interface Scenario {
+        void onActivity(java.util.function.Consumer<MainActivity> action);
+        void recreate();
+        void close();
+    }
+    private Scenario launch(SafeRouteApp app) {
+        if(!"true".equals(InstrumentationRegistry.getArguments().getString("physicalDevice"))) {
+            ActivityScenario<MainActivity> standard=ActivityScenario.launch(MainActivity.class);
+            return new Scenario(){
+                public void onActivity(java.util.function.Consumer<MainActivity> action){standard.onActivity(action::accept);}
+                public void recreate(){standard.recreate();}
+                public void close(){standard.close();}
+            };
+        }
+        return new Scenario() {
+            MainActivity current;
+            {
+                main(()->app.startActivity(new android.content.Intent(app,MainActivity.class)
+                    .addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK|android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)));
+                resumed(null);
+            }
+            void main(Runnable action){InstrumentationRegistry.getInstrumentation().runOnMainSync(action);}
+            void resumed(MainActivity previous) {
+                long deadline=SystemClock.elapsedRealtime()+20000;
+                AtomicBoolean ready=new AtomicBoolean();
+                while(SystemClock.elapsedRealtime()<deadline&&!ready.get()) {
+                    main(()->{
+                        for(android.app.Activity a:androidx.test.runner.lifecycle.ActivityLifecycleMonitorRegistry.getInstance()
+                            .getActivitiesInStage(androidx.test.runner.lifecycle.Stage.RESUMED))
+                            if(a instanceof MainActivity&&a!=previous){current=(MainActivity)a;ready.set(true);}
+                    });
+                    if(!ready.get())SystemClock.sleep(100);
+                }
+                assertTrue("Unlock phone and bring SafeRoute to foreground",ready.get());
+                main(()->current.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));
+            }
+            public void onActivity(java.util.function.Consumer<MainActivity> action){main(()->action.accept(current));}
+            public void recreate(){MainActivity previous=current;main(previous::recreate);resumed(previous);}
+            public void close(){main(()->{current.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);current.finish();});}
+        };
+    }
+    private Scenario scenario;
+    private void ui(java.util.function.Consumer<MainActivity> action){scenario.onActivity(action::accept);if(!"true".equals(InstrumentationRegistry.getArguments().getString("physicalDevice")))InstrumentationRegistry.getInstrumentation().waitForIdleSync();}
     private void waitFor(Predicate<MainActivity> condition) {
         long deadline=SystemClock.elapsedRealtime()+45000;AtomicBoolean done=new AtomicBoolean();
         while(SystemClock.elapsedRealtime()<deadline){ui(a->done.set(condition.test(a)));if(done.get())return;SystemClock.sleep(150);}
@@ -44,8 +87,9 @@ public class LiveBackendDeviceTest {
         SafeRouteApp app=ApplicationProvider.getApplicationContext();SessionManager session=new SessionManager(app);session.clearSession();
         ApiService api=app.api().service;
         String email="android-"+UUID.randomUUID()+"@example.com";
-        scenario=ActivityScenario.launch(MainActivity.class);
+        scenario=launch(app);
         try {
+            ui(a->a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));
             ui(a->a.openTv2Fragment(new RegisterFragment()));
             ui(a->{((EditText)a.findViewById(R.id.etFullName)).setText("Android E2E");((EditText)a.findViewById(R.id.etEmail)).setText(email);((EditText)a.findViewById(R.id.etPassword)).setText("local-device-test-password");((EditText)a.findViewById(R.id.etConfirmPassword)).setText("local-device-test-password");a.findViewById(R.id.btnRegister).performClick();});
             waitFor(a->session.isLoggedIn()&&a.getSupportFragmentManager().findFragmentById(R.id.content) instanceof com.comeforfood.saferoute.feature.map.MapFragment);
@@ -64,7 +108,7 @@ public class LiveBackendDeviceTest {
             waitFor(a->text(a.findViewById(R.id.flowActions),"Đồng tình")!=null);
             ui(a->{View vote=text(a.findViewById(R.id.flowActions),"Đồng tình");assertNotNull(vote);vote.performClick();});
             waitFor(a->{TextView body=a.findViewById(R.id.flowBody);return body!=null&&body.getText().toString().contains("Đồng tình: 1");});
-            scenario.recreate();assertEquals(id,api.mine().execute().body().get(0).getId());
+            scenario.recreate();ui(a->a.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON));assertEquals(id,api.mine().execute().body().get(0).getId());
             ui(MainActivity::logout);
             ui(a->{((EditText)a.findViewById(R.id.etEmail)).setText("android-review@example.com");((EditText)a.findViewById(R.id.etPassword)).setText("local-device-test-password");a.findViewById(R.id.btnLogin).performClick();});
             waitFor(a->session.isReviewerOrAdmin());assertEquals("REVIEWER",api.me().execute().body().getRole());
@@ -88,9 +132,31 @@ public class LiveBackendDeviceTest {
                 ui(a->a.openRoutes(null));
                 ui(a->{((EditText)a.findViewById(R.id.origin)).setText("10.755, 106.678");((EditText)a.findViewById(R.id.destination)).setText("10.77, 106.69");a.findViewById(R.id.compare).performClick();});
                 waitFor(a->{Tv1ViewModel.State<com.comeforfood.saferoute.feature.routing.RouteComparison> routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue();return routes!=null&&!routes.loading&&routes.data!=null&&!routes.data.routes.isEmpty();});
-                ui(a->{com.comeforfood.saferoute.feature.routing.RouteComparison routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue().data;assertTrue(routes.scoreDescription.contains("UNAVAILABLE"));for(com.comeforfood.saferoute.feature.routing.Route route:routes.routes){assertTrue(route.points.size()>=2);assertNull(route.riskScore);}});
+                ui(a->{com.comeforfood.saferoute.feature.routing.RouteComparison routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue().data;assertFalse(routes.scoreDescription.isEmpty());assertFalse(routes.scoreDescription.contains("UNAVAILABLE"));for(com.comeforfood.saferoute.feature.routing.Route route:routes.routes){assertTrue(route.points.size()>=2);assertNull(route.riskScore);}});
             }
 
+            if("true".equals(args.getString("adminE2E"))) {
+                ui(MainActivity::logout);
+                ui(a->{((EditText)a.findViewById(R.id.etEmail)).setText("android-admin@example.com");((EditText)a.findViewById(R.id.etPassword)).setText("local-device-test-password");a.findViewById(R.id.btnLogin).performClick();});
+                waitFor(a->"ADMIN".equals(session.getRole())&&session.isVerified());
+                ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_REPORTS));
+                waitFor(a->text(a.findViewById(R.id.content),"#"+id+" · D40 · Đã xác minh\n")!=null
+                    || (a.findViewById(R.id.flowBody) instanceof TextView && ((TextView)a.findViewById(R.id.flowBody)).getText().toString().startsWith("Báo cáo ·")));
+                ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_AUDIT));
+                waitFor(a->text(a.findViewById(R.id.content),"Lịch sử quyền tài khoản")!=null);
+                ui(a->text(a.findViewById(R.id.content),"Lịch sử quyền tài khoản").performClick());
+                waitFor(a->a.findViewById(R.id.flowBody) instanceof TextView && ((TextView)a.findViewById(R.id.flowBody)).getText().toString().equals("Chưa có thay đổi quyền."));
+                ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_METRICS));
+                waitFor(a->text(a.findViewById(R.id.content),"Số liệu hiện tại từ hệ thống")!=null);
+                ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_SETTINGS));
+                waitFor(a->text(a.findViewById(R.id.content),"Quản lý quyền tài khoản")!=null);
+                ui(a->text(a.findViewById(R.id.content),"Quản lý quyền tài khoản").performClick());
+                waitFor(a->a.findViewById(R.id.flowBody) instanceof TextView && ((TextView)a.findViewById(R.id.flowBody)).getText().toString().startsWith("Chọn tài khoản"));
+                scenario.recreate();
+                waitFor(a->a.findViewById(R.id.flowBody) instanceof TextView && ((TextView)a.findViewById(R.id.flowBody)).getText().toString().startsWith("Chọn tài khoản"));
+                ui(MainActivity::logout);
+                waitFor(a->a.findViewById(R.id.btnLogin)!=null);
+            }
         } finally {session.clearSession();scenario.close();}
     }
 }

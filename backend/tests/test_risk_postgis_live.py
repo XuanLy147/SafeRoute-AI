@@ -32,7 +32,7 @@ def db():
         session = SessionLocal(bind=conn, join_transaction_mode="create_savepoint")
         try:
             assert conn.scalar(text("SELECT PostGIS_Version()"))
-            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0002_image_owner_profile"
+            assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0003_role_audit"
             yield session
         finally:
             session.close()

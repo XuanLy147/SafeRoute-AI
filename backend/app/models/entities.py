@@ -150,3 +150,14 @@ class RiskWeight(Base):
     weight = Column(Float, nullable=False)
     severity = Column(String(20), nullable=False)
     verification_weight = Column(Float, nullable=False)
+
+
+class RoleAudit(Base):
+    __tablename__ = "role_audits"
+    id = Column(Integer, primary_key=True)
+    actor_id = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True)
+    from_role = Column(Enum(UserRole, name="user_role_enum"), nullable=False)
+    to_role = Column(Enum(UserRole, name="user_role_enum"), nullable=False)
+    reason = Column(String(500), nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)

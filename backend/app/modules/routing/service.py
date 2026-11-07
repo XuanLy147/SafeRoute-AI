@@ -25,8 +25,8 @@ from .schemas import (
 logger = logging.getLogger(__name__)
 
 SAFE_ROUTE_DISCLAIMER = (
-    "Tuyến đường được đề xuất dựa trên các nguy cơ mặt đường đã ghi nhận trong hệ thống. "
-    "SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối."
+    "SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối. "
+    "Luôn quan sát điều kiện giao thông thực tế."
 )
 
 
@@ -309,7 +309,7 @@ class RoutingService:
                 recommended_route_id = best_route.id
                 recommendation_basis = RecommendationBasis.SAFETY_LOWEST_RISK
 
-                mins = max(1, best_route.duration_seconds // 60)
+                mins = max(1, (best_route.duration_seconds + 59) // 60)
                 if best_route.risk.hazards_count == 0:
                     recommendation_reason = (
                         f"Tuyến '{best_route.summary}' được đề xuất vì chưa ghi nhận nguy cơ nào "
@@ -335,7 +335,7 @@ class RoutingService:
                 )
                 recommended_route_id = best_route.id
                 recommendation_basis = RecommendationBasis.DURATION_ETA_ONLY
-                mins = max(1, best_route.duration_seconds // 60)
+                mins = max(1, (best_route.duration_seconds + 59) // 60)
                 recommendation_reason = (
                     f"Tuyến '{best_route.summary}' có thời gian di chuyển ngắn nhất ({mins} phút). "
                     "Lưu ý: Dữ liệu nguy cơ mặt đường chỉ có cho một số tuyến (không đầy đủ), "
@@ -350,7 +350,7 @@ class RoutingService:
                 )
                 recommended_route_id = best_route.id
                 recommendation_basis = RecommendationBasis.DURATION_ETA_ONLY
-                mins = max(1, best_route.duration_seconds // 60)
+                mins = max(1, (best_route.duration_seconds + 59) // 60)
                 if assessment_status == RiskAssessmentStatus.INVALID:
                     recommendation_reason = (
                         f"Tuyến '{best_route.summary}' có thời gian di chuyển ngắn nhất ({mins} phút). "

@@ -86,6 +86,17 @@ def review_report_status(
         raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo yêu cầu kiểm duyệt.")
     if report.status != ReportStatus.PENDING_VERIFICATION:
         raise HTTPException(409, "Report already reviewed")
+    # Authentication may precede a long wait for the report lock. Re-read the
+    # actor under a shared row lock, held through commit, so a role revocation
+    # cannot race the final permission check. Lock order: report, then actor;
+    # role management locks users only and never waits on reports.
+    actor = (
+        db.query(User).filter(User.id == current_user.id)
+        .populate_existing().with_for_update(read=True).first()
+    )
+    if actor is None or actor.role not in (UserRole.REVIEWER, UserRole.ADMIN):
+        raise HTTPException(403, "Review permission has changed",
+                            headers={"X-SafeRoute-Role-Refresh": "required"})
     old_status = report.status
     report.status = request.status
     # Ghi log audit append-only

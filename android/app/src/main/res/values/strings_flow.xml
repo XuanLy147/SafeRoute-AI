@@ -12,7 +12,7 @@
 <string name="intro_permissions_title">Quyền truy cập</string>
 <string name="intro_permissions_body">Vị trí: chỉ xin khi bạn bấm lấy vị trí. Bạn cũng có thể chọn điểm trên bản đồ.\n\nẢnh: chỉ truy cập ảnh bạn chọn qua bộ chọn của hệ thống.\n\nCamera: mở ứng dụng máy ảnh khi bạn chọn chụp ảnh.\n\nBạn có thể thay đổi quyền trong cài đặt Android.</string>
 <string name="flow_guest">Xem bản đồ với tư cách khách</string>
-<string name="flow_guest_note">Chưa kết nối đăng nhập. Bạn có thể xem bản đồ với tư cách khách; không được cấp quyền gửi hoặc duyệt báo cáo.</string>
+<string name="flow_guest_note">Bạn có thể xem bản đồ với tư cách khách; không được cấp quyền gửi hoặc duyệt báo cáo.</string>
 <string name="nav_mine">Của tôi</string>
 <string name="nav_account">Tài khoản</string>
 <string name="flow_explore">Khám phá ứng dụng</string>

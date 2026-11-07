@@ -87,3 +87,44 @@
 
 Original dirty TV4 worktree and historical tracker entries are preserved. New
 integration evidence is recorded in docs/release, distinct from old owner runs.
+
+
+## Auth/RBAC local follow-up - 2026-11-08
+
+Android auth/session and ADMIN role management implemented on local/main-latest-20261107.
+72 JVM tests/build/lint PASS; 196 backend tests + 12 subtests, Ruff, migration round trip and OpenAPI contract PASS.
+See docs/integration/auth-rbac-flow.md for scope, evidence and remaining limitations. No push.
+Device instrumentation: NOT_VERIFIED (label assertion fixed; retry hung and was stopped). APK install PASS; initial ADMIN bootstrap authorized and audited.
+
+
+## Physical-device role audit - 2026-11-08
+
+Status: IN_PROGRESS / release acceptance FAIL. Actual Xiaomi UI + local backend audit found 10 issues, including idle GET EOF failures and private-image 403 redirecting USER away from public report detail. Core QA create/vote/verify/reject and ADMIN grant/revoke/history exercised; 27/27 supplemental HTTP permission/state checks PASS. Camera/picker touch remains blocked by INJECT_EVENTS. No production fixes or push in this audit. See docs/qa/DEVICE_ROLE_AUDIT_2026-11-08.md for reproducible findings, limits and cleanup. Test APK build PASS; bridge runner OK (1 harness test), not a blanket business PASS.
+
+## Device audit fixes — 2026-11-08 (supersedes open findings above)
+
+Implemented F01–F10 fixes on local/main-latest-20261107, preserving existing dirty work. Local verification complete; no commit/push and no cloud deployment. See docs/qa/DEVICE_ROLE_FIXES_2026-11-08.md.
+
+- Android: 77 JVM tests PASS; app/test APK build and lint PASS (0 errors). Final APK installed on Xiaomi.
+- Backend: 206 tests + 12 subtests, Ruff, migration round trip and OpenAPI contract PASS.
+- Device: idle GET recovery, private-image 403, own-vote persistence, reviewer history/duplicates, ADMIN all-status/filter/metrics/config/history, stale-role refresh and live Google routing reason/ETA verified.
+- QA reports removed with ownership/prefix guards; original data and roles unchanged. QA session and bridge cleared.
+- Limits: configuration is READ-ONLY; duplicates are suggestions, not automatic merges; system audit covers review decisions and role changes. Camera/picker system-touch E2E remains unverified. Not blanket production acceptance.
+
+## Comprehensive regression audit - 2026-11-08
+
+IN_PROGRESS: reproduce lifecycle/concurrency faults before fixing; preserve existing changes, database and roles. No dependency upgrades, schema reset, automatic write retries or push. Require regression tests and a fresh full-suite/device pass; report unverified cases explicitly.
+
+## Comprehensive audit result - 2026-11-08
+
+Local verification complete, not production certification; no commit/push. Fixed R01 ADMIN loading stuck after view recreation, R02 lost history mode, R03 ApiCalls starting writes for destroyed lifecycle owners, R04 demoted reviewer committing after waiting for a report lock. Added 3 JVM regressions and 2 real PostGIS concurrency tests; before-fix failures recorded.
+
+80 JVM tests, 208 backend tests + 12 subtests, build/lint/Ruff/migration/OpenAPI PASS. Isolated real-phone E2E PASS: USER registration, synthetic image -> real AI/upload/report/vote, REVIEWER password login/review/map, live Google Maps/Routes, ADMIN password login/read screens/activity recreation/logout, backend restart persistence. First ActivityScenario attempt stalled and was stopped; test-only physicalDevice lifecycle harness passed the retry. Camera/picker system-touch E2E remains NOT_VERIFIED. Test resources removed, local USB mapping restored; live data and roles not used for mutations. See docs/qa/COMPREHENSIVE_REGRESSION_2026-11-08.md for guardrails, scope and evidence.
+
+## Report draft follow-up - 2026-11-08
+
+IN_PROGRESS: reproduce stale form/photo/AI state after discard or failed reanalysis. Preserve uncertain-write guard, no live data mutations or push.
+
+## Report draft follow-up result - 2026-11-08
+
+Local verification complete; no commit/push. Fixed R05 stale description/category/severity after discard, R06 same-URI photo not reloaded after discard, R07 stale AI editors/model/consent after failed reanalysis, R08 previous image remaining after unreadable replacement. Production scope: ReportWizardFragment only. Four failing reproductions now pass; 84 JVM tests, APK builds and lint PASS. Isolated Xiaomi E2E with USER/REVIEWER/ADMIN, live Maps/Routes and restart persistence PASS. Temporary services removed; real database/accounts not used for mutations. Backend unit suite unchanged and not rerun this round. See docs/qa/REPORT_DRAFT_REGRESSION_2026-11-08.md; camera/picker system gestures and EXIF coverage remain unverified.

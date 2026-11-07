@@ -1,124 +1,65 @@
 package com.comeforfood.saferoute.feature.auth;
 
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Patterns;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast;
+import android.view.*;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import com.comeforfood.saferoute.feature.shared.Tv2Navigation;
-import com.comeforfood.saferoute.R;
-import com.comeforfood.saferoute.core.session.SessionManager;
+import androidx.lifecycle.ViewModelProvider;
+import com.comeforfood.saferoute.*;
 import com.comeforfood.saferoute.databinding.FragmentLoginBinding;
+import com.comeforfood.saferoute.feature.shared.Tv2Navigation;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-/**
- * Screen 2: Login Screen (Owned by TV2)
- * Features email/password input, "Quên mật khẩu?", "ĐĂNG NHẬP" CTA,
- * navigation to Register, and Google/Facebook social triggers.
- */
 public class LoginFragment extends Fragment {
-
     private FragmentLoginBinding binding;
-    private SessionManager sessionManager;
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentLoginBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    private AuthViewModel model;
+    @Override public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup parent, Bundle saved) {
+        binding=FragmentLoginBinding.inflate(inflater,parent,false);return binding.getRoot();
     }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        sessionManager = new SessionManager(requireContext());
-        binding.btnGuest.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openMap());
-        binding.btnAuthBack.setOnClickListener(v -> Tv2Navigation.back(this));
-
-        // Pre-fill email if previously registered or entered
-        if (!TextUtils.isEmpty(sessionManager.getEmail())) {
-            binding.etEmail.setText(sessionManager.getEmail());
-        }
-
-        // Navigate to Register screen
-        binding.tvGoToRegister.setOnClickListener(v -> {
-            Tv2Navigation.navigate(this, R.id.action_login_to_register);
+    @Override public void onViewCreated(@NonNull View view,Bundle saved) {
+        model=new ViewModelProvider(this).get(AuthViewModel.class);
+        binding.btnAuthBack.setOnClickListener(v->Tv2Navigation.back(this));
+        binding.tvGoToRegister.setOnClickListener(v->Tv2Navigation.navigate(this,R.id.action_login_to_register));
+        binding.btnGuest.setOnClickListener(v->((MainActivity)requireActivity()).openMap());
+        binding.tvForgotPassword.setOnClickListener(v->new MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Quên mật khẩu").setMessage("Khôi phục mật khẩu qua email chưa được cấu hình. Liên hệ quản trị viên để được hỗ trợ; không gửi mật khẩu hoặc mã xác thực cho người khác.")
+            .setPositiveButton("Đã hiểu",null).show());
+        binding.btnLogin.setOnClickListener(v->submit());
+        binding.etPassword.setOnEditorActionListener((v,id,event)->{
+            if(id==android.view.inputmethod.EditorInfo.IME_ACTION_DONE){submit();return true;}return false;
         });
-
-        // Forgot password click
-        binding.tvForgotPassword.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Tính năng quên mật khẩu đang được xử lý", Toast.LENGTH_SHORT).show();
+        model.state.observe(getViewLifecycleOwner(),s->{
+            binding.progressBar.setVisibility(s.loading?View.VISIBLE:View.GONE);
+            binding.btnLogin.setEnabled(!s.loading);
+            binding.btnLogin.setText(s.loading?"Đang đăng nhập…":getString(R.string.btn_login));
+            binding.etEmail.setEnabled(!s.loading);binding.etPassword.setEnabled(!s.loading);
+            binding.btnAuthBack.setEnabled(!s.loading);
+            binding.tvGoToRegister.setEnabled(!s.loading);binding.btnGuest.setEnabled(!s.loading);binding.tvForgotPassword.setEnabled(!s.loading);
+            binding.authMessage.setText(s.message);
+            binding.authMessage.setVisibility(s.message.isEmpty()?View.GONE:View.VISIBLE);
+            if(s.complete){model.consumeSuccess();binding.etPassword.setText("");((MainActivity)requireActivity()).openSessionHome();}
         });
-
-        // Submit Login
-        binding.btnLogin.setOnClickListener(v -> attemptLogin());
-
-        // Social login handlers
-        binding.btnGoogle.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Đăng nhập Google đang được tích hợp", Toast.LENGTH_SHORT).show();
-        });
-
-        binding.btnFacebook.setOnClickListener(v -> {
-            Toast.makeText(requireContext(), "Đăng nhập Facebook đang được tích hợp", Toast.LENGTH_SHORT).show();
-        });
+        if(getArguments()!=null && getArguments().getBoolean("expired")) {
+            binding.authMessage.setText("Phiên đã hết hạn. Vui lòng đăng nhập lại để tiếp tục.");
+            binding.authMessage.setVisibility(View.VISIBLE);
+        }
     }
+    private void submit() {
+        if(model.state.getValue().loading)return;
+        String email=binding.etEmail.getText().toString().trim();
+        String password=binding.etPassword.getText().toString();
+        binding.etEmail.setError(null);binding.etPassword.setError(null);
 
-    private void attemptLogin() {
-        String email = binding.etEmail.getText() != null ? binding.etEmail.getText().toString().trim() : "";
-        String password = binding.etPassword.getText() != null ? binding.etPassword.getText().toString() : "";
-
-        // Client-side validation
-        if (TextUtils.isEmpty(email)) {
-            binding.etEmail.setError(getString(R.string.err_empty_fields));
-            binding.etEmail.requestFocus();
-            return;
+        if(email.length()>254 || !Patterns.EMAIL_ADDRESS.matcher(email).matches()){
+            binding.etEmail.setError(getString(R.string.err_invalid_email));binding.etEmail.requestFocus();return;
+        }
+        if(password.codePointCount(0,password.length())<6 || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72){
+            binding.etPassword.setError("Dùng ít nhất 6 ký tự và không quá 72 byte. Chữ có dấu chiếm nhiều byte hơn.");
+            binding.etPassword.requestFocus();return;
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            binding.etEmail.setError(getString(R.string.err_invalid_email));
-            binding.etEmail.requestFocus();
-            return;
-        }
-
-        if (TextUtils.isEmpty(password)) {
-            binding.etPassword.setError(getString(R.string.err_empty_fields));
-            binding.etPassword.requestFocus();
-            return;
-        }
-
-        if (password.length() < 6 || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
-            binding.etPassword.setError(getString(R.string.err_password_short));
-            binding.etPassword.requestFocus();
-            return;
-        }
-
-        setLoading(true);
-        com.comeforfood.saferoute.core.network.ApiService api=((com.comeforfood.saferoute.SafeRouteApp)requireActivity().getApplication()).api().service;
-        com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(), api.login(new com.comeforfood.saferoute.core.model.AuthDto.LoginRequest(email,password)), response -> {
-            if(response.getAccessToken()==null || response.getAccessToken().isEmpty()) { setLoading(false);return; }
-            sessionManager.saveSession(response.getAccessToken(),response.getEmail(),"USER",response.getFullName());
-            com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(), api.me(), profile -> {
-                sessionManager.saveSession(response.getAccessToken(),profile.getEmail(),profile.getRole(),profile.getFullName());
-                setLoading(false);
-                ((com.comeforfood.saferoute.MainActivity)requireActivity()).openSessionHome();
-            }, error -> { sessionManager.clearSession();setLoading(false);Toast.makeText(requireContext(),error,Toast.LENGTH_LONG).show(); });
-        }, error -> { setLoading(false);Toast.makeText(requireContext(),error,Toast.LENGTH_LONG).show(); });
+        model.submit(null,email,password);
     }
-
-    private void setLoading(boolean isLoading) {
-        if (binding == null) return;
-        binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        binding.btnLogin.setEnabled(!isLoading);
-        binding.btnLogin.setText(isLoading ? "" : getString(R.string.btn_login));
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-    }
+    @Override public void onDestroyView(){binding=null;super.onDestroyView();}
 }

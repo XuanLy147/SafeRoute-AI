@@ -1219,3 +1219,18 @@ def test_regression_zero_score_with_pending_hazards_multiple_routes():
         "route_B has 5 pending hazards — must not claim no hazards recorded"
     )
     assert "bằng 0 theo chính sách" in reason, "Must explain score=0 is due to scoring policy, not absence of hazards"
+
+
+def test_eta_rounds_up_and_disclaimer_does_not_claim_risk_comparison():
+    adapter = MagicMock()
+    adapter.compute_routes.return_value = [
+        RouteCandidate(id="r1", summary="A", duration_seconds=361, distance_meters=2000, polyline="abc"),
+        RouteCandidate(id="r2", summary="B", duration_seconds=500, distance_meters=2500, polyline="def"),
+    ]
+    response = RoutingService(adapter=adapter, risk_scorer=None).compare_routes(
+        origin=LatLng(latitude=10.75, longitude=106.67),
+        destination=LatLng(latitude=10.76, longitude=106.68),
+    )
+    assert "7 ph\u00fat" in response.recommendation_reason
+    assert "6 ph\u00fat" not in response.recommendation_reason
+    assert "d\u1ef1a tr\u00ean c\u00e1c nguy c\u01a1" not in response.disclaimer

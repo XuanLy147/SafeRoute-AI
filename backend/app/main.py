@@ -80,7 +80,7 @@ def readiness():
         with engine.connect() as conn:
             revision = conn.scalar(text("SELECT version_num FROM alembic_version"))
             conn.execute(text("SELECT PostGIS_Version()"))
-        if revision != "0002_image_owner_profile":
+        if revision != "0003_role_audit":
             return JSONResponse(status_code=503, content={"detail": "Migration required"})
         policy = load_policy()
     except Exception:

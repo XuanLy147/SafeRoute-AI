@@ -63,7 +63,7 @@ public class AuthDto {
 
         public String getAccessToken() { return accessToken; }
         public String getTokenType() { return tokenType; }
-        public String getRole() { return role != null ? role : "USER"; }
+        public String getRole() { return role; }
         public String getEmail() { return email; }
         public String getFullName() { return fullName; }
     }

@@ -108,6 +108,7 @@ def require_role(allowed_roles: list[UserRole | str]):
         if user_role_val not in allowed_values:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
+                headers={"X-SafeRoute-Role-Refresh": "required"},
                 detail=(
                     f"Truy cập bị từ chối: Thao tác yêu cầu quyền thuộc {allowed_values}. "
                     f"Vai trò hiện tại của bạn là '{user_role_val}'."

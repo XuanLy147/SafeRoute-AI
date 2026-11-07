@@ -112,7 +112,7 @@ class RouteCompareResponse(BaseModel):
         None, description="Explanation why this route is recommended based on recorded hazards."
     )
     disclaimer: str = Field(
-        default="Tuyến đường được đề xuất dựa trên các nguy cơ mặt đường đã ghi nhận trong hệ thống. SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối.",
+        default="SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối. Luôn quan sát điều kiện giao thông thực tế.",
         description="Legal and safety disclaimer required by SafeRoute AI business rules.",
     )
     risk_assessment_status: Literal["AVAILABLE", "UNAVAILABLE", "PARTIAL", "INVALID"] | None = Field(

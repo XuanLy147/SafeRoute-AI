@@ -24,10 +24,20 @@ import static org.robolectric.Shadows.shadowOf;
 public class HtmlFlowTest {
     private ActivityController<MainActivity> controller;
     private MainActivity activity;
-    @Before public void launch() {
+    private okhttp3.mockwebserver.MockWebServer server;
+    @Before public void launch() throws Exception {
+        server=new okhttp3.mockwebserver.MockWebServer();
+        server.setDispatcher(new okhttp3.mockwebserver.Dispatcher() {
+            @Override public okhttp3.mockwebserver.MockResponse dispatch(okhttp3.mockwebserver.RecordedRequest request) {
+                return new okhttp3.mockwebserver.MockResponse().setResponseCode(503).setBody("{}");
+            }
+        });server.start();
+        SafeRouteApp app=(SafeRouteApp)RuntimeEnvironment.getApplication();
+        java.lang.reflect.Field field=SafeRouteApp.class.getDeclaredField("api");field.setAccessible(true);
+        field.set(app,new com.comeforfood.saferoute.core.network.ApiClient(app,server.url("/").toString()));
         controller=Robolectric.buildActivity(MainActivity.class).setup();activity=controller.get();settle();
     }
-    @After public void finish() {new SessionManager(activity).clearSession();controller.pause().stop().destroy();}
+    @After public void finish() throws Exception {new SessionManager(activity).clearSession();controller.pause().stop().destroy();server.shutdown();}
     private void settle(){shadowOf(Looper.getMainLooper()).idle();activity.getSupportFragmentManager().executePendingTransactions();shadowOf(Looper.getMainLooper()).idle();}
     private void click(int id){assertNotNull(activity.findViewById(id));activity.findViewById(id).performClick();settle();}
     private void tab(int id){((BottomNavigationView)activity.findViewById(R.id.navigation)).setSelectedItemId(id);settle();}
@@ -64,9 +74,10 @@ public class HtmlFlowTest {
         tab(R.id.nav_profile);click(R.id.btnSettings);
         assertEquals(FlowPageFragment.Page.SETTINGS,((FlowPageFragment)screen()).page());
         back();assertNotNull(activity.findViewById(R.id.btnSettings));
-        tab(R.id.nav_my_reports);assertEquals(View.VISIBLE,activity.findViewById(R.id.reportsUnavailable).getVisibility());
+        tab(R.id.nav_my_reports);assertTrue(screen() instanceof LoginFragment);
     }
     @Test public void reportStepsValidateKeepDraftAndNeverFabricateSuccess() {
+        new SessionManager(activity).saveSession("test-only-user", "user@example.invalid", "USER", "Test user");settle();
         activity.openMap();settle();tab(R.id.nav_report);
         assertEquals(View.GONE,activity.findViewById(R.id.navigation).getVisibility());
         ReportDraft draft=new ViewModelProvider(activity).get(ReportDraft.class);
@@ -106,8 +117,7 @@ public class HtmlFlowTest {
         session.saveSession("test-only-role-fixture","admin@example.invalid","ADMIN","Test admin");
         activity.openSessionHome();settle();
         assertEquals(FlowPageFragment.Page.ADMIN_HOME,((FlowPageFragment)screen()).page());
-        tab(R.id.nav_role_users);tag("ADMIN_ROLES");
-        assertEquals(View.GONE,activity.findViewById(R.id.navigation).getVisibility());
+        tab(R.id.nav_role_users);assertTrue(screen() instanceof com.comeforfood.saferoute.feature.admin.AdminUsersFragment);
         activity.logout();settle();assertTrue(screen() instanceof LoginFragment);assertFalse(session.isLoggedIn());
     }
     @Test @Config(qualifiers="w640dp-h360dp-land-night") public void roleScreensRenderWithLargeTextAndRecreate() {

@@ -82,14 +82,14 @@ def main():
                 conn.execute(text("SET LOCAL search_path TO public"))
                 inspector = inspect(conn)
                 tables = set(Base.metadata.tables)
-                assert len(tables) == 8 and tables <= set(inspector.get_table_names())
-                assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0002_image_owner_profile"
+                assert len(tables) == 9 and tables <= set(inspector.get_table_names())
+                assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0003_role_audit"
                 enums = {entry["name"]: entry["labels"] for entry in inspector.get_enums()}
                 assert enums["report_status_enum"] == ["PENDING_VERIFICATION", "VERIFIED", "REJECTED"]
                 assert enums["user_role_enum"] == ["USER", "REVIEWER", "ADMIN"]
                 assert enums["vote_type_enum"] == ["SUPPORT", "OPPOSE", "UNSURE"]
                 foreign_keys = sum(len(inspector.get_foreign_keys(table)) for table in tables)
-                assert foreign_keys == 9
+                assert foreign_keys == 11
                 idx = conn.scalar(text("SELECT indexdef FROM pg_indexes WHERE schemaname='public' AND indexname='idx_reports_location'"))
                 assert "USING gist (location)" in idx
                 typ = conn.scalar(text("SELECT format_type(a.atttypid,a.atttypmod) FROM pg_attribute a WHERE a.attrelid='reports'::regclass AND a.attname='location'"))
@@ -101,7 +101,7 @@ def main():
                 })
                 differences = compare_metadata(context, Base.metadata)
                 assert not differences, repr(differences)
-                print("SCHEMA_PASS: 8 model tables, 9 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]", flush=True)
+                print("SCHEMA_PASS: 9 model tables, 11 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]", flush=True)
 
         migrate("0001_initial_schema")
         with engine.begin() as conn:

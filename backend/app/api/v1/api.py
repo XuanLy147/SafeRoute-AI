@@ -53,3 +53,11 @@ api_router.include_router(ai_router, prefix="/ai", tags=["AI Inference"])
 
 # 7. Gắn Routing router: /api/v1/routes/compare (TV5 + TV4)
 api_router.include_router(routing_router, prefix="/routes", tags=["Routing"])
+
+from app.modules.admin.router import router as admin_router
+
+api_router.include_router(admin_router, prefix="/admin", tags=["Administration"])
+
+from app.modules.moderation.router import router as moderation_router
+
+api_router.include_router(moderation_router, tags=["Moderation views"])

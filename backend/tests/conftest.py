@@ -16,7 +16,7 @@ from app.models.entities import User, UserRole
 
 @pytest.fixture(autouse=True)
 def legacy_database(request, monkeypatch, tmp_path):
-    if request.module.__name__.split(".")[-1] not in {"test_auth_rbac", "test_reports", "test_votes_review"}:
+    if request.module.__name__.split(".")[-1] not in {"test_auth_rbac", "test_reports", "test_votes_review", "test_moderation"}:
         yield
         return
     url = os.environ.get("SAFEROUTE_TEST_DATABASE_URL")
@@ -34,7 +34,7 @@ def legacy_database(request, monkeypatch, tmp_path):
             (99, "tv2_user", UserRole.USER),
         ]:
             db.add(User(id=id_, email=email + "@saferoute.ai", password_hash=get_password_hash("123456"), role=role))
-        db.flush()
+        db.commit()  # Release seed savepoint; request rollback must not erase fixture users.
 
         def override():
             try:

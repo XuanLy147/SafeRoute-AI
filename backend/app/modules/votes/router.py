@@ -7,7 +7,7 @@ from app.core.errors import error_responses
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.entities import CommunityVote, Report, User
-from app.modules.votes.schemas import VoteCreateRequest, VoteResponse
+from app.modules.votes.schemas import MyVoteResponse, VoteCreateRequest, VoteResponse
 
 router = APIRouter(responses=error_responses(401, 404, 409, 503))
 
@@ -65,3 +65,13 @@ def create_vote(
         note=vote.note,
         created_at=vote.created_at,
     )
+
+
+@router.get("/{report_id}/votes/mine", response_model=MyVoteResponse)
+def my_vote(report_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if db.get(Report, report_id) is None:
+        raise HTTPException(404, "Report not found")
+    vote = db.query(CommunityVote).filter(
+        CommunityVote.report_id == report_id, CommunityVote.user_id == current_user.id
+    ).first()
+    return {"vote": vote.vote.value if vote else None}

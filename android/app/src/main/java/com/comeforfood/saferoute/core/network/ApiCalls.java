@@ -12,6 +12,8 @@ public final class ApiCalls {
     }
     public static <T> void enqueueDetailed(LifecycleOwner owner,Call<T> call,Consumer<T> success,java.util.function.BiConsumer<Integer,String> failure) {
         Lifecycle lifecycle=owner.getLifecycle();
+        // A destroyed owner cannot receive ON_DESTROY again; do not start a late write.
+        if(lifecycle.getCurrentState()==Lifecycle.State.DESTROYED){call.cancel();return;}
         DefaultLifecycleObserver observer=new DefaultLifecycleObserver() {
             @Override public void onDestroy(LifecycleOwner owner) { call.cancel(); }
         };
@@ -19,13 +21,16 @@ public final class ApiCalls {
         call.enqueue(new Callback<T>() {
             private boolean active() { lifecycle.removeObserver(observer);return !call.isCanceled() && lifecycle.getCurrentState()!=Lifecycle.State.DESTROYED; }
             @Override public void onResponse(Call<T> c, Response<T> r) {
-                if(!active())return;
-                if(r.isSuccessful() && r.body()!=null) success.accept(r.body());
-                else failure.accept(r.code(),message(r.code()));
-                if(r.errorBody()!=null)r.errorBody().close();
+                try {
+                    if(!active())return;
+                    if(r.isSuccessful() && r.body()!=null) success.accept(r.body());
+                    else failure.accept(r.code(),message(r.code()));
+                } finally { if(r.errorBody()!=null)r.errorBody().close(); }
             }
             @Override public void onFailure(Call<T> c, Throwable t) {
-                if(active()) failure.accept(0,"Không nhận được phản hồi. Với thao tác gửi, hãy kiểm tra dữ liệu trước khi thử lại.");
+                if(active()) failure.accept(0,c.request().method().equals("GET")
+                    ?"Không kết nối được dịch vụ. Kiểm tra mạng rồi tải lại."
+                    :"Chưa xác nhận được kết quả gửi. Hãy kiểm tra trạng thái hiện tại trước khi thử lại.");
             }
         });
     }

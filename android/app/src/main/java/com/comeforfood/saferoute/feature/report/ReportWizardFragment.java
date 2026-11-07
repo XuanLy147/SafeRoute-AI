@@ -142,6 +142,11 @@ public class ReportWizardFragment extends LocationAwareFragment {
     }
     private void render() {
         if(binding==null)return;
+        // Draft is the source of truth after discard, restore or image replacement.
+        syncChoice(binding.categoryOptions,draft.category());
+        syncChoice(binding.severityOptions,draft.severity());
+        if(!binding.etDescription.getText().toString().equals(draft.description()))
+            binding.etDescription.setText(draft.description());
         int step=draft.step();
         View[] groups={binding.stepStart,binding.stepPhoto,binding.stepGps,binding.cardAiResult,binding.stepType,binding.stepReview,binding.stepFailure};
         for(View group:groups) group.setVisibility(View.GONE);
@@ -162,13 +167,25 @@ public class ReportWizardFragment extends LocationAwareFragment {
                 binding.imgPreview.setImageURI(uri);copyPreview();
             } else com.comeforfood.saferoute.core.network.PhotoPreview.load(getViewLifecycleOwner(),requireContext().getContentResolver(),uri,bitmap->{
                 if(binding==null||!requested.equals(draft.image()))return;
-                if(bitmap==null){draft.image(null);previewUri=null;message(R.string.image_read_error);return;}
+                if(bitmap==null){draft.image(null);previewUri=null;render();message(R.string.image_read_error);return;}
                 binding.imgPreview.setImageBitmap(bitmap);copyPreview();
             });
-        } else if(draft.image()==null) binding.imgPreview.setImageResource(R.drawable.ic_camera);
+        } else if(draft.image()==null) {
+            previewUri=null;
+            binding.imgPreview.setImageResource(R.drawable.ic_camera);
+            copyPreview();
+        }
+        binding.aiBoxes.setDetections(draft.detections());
         binding.confirmReport.setChecked(draft.confirmed());
         if(draft.category()>=0&&draft.point()!=null) binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],severities[draft.severity()],draft.point().format(),draft.description()));
+        else binding.reviewSummary.setText("");
         renderPoint();renderDetections();
+    }
+    private void syncChoice(android.widget.RadioGroup group,int index) {
+        int target=index>=0&&index<group.getChildCount()?group.getChildAt(index).getId():View.NO_ID;
+        if(group.getCheckedRadioButtonId()!=target) {
+            if(target==View.NO_ID)group.clearCheck();else group.check(target);
+        }
     }
     private void copyPreview(){
         binding.reviewImage.setImageDrawable(binding.imgPreview.getDrawable());binding.aiImage.setImageDrawable(binding.imgPreview.getDrawable());
@@ -208,7 +225,11 @@ public class ReportWizardFragment extends LocationAwareFragment {
         },(code,error)->{if(code>=400&&code<500)draft.uncertain(false);failed(error);});
     }
     private void analyze(){
-        if(busy)return;go(4);draft.detections(java.util.Collections.emptyList());
+        if(busy)return;
+        // Remove previous inference and consent before rendering a new attempt,
+        // including synchronous URI/MIME failure and manual fallback.
+        draft.detections(java.util.Collections.emptyList());draft.modelVersion(null);draft.confirmed(false);
+        go(4);
         try {
             okhttp3.MultipartBody.Part file=com.comeforfood.saferoute.core.network.ImageUpload.part(requireContext().getContentResolver(),Uri.parse(draft.image()));
             busy=true;binding.tvAiTitle.setText("Đang phân tích ảnh…");binding.tvAiDetectionSummary.setText("Bạn có thể tiếp tục nhập nhãn thủ công.");

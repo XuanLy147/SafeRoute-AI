@@ -10,6 +10,11 @@ val mapsKey = providers.environmentVariable("MAPS_API_KEY")
     .orElse(providers.gradleProperty("MAPS_API_KEY"))
     .orElse(localConfig.getProperty("MAPS_API_KEY", ""))
 
+// Debug origin can be configured locally without committing per-device settings.
+val debugApiBaseUrl = providers.gradleProperty("API_BASE_URL")
+    .orElse(providers.environmentVariable("API_BASE_URL"))
+    .orElse(localConfig.getProperty("API_BASE_URL", "http://10.0.2.2:8000/"))
+
 android {
     namespace = "com.comeforfood.saferoute"
     compileSdk = 35
@@ -28,7 +33,7 @@ android {
     }
     buildFeatures { viewBinding = true; buildConfig = true }
     buildTypes {
-        debug { buildConfigField("String", "API_BASE_URL", "\"" + providers.gradleProperty("API_BASE_URL").orElse("http://10.0.2.2:8000/").get() + "\"") }
+        debug { buildConfigField("String", "API_BASE_URL", "\"" + debugApiBaseUrl.get() + "\"") }
         release {
             isMinifyEnabled = false
             buildConfigField("String", "API_BASE_URL", "\"" + providers.gradleProperty("API_BASE_URL").orElse("https://localhost/").get() + "\"")
@@ -68,6 +73,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-livedata:2.8.7")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
     implementation("com.google.android.gms:play-services-location:21.3.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test:core:1.6.1")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

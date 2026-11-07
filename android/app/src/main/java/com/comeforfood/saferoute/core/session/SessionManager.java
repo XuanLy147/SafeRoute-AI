@@ -2,70 +2,84 @@ package com.comeforfood.saferoute.core.session;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
-/**
- * Manages Auth Tokens and User Roles on device (Owned by TV2)
- */
+/** Encrypted credentials; elevated permissions only after a server profile response. */
 public class SessionManager {
-
-    private static final String PREF_NAME = "saferoute_session";
-    private static final String KEY_TOKEN = "access_token";
-    private static final String KEY_EMAIL = "user_email";
-    private static final String KEY_ROLE = "user_role";
-    private static final String KEY_NAME = "user_fullname";
-
+    private static final Object LOCK = new Object();
+    private static final MutableLiveData<Long> changes = new MutableLiveData<>(0L);
+    private static String memoryToken;
+    private static String validatedRole;
+    private static long generation;
     private final SharedPreferences prefs;
-    private static volatile String memoryToken;
-    private static volatile String validatedRole="USER";
 
     public SessionManager(Context context) {
-        this.prefs = context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        if(prefs.contains(KEY_TOKEN)) prefs.edit().remove(KEY_TOKEN).remove(KEY_ROLE).apply();
+        prefs = context.getApplicationContext().getSharedPreferences("saferoute_session", Context.MODE_PRIVATE);
+        if (prefs.contains("access_token")) prefs.edit().remove("access_token").remove("user_role").apply();
     }
-
+    public LiveData<Long> changes() { return changes; }
+    public long generation() { synchronized (LOCK) { return generation; } }
+    public static boolean knownRole(String role) {
+        return "USER".equals(role) || "REVIEWER".equals(role) || "ADMIN".equals(role);
+    }
     public void saveSession(String token, String email, String role, String fullName) {
-        memoryToken=token;validatedRole=role;
-        String encrypted=null;
-        try { encrypted=TokenVault.encrypt(token); } catch(Exception ignored) { /* No plaintext persistence. */ }
-        prefs.edit()
-                .putString("encrypted_token", encrypted)
-                .putString(KEY_EMAIL, email)
-                .putString(KEY_ROLE, role)
-                .putString(KEY_NAME, fullName)
-                .apply();
+        synchronized (LOCK) {
+            if (token == null || token.isEmpty() || !knownRole(role)) throw new IllegalArgumentException("Invalid session");
+            memoryToken = token;
+            validatedRole = role;
+            String encrypted = null;
+            try { encrypted = TokenVault.encrypt(token); } catch (Exception ignored) { /* Memory only; never plaintext. */ }
+            prefs.edit().putString("encrypted_token", encrypted).putString("user_email", email)
+                .putString("user_fullname", fullName == null ? "" : fullName).remove("user_role").apply();
+            changes.postValue(++generation);
+        }
     }
-
-    public boolean isLoggedIn() {
-        return getToken() != null && !getToken().isEmpty() && !getToken().startsWith("mock_") && !"token_registered".equals(getToken());
+    public boolean saveIfUnchanged(long expected, String token, String email, String role, String name) {
+        synchronized (LOCK) {
+            if (expected != generation) return false;
+            saveSession(token, email, role, name);
+            return true;
+        }
     }
-
     public String getToken() {
-        if(memoryToken!=null)return memoryToken;
-        String encrypted=prefs.getString("encrypted_token",null);
-        if(encrypted==null)return null;
-        try { memoryToken=TokenVault.decrypt(encrypted);return memoryToken; }
-        catch(Exception ignored) { clearSession();return null; }
+        synchronized (LOCK) {
+            if (memoryToken != null) return memoryToken;
+            String encrypted = prefs.getString("encrypted_token", null);
+            if (encrypted == null) return null;
+            try { memoryToken = TokenVault.decrypt(encrypted); return memoryToken; }
+            catch (Exception ignored) { clearSession(); return null; }
+        }
     }
-
-    public String getEmail() {
-        return prefs.getString(KEY_EMAIL, "");
+    public boolean isLoggedIn() {
+        String token = getToken();
+        return token != null && !token.isEmpty() && !token.startsWith("mock_") && !"token_registered".equals(token);
     }
-
-    public String getRole() {
-        return validatedRole;
-    }
-
-    public String getFullName() {
-        return prefs.getString(KEY_NAME, "");
-    }
-
+    public boolean isVerified() { synchronized (LOCK) { return isLoggedIn() && validatedRole != null; } }
+    public String getRole() { synchronized (LOCK) { return validatedRole == null ? "USER" : validatedRole; } }
+    public String getEmail() { return prefs.getString("user_email", ""); }
+    public String getFullName() { return prefs.getString("user_fullname", ""); }
     public boolean isReviewerOrAdmin() {
-        String role = getRole();
-        return isLoggedIn() && ("REVIEWER".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role));
+        return isVerified() && ("REVIEWER".equals(getRole()) || "ADMIN".equals(getRole()));
     }
-
+    public boolean expireIfTokenMatches(String token) {
+        synchronized (LOCK) {
+            if (token == null || !token.equals(getToken())) return false;
+            clearSession(); return true;
+        }
+    }
+    public void invalidatePermissions(String token) {
+        synchronized (LOCK) {
+            if(token!=null && token.equals(getToken()) && validatedRole!=null) {
+                validatedRole=null;changes.postValue(++generation);
+            }
+        }
+    }
     public void clearSession() {
-        memoryToken=null;validatedRole="USER";
-        prefs.edit().clear().apply();
+        synchronized (LOCK) {
+            memoryToken = null; validatedRole = null;
+            prefs.edit().clear().apply();
+            changes.postValue(++generation);
+        }
     }
 }

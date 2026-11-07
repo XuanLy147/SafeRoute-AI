@@ -24,8 +24,13 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private boolean keyboardVisible;
     private String menuRole = "";
+    private boolean hadSession, checkingSession;
+    private int pendingDestination;
+    private SessionManager session;
+
     @Override protected void onCreate(Bundle saved) {
         super.onCreate(saved);
+        if(saved!=null)pendingDestination=saved.getInt("auth.destination",0);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         binding = ActivityMainBinding.inflate(getLayoutInflater()); setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, (view, insets) -> {
@@ -62,34 +67,84 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
             @Override public void onFragmentResumed(FragmentManager manager, Fragment fragment) { syncNavigation(); }
         }, false);
-        if (saved == null) {
-            if (new SessionManager(this).isLoggedIn()) {
-                openMap();
-                SessionManager session=new SessionManager(this);
-                String token=session.getToken();
-                com.comeforfood.saferoute.core.network.ApiCalls.enqueue(this,((SafeRouteApp)getApplication()).api().service.me(),profile->{
-                    if(!token.equals(session.getToken()))return;
-                    session.saveSession(token,profile.getEmail(),profile.getRole(),profile.getFullName());
-                    if(!getSupportFragmentManager().isStateSaved())openSessionHome();
-                },error->{session.clearSession();if(!getSupportFragmentManager().isStateSaved())openRoot(new LoginFragment(),R.id.nav_profile);});
+        session=new SessionManager(this);
+        hadSession=session.isLoggedIn();
+        session.changes().observe(this, ignored -> {
+            if(getSupportFragmentManager().isStateSaved())return;
+            if(hadSession && !session.isLoggedIn()) {
+                new ViewModelProvider(this).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();
+                LoginFragment login=new LoginFragment();Bundle args=new Bundle();args.putBoolean("expired",true);login.setArguments(args);
+                openRoot(login,R.id.nav_profile);
+            } else if(session.isLoggedIn()) {
+                Fragment current=getSupportFragmentManager().findFragmentById(R.id.content);
+                if(session.isLoggedIn()&&!session.isVerified() && !(current instanceof SessionGateFragment)) {
+                    openRoot(new SessionGateFragment(),R.id.nav_profile);
+                } else if(current instanceof com.comeforfood.saferoute.feature.admin.AdminUsersFragment && !isAdmin())openSessionHome();
+                if(current instanceof com.comeforfood.saferoute.feature.review.ModerationFragment && !((com.comeforfood.saferoute.feature.review.ModerationFragment)current).allowed(session))openSessionHome();
+                if(current instanceof FlowPageFragment) {
+                    FlowPageFragment.Page page=((FlowPageFragment)current).page();
+                    if(page.restricted() && (!session.isReviewerOrAdmin() || (page.admin()&&!isAdmin())))openSessionHome();
+                }
             }
-            else if (getPreferences(MODE_PRIVATE).getBoolean("intro.complete", false)) openRoot(new LoginFragment(), R.id.nav_profile);
-            else openRoot(new WelcomeFragment(), R.id.nav_profile);
-        }
+            hadSession=session.isLoggedIn();syncNavigation();
+        });
+        if (saved == null) {
+            if(session.isLoggedIn())openRoot(new SessionGateFragment(),R.id.nav_profile);
+            else if(getPreferences(MODE_PRIVATE).getBoolean("intro.complete",false))openRoot(new LoginFragment(),R.id.nav_profile);
+            else openRoot(new WelcomeFragment(),R.id.nav_profile);
+        } else if(session.isLoggedIn()&&!session.isVerified())openRoot(new SessionGateFragment(),R.id.nav_profile);
     }
+    @Override protected void onStart() {
+        super.onStart();
+        Fragment current=getSupportFragmentManager().findFragmentById(R.id.content);
+        if(session!=null && session.isVerified() && current!=null && !(current instanceof SessionGateFragment))refreshSession();
+    }
+    @Override protected void onSaveInstanceState(Bundle out) {
+        out.putInt("auth.destination",pendingDestination);super.onSaveInstanceState(out);
+    }
+    public void refreshSession() {
+        if(checkingSession || !session.isLoggedIn())return;
+        checkingSession=true;
+        String token=session.getToken();long generation=session.generation();
+        com.comeforfood.saferoute.core.network.ApiCalls.enqueueDetailed(this,((SafeRouteApp)getApplication()).api().service.me(),p->{
+            checkingSession=false;
+            if(SessionManager.knownRole(p.getRole()))session.saveIfUnchanged(generation,token,p.getEmail(),p.getRole(),p.getFullName());
+        },(code,error)->{ checkingSession=false; /* 401 is handled centrally; offline keeps credentials. */ });
+    }
+    public void requireSignIn() {
+        openRoot(new LoginFragment(),R.id.nav_profile);
+    }
+
     private void openRoot(Fragment fragment, int tab) {
+        SessionManager currentSession=new SessionManager(this);
+        if((fragment instanceof ReportWizardFragment || fragment instanceof MyReportsFragment)
+                && !currentSession.isVerified()) {
+            pendingDestination=tab;
+            fragment=currentSession.isLoggedIn()?new SessionGateFragment():new LoginFragment();tab=R.id.nav_profile;
+        }
         getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment, TAB_TAG + tab).commit();
     }
     private boolean isAdmin() { return new SessionManager(this).isReviewerOrAdmin() && "ADMIN".equalsIgnoreCase(new SessionManager(this).getRole()); }
     public void openSessionHome() {
         SessionManager session = new SessionManager(this);
+        if(session.isLoggedIn()&&!session.isVerified()){openRoot(new SessionGateFragment(),R.id.nav_profile);return;}
+        if(session.isVerified() && pendingDestination!=0) {
+            int destination=pendingDestination;pendingDestination=0;
+            if(destination==R.id.nav_report){openRoot(new ReportWizardFragment(),destination);return;}
+            if(destination==R.id.nav_my_reports){openRoot(new MyReportsFragment(),destination);return;}
+        }
         if (session.isReviewerOrAdmin()) openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_HOME:FlowPageFragment.Page.REVIEW_HOME,R.id.nav_role_home);
         else openMap();
     }
-    private void openRoleRoot(FlowPageFragment.Page page,int tab) { openRoot(FlowPageFragment.at(page),tab); }
-    public void openFlow(FlowPageFragment.Page page) { openTv2Fragment(FlowPageFragment.at(page)); }
-    public void logout() { new ViewModelProvider(this).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();new SessionManager(this).clearSession();openRoot(new LoginFragment(),R.id.nav_profile); }
+    private Fragment rolePage(FlowPageFragment.Page page) {
+        if(com.comeforfood.saferoute.feature.review.ModerationFragment.supports(page))return com.comeforfood.saferoute.feature.review.ModerationFragment.at(page);
+        return page==FlowPageFragment.Page.ADMIN_USERS||page==FlowPageFragment.Page.ADMIN_ROLES
+            ?new com.comeforfood.saferoute.feature.admin.AdminUsersFragment():FlowPageFragment.at(page);
+    }
+    private void openRoleRoot(FlowPageFragment.Page page,int tab) { openRoot(rolePage(page),tab); }
+    public void openFlow(FlowPageFragment.Page page) { openTv2Fragment(rolePage(page)); }
+    public void logout() { pendingDestination=0; new ViewModelProvider(this).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();hadSession=false;new SessionManager(this).clearSession();openRoot(new LoginFragment(),R.id.nav_profile); }
     public void openMapAt(Point point) {
         MapFragment fragment=new MapFragment();Bundle b=new Bundle();b.putDouble("center.lat",point.latitude);b.putDouble("center.lon",point.longitude);fragment.setArguments(b);openRoot(fragment,R.id.nav_map);
     }
@@ -121,6 +176,7 @@ public class MainActivity extends AppCompatActivity {
     }
     public void navigateBack() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) getSupportFragmentManager().popBackStack();
+        else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof com.comeforfood.saferoute.feature.review.ModerationFragment) openSessionHome();
         else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof FlowPageFragment && ((FlowPageFragment)getSupportFragmentManager().findFragmentById(R.id.content)).page().admin() && isAdmin()) openSessionHome();
         else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof MyReportsFragment
                 && getSupportFragmentManager().findFragmentById(R.id.content).getArguments()!=null
@@ -144,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         boolean fullScreen = current instanceof WelcomeFragment || current instanceof OnboardingFragment
-                || current instanceof LoginFragment || current instanceof RegisterFragment || current instanceof ReportWizardFragment
+                || current instanceof LoginFragment || current instanceof RegisterFragment || current instanceof SessionGateFragment || current instanceof ReportWizardFragment
                 || (current instanceof FlowPageFragment && ((FlowPageFragment)current).isDecision());
         binding.navigation.setVisibility(keyboardVisible || fullScreen ? View.GONE : View.VISIBLE);
         if (current == null) return;

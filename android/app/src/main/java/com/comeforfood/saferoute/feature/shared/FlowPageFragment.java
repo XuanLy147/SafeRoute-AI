@@ -58,8 +58,8 @@ public class FlowPageFragment extends Fragment {
         if(!allowed)return;
         binding.flowBody.setText(R.string.role_unavailable);
         switch(page) {
-            case REVIEW_HOME: link(Page.REVIEW_QUEUE);link(Page.REVIEW_HISTORY);link(Page.DUPLICATES);account();break;
-            case ADMIN_HOME: link(Page.ADMIN_REPORTS);link(Page.ADMIN_AUDIT);link(Page.ADMIN_USERS);link(Page.ADMIN_METRICS);link(Page.ADMIN_SETTINGS);account();break;
+            case REVIEW_HOME: binding.flowBody.setText("Không gian xét duyệt: mở hàng đợi để kiểm tra và xác minh báo cáo.");link(Page.REVIEW_QUEUE);link(Page.REVIEW_HISTORY);link(Page.DUPLICATES);account();break;
+            case ADMIN_HOME: binding.flowBody.setText("Quản lý báo cáo và quyền tài khoản. Mỗi lần cấp hoặc thu hồi quyền đều được ghi lịch sử.");link(Page.ADMIN_REPORTS);link(Page.ADMIN_AUDIT);link(Page.ADMIN_USERS);link(Page.ADMIN_METRICS);link(Page.ADMIN_SETTINGS);account();break;
             case REVIEW_QUEUE: case ADMIN_REPORTS: loadQueue();break;
             case DUPLICATES:
                 EditText search=new EditText(requireContext());search.setHint(R.string.role_search);search.setInputType(android.text.InputType.TYPE_CLASS_TEXT);

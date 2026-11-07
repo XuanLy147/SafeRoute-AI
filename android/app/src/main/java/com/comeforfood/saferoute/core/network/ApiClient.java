@@ -19,20 +19,37 @@ public final class ApiClient {
                 || !origin.password().isEmpty() || (!BuildConfig.DEBUG && !origin.isHttps()))
             throw new IllegalArgumentException("API_BASE_URL must be an origin; release requires HTTPS");
         SessionManager session = new SessionManager(context);
-        OkHttpClient client = new OkHttpClient.Builder()
+        ConnectionPool pool = new ConnectionPool();
+        OkHttpClient client = new OkHttpClient.Builder().connectionPool(pool)
             .connectTimeout(10, TimeUnit.SECONDS).readTimeout(25, TimeUnit.SECONDS)
             .writeTimeout(25, TimeUnit.SECONDS).callTimeout(30, TimeUnit.SECONDS)
             .retryOnConnectionFailure(false).followRedirects(false).followSslRedirects(false)
             .addInterceptor(chain -> {
                 Request request = chain.request();
                 if (!sameOrigin(request.url())) throw new java.io.IOException("Cross-origin request rejected");
-                String token = session.getToken();
-                if (token != null) request = request.newBuilder().header("Authorization", "Bearer " + token).build();
-                Response response = chain.proceed(request);
-                if (response.code()==401 && token!=null && token.equals(session.getToken())) session.clearSession();
+                boolean credentials = request.url().encodedPath().equals("/api/v1/auth/login")
+                    || request.url().encodedPath().equals("/api/v1/auth/register");
+                String bearer = request.header("Authorization");
+                String token = credentials ? null : bearer != null && bearer.startsWith("Bearer ")
+                    ? bearer.substring(7) : session.getToken();
+                if (credentials) request=request.newBuilder().removeHeader("Authorization").build();
+                else if (token != null) request=request.newBuilder().header("Authorization", "Bearer " + token).build();
+                Response response;
+                try { response = chain.proceed(request); }
+                catch (java.io.IOException error) {
+                    boolean read = request.method().equals("GET") || request.method().equals("HEAD");
+                    boolean closed = error instanceof java.net.SocketException || error instanceof java.io.EOFException
+                        || error.getCause() instanceof java.io.EOFException;
+                    if (!read || !closed || chain.call().isCanceled()) throw error;
+                    pool.evictAll(); // Discard other idle sockets closed by the same server/USB tunnel timeout.
+                    response = chain.proceed(request); // One recovery for a closed read connection; never retry writes.
+                }
+                if (response.code()==401) session.expireIfTokenMatches(token);
+                if (response.code()==403 && !credentials && "required".equals(response.header("X-SafeRoute-Role-Refresh"))) session.invalidatePermissions(token);
                 return response;
             }).build();
         service = new Retrofit.Builder().baseUrl(origin).client(client)
+            .callbackExecutor(command -> new android.os.Handler(android.os.Looper.getMainLooper()).post(command))
             .addConverterFactory(GsonConverterFactory.create()).build().create(ApiService.class);
     }
     public boolean sameOrigin(HttpUrl url) {

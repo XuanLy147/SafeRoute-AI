@@ -55,3 +55,7 @@ class VoteResponse(BaseModel):
         elif hasattr(data, "vote") and not hasattr(data, "vote_type"):
             pass
         return data
+
+
+class MyVoteResponse(BaseModel):
+    vote: VoteType | None = None

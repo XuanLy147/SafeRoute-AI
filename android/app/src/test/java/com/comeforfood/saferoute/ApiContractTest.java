@@ -78,4 +78,66 @@ public class ApiContractTest {
         RecordedRequest request=server.takeRequest();assertEquals("PATCH",request.getMethod());assertEquals("/api/v1/reports/123/status",request.getPath());
         JsonObject body=JsonParser.parseString(request.getBody().readUtf8()).getAsJsonObject();assertTrue(body.has("reason"));assertFalse(body.has("reviewer_note"));assertEquals(1,server.getRequestCount());
     }
+
+    @Test public void failedLoginDoesNotExpireOrSendExistingSession() throws Exception {
+        session.saveSession("existing-token","a@example.com","ADMIN","A");
+        json(401,"{}");
+        client.service.login(new AuthDto.LoginRequest("b@example.com","wrong-password")).execute();
+        assertNull(server.takeRequest().getHeader("Authorization"));
+        assertEquals("existing-token",session.getToken());
+    }
+    @Test public void candidateProfileNeverReplacesCurrentSession() throws Exception {
+        session.saveSession("existing-token","a@example.com","ADMIN","A");
+        json(401,"{}");
+        client.service.meWithToken("Bearer candidate-token").execute();
+        assertEquals("Bearer candidate-token",server.takeRequest().getHeader("Authorization"));
+        assertEquals("existing-token",session.getToken());
+    }
+    @Test public void lateProfileCannotResurrectLogoutOrOverwriteNewAccount() {
+        session.saveSession("first-token","a@example.com","USER","A");
+        long generation=session.generation();
+        session.clearSession();
+        assertFalse(session.saveIfUnchanged(generation,"first-token","a@example.com","ADMIN","A"));
+        session.saveSession("second-token","b@example.com","USER","B");
+        assertFalse(session.expireIfTokenMatches("first-token"));
+        assertEquals("second-token",session.getToken());
+    }
+    @Test public void unknownRoleIsNeverAccepted() {
+        assertThrows(IllegalArgumentException.class,()->session.saveSession("token","a@example.com","OWNER","A"));
+        assertFalse(session.isLoggedIn());
+    }
+
+
+    @Test public void closedReadConnectionRecoversOnce() throws Exception {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        json(200,"[]");
+        assertTrue(client.service.reports().execute().isSuccessful());
+        assertEquals(2,server.getRequestCount());
+    }
+    @Test public void closedReadConnectionHasBoundedRetry() throws Exception {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        assertThrows(java.io.IOException.class,()->client.service.reports().execute());
+        assertEquals(2,server.getRequestCount());
+    }
+    @Test public void uncertainWriteIsNeverRetried() throws Exception {
+        server.enqueue(new MockResponse().setSocketPolicy(SocketPolicy.DISCONNECT_AFTER_REQUEST));
+        assertThrows(java.io.IOException.class,()->client.service.vote("1",new ReportDto.VoteRequest("SUPPORT",null)).execute());
+        assertEquals(1,server.getRequestCount());
+    }
+    @Test public void deniedImageKeepsVerifiedRoleButExplicitRoleDenialInvalidatesIt() throws Exception {
+        session.saveSession("token","a@example.com","USER","A");
+        json(403,"{}");client.service.image(server.url("/api/v1/images/test").toString()).execute();
+        assertTrue(session.isVerified());
+        server.enqueue(new MockResponse().setResponseCode(403).setHeader("X-SafeRoute-Role-Refresh","required").setBody("{}"));
+        client.service.queue().execute();
+        assertTrue(session.isLoggedIn());assertFalse(session.isVerified());
+    }
+    @Test public void routeExplanationDoesNotExposeInternalEnums() {
+        RouteComparison c=NetworkDataSource.mapRoutes(route("UNAVAILABLE","null"));
+        assertFalse(c.scoreDescription.contains("UNAVAILABLE"));
+        assertFalse(c.scoreDescription.contains("SINGLE_ROUTE"));
+        assertFalse(c.scoreDescription.contains(" ? "));
+    }
+
 }

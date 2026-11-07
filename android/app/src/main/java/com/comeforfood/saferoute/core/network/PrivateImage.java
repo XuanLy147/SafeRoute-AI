@@ -13,8 +13,11 @@ public final class PrivateImage {
     private static final ExecutorService WORKER=Executors.newFixedThreadPool(2);
     private PrivateImage(){}
     public static void load(LifecycleOwner owner,ApiClient client,String url,ImageView image) {
+        load(owner,client,url,image,loaded->{});
+    }
+    public static void load(LifecycleOwner owner,ApiClient client,String url,ImageView image,java.util.function.Consumer<Boolean> completion) {
         final Call<ResponseBody> call;
-        try {call=client.service.image(client.imageUrl(url));}catch(IllegalArgumentException e){return;}
+        try {call=client.service.image(client.imageUrl(url));}catch(IllegalArgumentException e){completion.accept(false);return;}
         Lifecycle lifecycle=owner.getLifecycle();
         java.lang.ref.WeakReference<ImageView> target=new java.lang.ref.WeakReference<>(image);
         DefaultLifecycleObserver observer=new DefaultLifecycleObserver(){@Override public void onDestroy(LifecycleOwner o){call.cancel();target.clear();}};
@@ -37,6 +40,7 @@ public final class PrivateImage {
             new android.os.Handler(android.os.Looper.getMainLooper()).post(()->{
                 lifecycle.removeObserver(observer);ImageView view=target.get();
                 if(view!=null&&!call.isCanceled()&&lifecycle.getCurrentState()!=Lifecycle.State.DESTROYED){
+                    completion.accept(decoded!=null);
                     if(decoded!=null)view.setImageBitmap(decoded);else view.setContentDescription("Ảnh không khả dụng hoặc không có quyền truy cập");
                 }
             });

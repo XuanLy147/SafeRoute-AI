@@ -49,8 +49,10 @@ public final class NetworkDataSource implements Tv1DataSource {
             routes.add(new Route(string(r,"id"),string(r,"summary"),r.get("duration_seconds").getAsInt(),r.get("distance_meters").getAsInt(),
                 risk==null?null:risk.get("score").getAsDouble(),verified,pending,risk==null?"Chưa có đánh giá nguy cơ":string(risk,"reason"),decode(string(r,"polyline"))));
         }
-        String description=status+" · "+string(body,"recommendation_basis")+"\n"+string(body,"recommendation_reason")+"\n"+string(body,"disclaimer")
-            +"\n"+string(body,"risk_policy_status")+" · "+string(body,"risk_policy_revision");
+        String assessment="AVAILABLE".equals(status)?"Có đánh giá nguy cơ cho các tuyến"
+            :"PARTIAL".equals(status)?"Chưa đủ dữ liệu để so sánh nguy cơ giữa các tuyến"
+            :"Chưa có đánh giá nguy cơ khả dụng";
+        String description=assessment+"\n"+string(body,"recommendation_reason")+"\n"+string(body,"disclaimer");
         String recommended=string(body,"recommended_route_id");
         return new RouteComparison(routes,recommended.isEmpty()?null:recommended,description);
     }
