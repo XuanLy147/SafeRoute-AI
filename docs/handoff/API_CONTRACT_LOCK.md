@@ -1,7 +1,7 @@
 # API contract lock
 
 Backend branch: `integration/tv345-backend-handoff`.
-Implementation snapshot: `aefef2acc2046de37076455d06fe5774040648e1` (source/security/runtime commits b7c0b87, 828f1ef, 005366b).
+Implementation snapshot: `a11875074dd14da9cc1af18fa10099c45e08ba72` (source/security/runtime commits b7c0b87, 828f1ef, 005366b).
 Final delivery SHA is reported by Git and the final handoff message; subsequent
 contract documentation changes do not change this provenance anchor.
 Contract revision: `tv345-contract-2026-11-07`, API `/api/v1`.

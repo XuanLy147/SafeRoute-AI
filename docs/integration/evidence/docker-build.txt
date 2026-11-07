@@ -5,7 +5,7 @@
 #1 DONE 0.0s
 
 #2 [internal] load metadata for docker.io/library/python:3.11-slim
-#2 DONE 3.0s
+#2 DONE 2.0s
 
 #3 [internal] load .dockerignore
 #3 transferring context: 160B done
@@ -16,16 +16,16 @@
 #4 DONE 0.0s
 
 #5 [internal] load build context
-#5 transferring context: 8.84kB 0.0s done
+#5 transferring context: 12.85kB 0.0s done
 #5 DONE 0.0s
 
-#6 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+#6 [2/8] WORKDIR /srv/backend
 #6 CACHED
 
-#7 [4/8] COPY backend/requirements.txt backend/requirements-ai.txt ./
+#7 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
 #7 CACHED
 
-#8 [2/8] WORKDIR /srv/backend
+#8 [4/8] COPY backend/requirements.txt backend/requirements-ai.txt ./
 #8 CACHED
 
 #9 [5/8] RUN pip install --no-cache-dir torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu && pip install --no-cache-dir -r requirements.txt -r requirements-ai.txt
@@ -38,16 +38,16 @@
 #11 DONE 0.2s
 
 #12 [8/8] RUN cd /srv/ai/weights && sha256sum -c best.pt.sha256 && useradd --uid 10001 --create-home saferoute && mkdir -p /srv/uploads && chown -R saferoute:saferoute /srv/uploads
-#12 0.347 best.pt: OK
+#12 0.354 best.pt: OK
 #12 DONE 0.4s
 
 #13 exporting to image
 #13 exporting layers
 #13 exporting layers 0.7s done
-#13 exporting manifest sha256:b7023c914f97afc55ecf3e23d80336456b0277d5d754660d5497d6d040a7c62b 0.0s done
-#13 exporting config sha256:e5115268da4f11a3913b8bd60daab6c68b09e8a703ea7ecde7340ace1b01db02 0.0s done
-#13 exporting attestation manifest sha256:d0e5b4ea853dcaad23bb753513def2559f2b20a98cb0cd8ca51696ccf4548207 0.0s done
-#13 exporting manifest list sha256:c9f8efb8fc8a6ef6a9213b10849aa896d59a7f61ac5680ecb9b81afa4a0cad09 0.0s done
+#13 exporting manifest sha256:8116057aad2abe418d46ae0b699cbb831f2f134b05c396135684af9b2ef04c2f 0.0s done
+#13 exporting config sha256:604e746e4cd25f52c66261fa8de44d2b4523b706488bfb09eccf0ab920e6acbb 0.0s done
+#13 exporting attestation manifest sha256:9be9866b8836a15cc2abe6beeebbc67af150699c32fed32d917a1fbb6cb8da0a 0.0s done
+#13 exporting manifest list sha256:144ae9d93322e2432f90454af706550d9c7c1b77f49fc2eb270baad25a7e3f39 0.0s done
 #13 naming to docker.io/library/saferoute-tv345:integration done
 #13 unpacking to docker.io/library/saferoute-tv345:integration
 #13 unpacking to docker.io/library/saferoute-tv345:integration 0.2s done

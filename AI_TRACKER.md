@@ -132,13 +132,13 @@ Routing/Geometry/Recommendation. Android remains TV1/TV2.
 
 | Task | Owner | Status | Evidence |
 |---|---|---|---|
-| Durable API/private images/security/DTO | TV3 | DONE_VERIFIED | b7c0b87; 178 combined tests PASS; container HTTP/restart PASS |
+| Durable API/private images/security/DTO | TV3 | DONE_VERIFIED | b7c0b87; 179 combined tests PASS; container HTTP/restart PASS |
 | PostGIS/migrations/keyed risk | TV4 | DONE_VERIFIED | cycle/data preservation/diff=[]; 5 live spatial + HTTP risk PASS |
 | Routing/Google adapter regression | TV5 | DONE_VERIFIED | b5c81b4 retained; unavailable/partial/invalid/zero tested |
 | Production risk approval | TV4 + owners | BLOCKED | numeric approval absent; explicit demo profile |
 | Docker/real AI CPU | TV3/TV4 | DONE_VERIFIED | build/start/restart/checksum/class mapping/inference PASS |
 | Cloud/live Google | TV4/TV5 | BLOCKED | credentials/cost approval absent |
-| GitHub CI | TV4 | IN_PROGRESS | workflow authored; remote evidence pending |
+| GitHub CI | TV4 | DONE_VERIFIED | run 42364615627 PASS on 3847148, including Docker and restart; subsequent branch commits trigger the same gates |
 | Android device integration | TV1/TV2 | TODO | handoff ready; no Android modifications |
 
 Evidence: docs/integration/evidence/; handoff: docs/handoff/RELEASE_READINESS.md.

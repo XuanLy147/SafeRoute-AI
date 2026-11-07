@@ -31,16 +31,16 @@ INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial_schema, initi
 INFO  [alembic.runtime.migration] Running upgrade 0001_initial_schema -> 0002_image_owner_profile, Persistent upload ownership and Android profile; legacy rows remain private.
 
 SCHEMA_PASS: 8 model tables, 9 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]
-.................................................................................................................................... [ 74%]
-..............................................                           [100%]
+.................................................................................................................................... [ 73%]
+...............................................                          [100%]
 ============================== warnings summary ===============================
 ..\.venv\Lib\site-packages\starlette\testclient.py:37
   C:\dev\SafeRoute-AI-tv345-handoff\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
     _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-178 passed, 1 warning, 12 subtests passed in 41.22s
+179 passed, 1 warning, 12 subtests passed in 37.28s
 
 VERIFICATION_COMPLETE: real PostgreSQL/PostGIS; synthetic policy/coordinates only
-df89f614e5d1a26512a3be161a2b4fbe6ad0cad1823ff35aeace5607466d649d
+e47496aef0d205df4a08556e604e0543702a3ecea48d7e1363bb0f93685b4ffc
 CLEANUP: disposable container stopped/auto-removed

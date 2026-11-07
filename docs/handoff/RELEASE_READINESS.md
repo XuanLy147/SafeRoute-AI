@@ -2,7 +2,7 @@
 
 Verdict: **READY_WITH_DOCUMENTED_LIMITATIONS** for backend/Android integration;
 **not Production Ready**. Branch `integration/tv345-backend-handoff`.
-Implementation snapshot: `aefef2acc2046de37076455d06fe5774040648e1`.
+Implementation snapshot: `a11875074dd14da9cc1af18fa10099c45e08ba72`.
 CI refinement: `c4ba25d`. Final delivery SHA is in Git/final handoff message;
 documentation and evidence commits follow this implementation snapshot.
 
@@ -19,7 +19,7 @@ backed up separately. No main/frontend/Android edits or pushes.
 
 | Gate | Observed result |
 |---|---|
-| Combined regression/HTTP/PostGIS | PASS 178 tests + 12 subtests; 0 failures/skips/xfail |
+| Combined regression/HTTP/PostGIS | PASS 179 tests + 12 subtests; 0 failures/skips/xfail |
 | Original live spatial suite | PASS 5 tests within combined count, not added twice |
 | Alembic | PASS upgrade/rollback/re-upgrade, existing-row preservation, metadata diff=[] |
 | PostGIS | PostgreSQL 16.4/PostGIS 3.4.3; geography SRID4326/GiST/ST_DWithin meters PASS |
@@ -31,13 +31,13 @@ backed up separately. No main/frontend/Android edits or pushes.
 | Secrets | PASS Gitleaks 8.24.3 scan of tracked release content |
 | Contract | Runtime-generated OpenAPI and schema-validated examples |
 | Google Routes live | NOT_RUN; no authorized configured key/billing |
-| GitHub Actions | First run failed in runner container-ID parsing after fresh image pull; fixed, rerun pending |
+| GitHub Actions | PASS [run 42364615627](https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42364615627) on 3847148; current branch triggers verification again |
 | Cloud Run | NOT_RUN; no credentials/project/cost approval |
 | Android device | NOT_RUN; read-only source audit and handoff only |
 
 Evidence in `docs/integration/evidence/`: postgis-http.txt, container-http.txt,
 docker-build.txt, ai-cpu.txt, secrets.txt. Container verified image:
-`sha256:c9f8efb8fc8a6ef6a9213b10849aa896d59a7f61ac5680ecb9b81afa4a0cad09`.
+`sha256:144ae9d93322e2432f90454af706550d9c7c1b77f49fc2eb270baad25a7e3f39`.
 The AI input is a synthetic gray image, not an accuracy benchmark or cloud latency
 measurement. Runtime matches checkpoint metadata; see official YOLO12 guidance
 https://docs.ultralytics.com/models/yolo12/ . No model substitution or training.
@@ -65,3 +65,9 @@ not authorize production deployment. Final committed HEAD is reverified before p
 
 CI run 42364384922 failed before tests: Docker pull stderr was appended to container ID.
 Runner now returns stdout only for container creation; no assertions changed.
+
+Remote CI evidence is pinned to source 3847148: 178 tests plus 12 subtests and
+all runtime gates PASS. Later HTTPBearer/OpenAPI correction adds one local test
+(179 total) and has passed the same local suite/container gates. Each push runs
+GitHub Actions again; the final delivery message links the final HEAD run.
+The prior failed first run is retained as history; no failure was hidden.
