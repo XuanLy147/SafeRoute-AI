@@ -28,12 +28,15 @@ jobs:
         run: python scripts/qa/verify_ai.py > ai-evidence.txt 2>&1
       - name: Contract and handoff artifacts
         run: python scripts/qa/verify_contract.py
-      - name: Secrets scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Secrets scan of tracked release content
+        run: |
+          mkdir -p "$RUNNER_TEMP/saferoute-scan"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/saferoute-scan"
+          docker run --rm -v "$RUNNER_TEMP/saferoute-scan:/repo:ro" ghcr.io/gitleaks/gitleaks:v8.24.3 dir /repo --redact --no-banner
       - name: Build runtime image
-        run: docker build -f backend/Dockerfile -t saferoute-ci .
+        run: docker build -f backend/Dockerfile -t saferoute-tv345:integration .
+      - name: Container HTTP and restart persistence
+        run: python scripts/qa/verify_container.py > container-evidence.txt 2>&1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
