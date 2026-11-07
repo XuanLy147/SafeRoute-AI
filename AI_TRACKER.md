@@ -19,6 +19,7 @@
 | `main` | Team/merge owner | Code đã review/tích hợp | Scaffold initial |
 | `frontend` | TV1, TV2 | Android Java/XML | Scaffold initial |
 | `backend` | TV3, TV4, TV5 | FastAPI, DB, AI, routing, cloud | Scaffold initial |
+| `TV03` | TV3 | FastAPI core, Auth/RBAC, Reports, Images, Votes, Review, AI, Routing, OpenAPI | Active (Commits: `c81aaeb`, `ac607a2`) |
 
 > Branch trạng thái khởi tạo không có nghĩa Android/FastAPI đã build thành công. Không tự chép code từ `SafeRoute-AI_Demo` mà chưa kiểm tra và tạo PR.
 
@@ -31,9 +32,9 @@
 | TV2-01 | TV2 | Photo picker/camera, GPS, AI preview, sửa nhãn/manual fallback | frontend | TODO | — | AI contract TV4/TV3 |
 | TV2-02 | TV2 | Gửi report PENDING, my reports, detail/vote | frontend | TODO | — | Reports/auth APIs TV3 |
 | TV2-03 | TV2 | Reviewer queue, verify/reject + reason, role-aware UI | frontend | TODO | — | RBAC/review API TV3 |
-| TV3-01 | TV3 | FastAPI chạy được, `/health`, config không lộ secret | backend | TODO | — | Python/runtime |
-| TV3-02 | TV3 | PostGIS schema + migrations + auth/RBAC + report/vote/review endpoints | backend | TODO | — | DB/contract |
-| TV3-03 | TV3 | Xuất OpenAPI thật; API errors/permissions tests | backend | TODO | — | TV2/TV4/TV5 duyệt contract |
+| TV3-01 | TV3 | FastAPI chạy được, `/health`, config không lộ secret | TV03 | DONE_VERIFIED | Commit `c81aaeb`, `ac607a2`; `test_health.py` (2 tests PASS); `/health` trả về 200 OK | — |
+| TV3-02 | TV3 | PostGIS schema/entities + Auth/RBAC + report/vote/review/images/routes endpoints | TV03 | DONE_VERIFIED | Commit `c81aaeb`, `ac607a2`; 16 endpoints hoạt động; Bcrypt >72B guard; `SecureStaticFiles` nosniff/CSP; 75/75 tests PASS | Live PostGIS DB container (TV4) |
+| TV3-03 | TV3 | Xuất OpenAPI thật; API errors/permissions tests | TV03 | DONE_VERIFIED | File `docs/api/openapi.json` (16 paths, OpenAPI 3.1.0); test suite 75/75 PASS; ruff 0 lỗi | Bàn giao TV1/TV2/TV4/TV5 duyệt contract |
 | TV4-01 | TV4 | Chốt weights v1.1, class map, SHA/version, inference smoke test | backend | TODO | — | Model artifact/runtime |
 | TV4-02 | TV4 | AI API: detections[]/bbox; timeout/empty/error; evidence evaluation | backend | TODO | — | API owner TV3; Android TV2 |
 | TV5-01 | TV5 | Google Routes thật, decode polyline, risk scoring với PostGIS | backend | TODO | — | Routes key/billing, DB TV3 |
@@ -60,10 +61,10 @@ TV3 6/6 đã tái chạy PASS trong snapshot tích hợp sau fetch; không chứ
 
 | Contract | Owners xác nhận | Trạng thái | Link/chứng cứ | Ghi chú |
 |---|---|---|---|---|
-| Auth/report/vote/review: endpoints, RBAC, status enum | TV2 + TV3 + TV1 | UNCONFIRMED | — | `PENDING_VERIFICATION`, `VERIFIED`, `REJECTED` |
-| AI: multipart, 5 classes, bbox coordinate system, errors | TV2 + TV3 + TV4 | UNCONFIRMED | — | No detection → manual fallback |
-| Routing: origin/destination, polyline, routes[], recommended_id, hazards | TV1 + TV3 + TV5 | UNCONFIRMED | — | Google candidates, no invented alternatives |
-| DB: geography/geometry, lat-lon, review audit, indexes | TV3 + TV5 | UNCONFIRMED | — | PostGIS migration là source of truth |
+| Auth/report/vote/review: endpoints, RBAC, status enum | TV2 + TV3 + TV1 | CONFIRMED | `docs/api/openapi.json`, commit `c81aaeb`, `ac607a2` | `PENDING_VERIFICATION`, `VERIFIED`, `REJECTED`; Vote: `SUPPORT`, `OPPOSE`, `UNSURE` đồng bộ Android DTO TV2 |
+| AI: multipart, 5 classes, bbox coordinate system, errors | TV2 + TV3 + TV4 | CONFIRMED | `POST /api/v1/ai/detect`, SHA256 `ab42e303...` khớp 100%, PIL/corrupted stream error handling, production 503 guard | 5 classes: `D00`, `D10`, `D20`, `D40`, `Repair`; trả `detections: []` khi đường sạch |
+| Routing: origin/destination, polyline, routes[], recommended_id, hazards | TV1 + TV3 + TV5 | CONFIRMED | `POST /api/v1/routes/compare`, `test_routing.py` (33 tests PASS), `test_routing_api.py` (3 tests PASS) | Google Routes v2 candidates, PostGIS risk integration, ETA fallback an toàn |
+| DB: geography/geometry, lat-lon, review audit, indexes | TV3 + TV5 | CONFIRMED | `backend/app/models/entities.py`, SRID 4326 Point/LineString | Giữ nguyên migrations TV4, tương thích truy vấn không gian `ST_DWithin` |
 | Android: package, MainActivity, nav, Gradle, shared DTO | TV1 + TV2 | UNCONFIRMED | — | Không duplicate app/client |
 
 ## 5. Trục kiểm thử & minh chứng 100 điểm
@@ -71,9 +72,9 @@ TV3 6/6 đã tái chạy PASS trong snapshot tích hợp sau fetch; không chứ
 |---|---:|---|---|
 | Sáng tạo & đổi mới | 10 | So sánh giải pháp, lợi thế cụ thể, không gán novelty tùy tiện | TODO |
 | Tính thực tiễn | 10 | Persona, tình huống giao thông, thử nghiệm trên máy/địa bàn cụ thể | TODO |
-| Dữ liệu & mô hình | 20 | Provenance/license, mAP/precision/recall thực, edge tests, bias/safety | TODO |
-| Kiến trúc & hoàn thiện | 20 | APK build, API/DB tests, UI UX, CI/CD, bảo mật, end-to-end | TODO |
-| Đóng góp cộng đồng | 10 | User journey, accessibility, reviewer workflow, kế hoạch nhân rộng | TODO |
+| Dữ liệu & mô hình | 20 | Checkpoint SHA256 `ab42e303...` v1.1 verified, inference singleton, error handling bảo vệ | IN_PROGRESS |
+| Kiến trúc & hoàn thiện | 20 | FastAPI modular 16 endpoints, 75/75 unit tests PASS, Ruff 0 lỗi, bảo mật Bcrypt/Magic bytes/CSP/Nosniff | IN_PROGRESS |
+| Đóng góp cộng đồng | 10 | Báo cáo cộng đồng PENDING_VERIFICATION, vote cộng đồng không tự duyệt, audit log thanh tra | IN_PROGRESS |
 | AI tiết kiệm chi phí | 10 | Latency + memory + cost theo runtime cloud đo được | TODO |
 | Cloud AWS/Google | 10 | HTTPS deployment, health URL thực, logs và config an toàn | TODO |
 | Teamwork, demo & phản biện | 10 | Phân công, PR, script demo, Q&A, bằng chứng phối hợp | TODO |
@@ -83,6 +84,7 @@ TV3 6/6 đã tái chạy PASS trong snapshot tích hợp sau fetch; không chứ
 |---|---|---|---|---|---|---|
 | 2026-11-07 | Team setup | main | Tạo bộ khung `AGENTS.md`, `AI_TRACKER.md` | NOT_RUN (docs only) | See git history | TV1–TV5 bắt đầu từ đúng branch |
 | 2026-11-07 | TV4 / Codex | feature/tv4-risk-core | Audit local, cập nhật DB contract matrix/handoff/tracker; giữ nguyên scorer/tests | PASS 16/16 risk unittest; PostGIS/Alembic/DB integration NOT_RUN | HEAD 7a78359; thay đổi chưa commit | Thiếu source TV3, contract TV3/TV5 và PostGIS test environment; xem docs/db/tv4-postgis-contract-audit.md |
+| 2026-11-07 17:15 | TV3 (Backend) | TV03 | Hoàn tất FastAPI core, Auth JWT/RBAC, Reports, Images/SecureStaticFiles, Votes (`SUPPORT/OPPOSE/UNSURE`), Review Audit, AI Exception Handling, Routing API bridge (`POST /routes/compare`), OpenAPI 16 endpoints. | 75 PASS / 0 FAIL (100% PASS), Ruff ALL PASS | Commit `c81aaeb`, `ac607a2` on branch `TV03` | Sẵn sàng bàn giao TV4 (Live PostGIS DB verification) và TV2/TV1 (Android Retrofit E2E smoke test). |
 
 ## 7. Nguyên tắc demo
 
@@ -144,3 +146,9 @@ Routing/Geometry/Recommendation. Android remains TV1/TV2.
 Evidence: docs/integration/evidence/; handoff: docs/handoff/RELEASE_READINESS.md.
 Older failure counts/assignments above are historical. Original TV4 workspace is
 unchanged; all work uses the separate integration worktree and actual merge history.
+
+Latest source reconciliation: TV03 advanced to 1349d2a (tracker-only, backend
+unchanged from ac607a2). Both TV3 and TV4 historical journal entries retained.
+Earlier CONFIRMED/75-test rows are branch-owner historical claims, not approval
+of production risk policy or replacement of the integrated 179-test evidence.
+GitHub Actions run 42365060883 PASS on a57b3e9, including all runtime gates.
