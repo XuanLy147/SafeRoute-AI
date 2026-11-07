@@ -29,20 +29,20 @@ def main():
     env["POSTGRES_PASSWORD"] = password
     database = "saferoute_test_tv4_" + secrets.token_hex(4)
 
-    def run(command, **kwargs):
+    def run(command, *, stdout_only=False, **kwargs):
         result = subprocess.run(command, capture_output=True, text=True, **kwargs)
         output = (result.stdout + result.stderr).replace(password, "[REDACTED]")
         output = re.sub(r"eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", "[REDACTED_TEST_JWT]", output)
         if result.returncode:
             raise RuntimeError(output)
-        return output
+        return result.stdout if stdout_only else output
 
     try:
         container = run([
             "docker", "run", "--detach", "--rm", "--label", "saferoute.owner=tv4-verification",
             "--publish", "127.0.0.1::5432", "--env", "POSTGRES_PASSWORD",
             "--env", f"POSTGRES_DB={database}", "postgis/postgis:16-3.4",
-        ], env=env).strip()
+        ], env=env, stdout_only=True).strip()
         port = run(["docker", "port", container, "5432/tcp"]).strip().rsplit(":", 1)[1]
         url = f"postgresql+psycopg2://postgres:{password}@127.0.0.1:{port}/{database}"
         env["DATABASE_URL"] = url

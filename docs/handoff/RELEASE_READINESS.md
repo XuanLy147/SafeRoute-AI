@@ -31,7 +31,7 @@ backed up separately. No main/frontend/Android edits or pushes.
 | Secrets | PASS Gitleaks 8.24.3 scan of tracked release content |
 | Contract | Runtime-generated OpenAPI and schema-validated examples |
 | Google Routes live | NOT_RUN; no authorized configured key/billing |
-| GitHub Actions | NOT_RUN at document creation; final delivery reports remote outcome |
+| GitHub Actions | First run failed in runner container-ID parsing after fresh image pull; fixed, rerun pending |
 | Cloud Run | NOT_RUN; no credentials/project/cost approval |
 | Android device | NOT_RUN; read-only source audit and handoff only |
 
@@ -62,3 +62,6 @@ Delivery: TV1_MAP_ROUTING_HANDOFF.md, TV2_REPORT_COMMUNITY_HANDOFF.md,
 API_CONTRACT_LOCK.md, LOCAL_DEVELOPMENT.md, examples.json and generated OpenAPI.
 See source audit/risk decision for root causes and policy formula. Local gates do
 not authorize production deployment. Final committed HEAD is reverified before push.
+
+CI run 42364384922 failed before tests: Docker pull stderr was appended to container ID.
+Runner now returns stdout only for container creation; no assertions changed.
