@@ -47,6 +47,13 @@ class RouteCandidate(BaseModel):
     )
     warnings: List[str] = Field(default_factory=list, description="Navigation warnings from Google Routes")
 
+    def to_geojson(self) -> dict:
+        """Export coordinates as GeoJSON LineString [longitude, latitude] for PostGIS / TV4."""
+        return {
+            "type": "LineString",
+            "coordinates": [[lng, lat] for lat, lng in self.coordinates]
+        }
+
 
 class RouteRiskScore(BaseModel):
     """Risk assessment contract provided by TV4 (PostGIS risk scorer)."""

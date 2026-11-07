@@ -408,3 +408,146 @@ def test_service_without_risk_scorer_no_synthetic_hazards():
     assert response.recommended_route_id == "route_2"
     assert "chờ cập nhật" in response.recommendation_reason
 
+
+def test_service_risk_scorer_mismatched_length_never_drops_routes():
+    """BUGFIX TEST (TV4 Contract Gate):
+
+    Verify that when Risk Scorer returns fewer items than candidates (e.g. 1 score for 2 routes),
+    NO route is silently dropped! Both candidate routes, their IDs and order must be 100% preserved.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(
+            id="route_1",
+            summary="Tuyến 1",
+            distance_meters=3000,
+            duration_seconds=500,
+            polyline="c_w`AomfjSb[nd@f^nd@jRbV",
+        ),
+        RouteCandidate(
+            id="route_2",
+            summary="Tuyến 2",
+            distance_meters=2800,
+            duration_seconds=450,
+            polyline="c_w`AomfjSzT_Xvj@vj@vj@~p@s]j\\",
+        ),
+    ]
+
+    # Scorer only returns 1 score instead of 2
+    mock_scorer = MagicMock()
+    mock_scorer.evaluate_routes.return_value = [
+        RouteRiskScore(
+            score=1.5,
+            level="LOW",
+            hazards_count=1,
+            verified_hazards_count=1,
+            pending_hazards_count=0,
+            reason="1 ổ gà đã xác minh",
+        )
+    ]
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    # CRITICAL: Both routes must still exist
+    assert len(response.routes) == 2
+    assert response.routes[0].id == "route_1"
+    assert response.routes[0].risk is not None
+    assert response.routes[0].risk.score == 1.5
+
+    assert response.routes[1].id == "route_2"
+    assert response.routes[1].risk is None  # Safe fallback, not dropped!
+
+
+def test_service_risk_scorer_dict_return_type():
+    """Verify Risk Scorer can return a dictionary keyed by candidate ID."""
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(
+            id="route_1",
+            summary="Tuyến 1",
+            distance_meters=3000,
+            duration_seconds=500,
+            polyline="c_w`AomfjSb[nd@f^nd@jRbV",
+        ),
+        RouteCandidate(
+            id="route_2",
+            summary="Tuyến 2",
+            distance_meters=2800,
+            duration_seconds=450,
+            polyline="c_w`AomfjSzT_Xvj@vj@vj@~p@s]j\\",
+        ),
+    ]
+
+    mock_scorer = MagicMock()
+    mock_scorer.evaluate_routes.return_value = {
+        "route_2": RouteRiskScore(
+            score=0.5,
+            level="LOW",
+            hazards_count=1,
+            verified_hazards_count=0,
+            pending_hazards_count=1,
+            reason="1 nguy cơ chờ xác minh",
+        )
+    }
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 2
+    assert response.routes[0].risk is None
+    assert response.routes[1].risk is not None
+    assert response.routes[1].risk.score == 0.5
+
+
+def test_service_risk_scorer_exception_handling():
+    """Verify that if the Risk Scorer raises an exception, routes are preserved safely."""
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(
+            id="route_1",
+            summary="Tuyến 1",
+            distance_meters=3000,
+            duration_seconds=500,
+            polyline="c_w`AomfjSb[nd@f^nd@jRbV",
+        )
+    ]
+
+    mock_scorer = MagicMock()
+    mock_scorer.evaluate_routes.side_effect = RuntimeError("PostGIS connection failed")
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    # Route is NOT dropped even if DB scoring fails
+    assert len(response.routes) == 1
+    assert response.routes[0].id == "route_1"
+    assert response.routes[0].risk is None
+
+
+def test_route_candidate_to_geojson():
+    """Verify RouteCandidate.to_geojson() exports [lon, lat] LineString for PostGIS ST_GeomFromGeoJSON."""
+    candidate = RouteCandidate(
+        id="route_1",
+        summary="Test",
+        distance_meters=1000,
+        duration_seconds=120,
+        polyline="dummy",
+        coordinates=[(10.7725, 106.6980), (10.7599, 106.6823)],
+    )
+    geojson = candidate.to_geojson()
+    assert geojson["type"] == "LineString"
+    assert geojson["coordinates"] == [
+        [106.6980, 10.7725],
+        [106.6823, 10.7599],
+    ]
+

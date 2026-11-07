@@ -5,9 +5,11 @@ TV4 Risk Scorer (PostGIS hazard analysis), and constructs the final
 RouteCompareResponse for TV3 API endpoint and TV1 Android client.
 """
 
-from typing import Callable, List, Optional, Protocol
-from backend.app.modules.routing.adapter import GoogleRoutesAdapter
-from backend.app.modules.routing.schemas import (
+from typing import Callable, Dict, List, Optional, Protocol, Union
+import logging
+
+from .adapter import GoogleRoutesAdapter
+from .schemas import (
     EvaluatedRoute,
     LatLng,
     RouteCandidate,
@@ -16,6 +18,8 @@ from backend.app.modules.routing.schemas import (
     RouteRiskScore,
     TravelMode,
 )
+
+logger = logging.getLogger(__name__)
 
 SAFE_ROUTE_DISCLAIMER = (
     "Tuyến đường được đề xuất dựa trên các nguy cơ mặt đường đã ghi nhận trong hệ thống. "
@@ -30,7 +34,9 @@ class RiskScorerProtocol(Protocol):
     against recorded and verified road hazard reports.
     """
 
-    def evaluate_routes(self, candidates: List[RouteCandidate]) -> List[RouteRiskScore]:
+    def evaluate_routes(
+        self, candidates: List[RouteCandidate]
+    ) -> Union[List[RouteRiskScore], Dict[str, RouteRiskScore]]:
         ...
 
 
@@ -62,6 +68,7 @@ class RoutingService:
         Business rules strictly applied:
         - Exactly the number of routes returned by Google is passed through (0 -> 404, 1 -> 1, N -> N).
         - No invented routes or fake hazards.
+        - Preserves all candidate IDs, counts, and exact ordering.
         - Recommended route is the one with the lowest recorded risk score.
         - Legal disclaimer always included.
         """
@@ -73,33 +80,43 @@ class RoutingService:
         )
 
         # 2. Risk scoring (via TV4 scorer if provided)
-        evaluated_routes: List[EvaluatedRoute] = []
+        # BUGFIX (TV4 Contract Gate): Do NOT use zip() which silently drops candidates
+        # when the risk scorer returns fewer items than candidates or raises an error.
+        risk_map: Dict[str, Optional[RouteRiskScore]] = {}
         if self.risk_scorer is not None and candidates:
-            risk_scores = self.risk_scorer.evaluate_routes(candidates)
-            for candidate, risk in zip(candidates, risk_scores):
-                evaluated_routes.append(
-                    EvaluatedRoute(
-                        id=candidate.id,
-                        summary=candidate.summary,
-                        distance_meters=candidate.distance_meters,
-                        duration_seconds=candidate.duration_seconds,
-                        polyline=candidate.polyline,
-                        risk=risk,
-                    )
+            try:
+                raw_risk = self.risk_scorer.evaluate_routes(candidates)
+                if isinstance(raw_risk, dict):
+                    risk_map = raw_risk
+                elif isinstance(raw_risk, (list, tuple)):
+                    if len(raw_risk) != len(candidates):
+                        logger.warning(
+                            "Risk scorer returned %d scores for %d candidates. Missing candidates mapped to None.",
+                            len(raw_risk),
+                            len(candidates),
+                        )
+                    for idx, candidate in enumerate(candidates):
+                        risk_map[candidate.id] = raw_risk[idx] if idx < len(raw_risk) else None
+                else:
+                    logger.warning("Unrecognized risk scorer return type: %s", type(raw_risk))
+            except Exception as exc:
+                logger.error("Error executing risk scorer: %s. Preserving routes without synthetic risk.", exc)
+                risk_map = {}
+
+        # Build evaluated routes strictly preserving candidates order, IDs, and count
+        evaluated_routes: List[EvaluatedRoute] = []
+        for candidate in candidates:
+            risk = risk_map.get(candidate.id)
+            evaluated_routes.append(
+                EvaluatedRoute(
+                    id=candidate.id,
+                    summary=candidate.summary,
+                    distance_meters=candidate.distance_meters,
+                    duration_seconds=candidate.duration_seconds,
+                    polyline=candidate.polyline,
+                    risk=risk,
                 )
-        else:
-            # Scorer not yet wired or unconfigured: return routes without synthetic risk
-            for candidate in candidates:
-                evaluated_routes.append(
-                    EvaluatedRoute(
-                        id=candidate.id,
-                        summary=candidate.summary,
-                        distance_meters=candidate.distance_meters,
-                        duration_seconds=candidate.duration_seconds,
-                        polyline=candidate.polyline,
-                        risk=None,
-                    )
-                )
+            )
 
         # 3. Determine recommended route and explanation
         recommended_route_id: Optional[str] = None

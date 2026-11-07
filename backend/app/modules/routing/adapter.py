@@ -9,7 +9,7 @@ import re
 from typing import Any, Dict, List, Optional
 import httpx
 
-from backend.app.modules.routing.exceptions import (
+from .exceptions import (
     InvalidCoordinatesError,
     NoRouteFoundError,
     RouteServiceAuthError,
@@ -18,8 +18,8 @@ from backend.app.modules.routing.exceptions import (
     RouteServiceQuotaError,
     RouteServiceTimeoutError,
 )
-from backend.app.modules.routing.polyline import decode_polyline
-from backend.app.modules.routing.schemas import LatLng, RouteCandidate, TravelMode
+from .polyline import decode_polyline
+from .schemas import LatLng, RouteCandidate, TravelMode
 
 GOOGLE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes"
 DEFAULT_FIELD_MASK = (

@@ -4,8 +4,8 @@ Provides Google Routes API v2 integration, polyline decoding, candidate normaliz
 and route risk comparison orchestration.
 """
 
-from backend.app.modules.routing.adapter import GoogleRoutesAdapter
-from backend.app.modules.routing.exceptions import (
+from .adapter import GoogleRoutesAdapter
+from .exceptions import (
     InvalidCoordinatesError,
     NoRouteFoundError,
     RouteServiceAuthError,
@@ -15,7 +15,7 @@ from backend.app.modules.routing.exceptions import (
     RouteServiceTimeoutError,
     RoutingError,
 )
-from backend.app.modules.routing.fixtures import (
+from .fixtures import (
     FIXTURE_DESTINATION,
     FIXTURE_GOOGLE_ROUTES_AUTH_ERROR,
     FIXTURE_GOOGLE_ROUTES_EMPTY,
@@ -24,13 +24,13 @@ from backend.app.modules.routing.fixtures import (
     FIXTURE_GOOGLE_ROUTES_TWO_CANDIDATES,
     FIXTURE_ORIGIN,
 )
-from backend.app.modules.routing.polyline import (
+from .polyline import (
     calculate_bounds,
     decode_polyline,
     encode_polyline,
     to_geojson_linestring,
 )
-from backend.app.modules.routing.schemas import (
+from .schemas import (
     EvaluatedRoute,
     LatLng,
     RouteCandidate,
@@ -39,7 +39,7 @@ from backend.app.modules.routing.schemas import (
     RouteRiskScore,
     TravelMode,
 )
-from backend.app.modules.routing.service import (
+from .service import (
     RiskScorerProtocol,
     RoutingService,
     SAFE_ROUTE_DISCLAIMER,
