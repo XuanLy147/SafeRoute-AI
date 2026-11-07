@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 
 import bcrypt
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
@@ -67,15 +67,16 @@ def decode_access_token(token: str) -> dict:
         )
 
 
-# 3. OAuth2 Bearer scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
+# Login uses JSON; advertise HTTP Bearer instead of an unsupported OAuth form flow.
+bearer_scheme = HTTPBearer(auto_error=False)
 
 
 # 4. Dependency lấy User hiện tại
 def get_current_user(
-    token: str | None = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     db: Session = Depends(get_db),
 ) -> User:
+    token = credentials.credentials if credentials else None
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

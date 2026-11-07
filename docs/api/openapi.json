@@ -303,7 +303,7 @@
         },
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ]
       }
@@ -409,7 +409,7 @@
         },
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ]
       }
@@ -423,7 +423,7 @@
         "operationId": "get_image_api_v1_images__image_id__get",
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ],
         "parameters": [
@@ -529,7 +529,7 @@
         "operationId": "create_report_api_v1_reports_post",
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ],
         "requestBody": {
@@ -939,7 +939,7 @@
         },
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ]
       }
@@ -1057,7 +1057,7 @@
         "operationId": "create_vote_api_v1_reports__report_id__votes_post",
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ],
         "parameters": [
@@ -1231,7 +1231,7 @@
         },
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ]
       }
@@ -1246,7 +1246,7 @@
         "operationId": "review_report_status_api_v1_review_reports__report_id__status_patch",
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ],
         "parameters": [
@@ -1363,7 +1363,7 @@
         "operationId": "review_report_status_api_v1_reports__report_id__status_patch",
         "security": [
           {
-            "OAuth2PasswordBearer": []
+            "HTTPBearer": []
           }
         ],
         "parameters": [
@@ -2819,14 +2819,9 @@
       }
     },
     "securitySchemes": {
-      "OAuth2PasswordBearer": {
-        "type": "oauth2",
-        "flows": {
-          "password": {
-            "scopes": {},
-            "tokenUrl": "/api/v1/auth/login"
-          }
-        }
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

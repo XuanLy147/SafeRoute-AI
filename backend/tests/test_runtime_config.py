@@ -24,3 +24,11 @@ def test_runtime_database_matches_migration_settings():
     from app.db.session import DATABASE_URL
 
     assert DATABASE_URL == settings.DATABASE_URL
+
+
+def test_openapi_bearer_matches_json_login():
+    from app.main import app
+
+    schema = app.openapi()
+    assert schema["components"]["securitySchemes"]["HTTPBearer"] == {"type": "http", "scheme": "bearer"}
+    assert "application/json" in schema["paths"]["/api/v1/auth/login"]["post"]["requestBody"]["content"]
