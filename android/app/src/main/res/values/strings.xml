@@ -29,13 +29,15 @@
     <string name="location_accuracy">Đã lấy vị trí, độ chính xác khoảng %1$.0f m.</string>
     <string name="route_title">Bạn muốn đến đâu?</string>
     <string name="route_subtitle">So sánh các tuyến theo nguy cơ đã được ghi nhận.</string>
-    <string name="origin">A · Điểm xuất phát</string>
-    <string name="destination">B · Điểm đến</string>
+    <string name="origin">Điểm xuất phát</string>
+    <string name="destination">Điểm đến</string>
     <string name="invalid_coordinate">Nhập vĩ độ từ −90 đến 90, kinh độ từ −180 đến 180; cách nhau bằng dấu phẩy.</string>
     <string name="same_endpoints">Điểm đến phải khác điểm xuất phát.</string>
     <string name="swap">Đổi A và B</string>
     <string name="choose_a">Chọn A trên bản đồ</string>
     <string name="choose_b">Chọn B trên bản đồ</string>
+    <string name="choose_current_location_a">📍 Chọn vị trí hiện tại cho Điểm xuất phát (A)</string>
+    <string name="choose_current_location_b">📍 Chọn vị trí hiện tại cho Điểm đến (B)</string>
     <string name="choose_point">Chạm bản đồ để đặt điểm %1$s</string>
     <string name="point_chosen">Đã chọn điểm %1$s</string>
     <string name="compare">So sánh tuyến</string>

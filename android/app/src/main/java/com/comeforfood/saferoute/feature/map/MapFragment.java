@@ -32,6 +32,7 @@ public class MapFragment extends LocationAwareFragment {
     private GoogleMap map;
     private final HazardMarkerRenderer markers = new HazardMarkerRenderer();
     private List<Hazard> visibleReports = Collections.emptyList();
+    private boolean hasUnreadNotification = true;
 
     @Nullable @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle saved) {
         binding = FragmentMapBinding.inflate(inflater, parent, false); return binding.getRoot();
@@ -44,6 +45,12 @@ public class MapFragment extends LocationAwareFragment {
         binding.categories.setOnCheckedStateChangeListener((group, checked) -> updateFilters());
         binding.verified.setOnCheckedChangeListener((button, checked) -> updateFilters());
         binding.refresh.setOnClickListener(v -> model.refreshReports());
+        binding.badgeNotification.setVisibility(hasUnreadNotification ? View.VISIBLE : View.GONE);
+        binding.btnNotification.setOnClickListener(v -> {
+            hasUnreadNotification = false;
+            binding.badgeNotification.setVisibility(View.GONE);
+            ((MainActivity) requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.NOTIFICATIONS);
+        });
         binding.routes.setOnClickListener(v -> ((MainActivity) requireActivity()).openRoutes(null));
         binding.location.setOnClickListener(v -> useLocation(location -> {
             Point point = new Point(location.getLatitude(), location.getLongitude());

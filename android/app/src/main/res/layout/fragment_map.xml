@@ -81,11 +81,12 @@
                     android:paddingHorizontal="14dp"
                     android:paddingVertical="10dp">
 
-                    <!-- Header Logo + Title -->
+                    <!-- Header Logo + Title on Left, Bell Button on Right -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
+                        android:orientation="horizontal"
                         android:layout_marginBottom="8dp">
 
                         <ImageView
@@ -99,10 +100,11 @@
                             android:layout_weight="1"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_marginStart="10dp">
+                            android:layout_marginStart="10dp"
+                            android:layout_marginEnd="8dp">
 
                             <TextView
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/brand_wordmark"
                                 android:textColor="@color/ink"
@@ -110,12 +112,42 @@
                                 android:fontFamily="sans-serif" />
 
                             <TextView
-                                android:layout_width="match_parent"
+                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="@string/polish_map_nearby"
                                 android:textAppearance="@style/Text.SafeRoute.Label"
                                 android:textSize="11sp" />
                         </LinearLayout>
+
+                        <!-- Notification Bell Button with Unread Badge -->
+                        <FrameLayout
+                            android:id="@+id/btnNotification"
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
+                            android:background="@drawable/bg_notification_btn"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:contentDescription="Thông báo">
+
+                            <ImageView
+                                android:layout_width="20dp"
+                                android:layout_height="20dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_notification"
+                                app:tint="@color/ink"
+                                android:importantForAccessibility="no" />
+
+                            <View
+                                android:id="@+id/badgeNotification"
+                                android:layout_width="9dp"
+                                android:layout_height="9dp"
+                                android:layout_gravity="top|end"
+                                android:layout_marginTop="5dp"
+                                android:layout_marginEnd="6dp"
+                                android:background="@drawable/bg_notification_badge"
+                                android:visibility="visible" />
+                        </FrameLayout>
                     </LinearLayout>
 
                     <!-- Search Area Button -->
