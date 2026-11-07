@@ -25,3 +25,8 @@ Evidence: evidence/android-test-counts.json and *.txt; source checkpoints named
 above. Failed intermediate runs were diagnosed (disconnected UI fixture needed
 explicit injection); no existing test assertions removed or weakened. New final
 changes must rerun relevant tests. No mock result is claimed as provider evidence.
+
+CI first attempt 42369835242 failed before build: setup-android v3 tried to install
+removed SDK package `tools`. Workflow now explicitly requests platform-tools;
+Gradle resolves the project's locked platform/build tools. No test was skipped
+to make a job green. Draft PR: https://github.com/XuanLy147/SafeRoute-AI/pull/3.
