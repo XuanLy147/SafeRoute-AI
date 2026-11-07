@@ -23,3 +23,6 @@ android/local.properties
 *.pth
 *.onnx
 *.tflite
+SafeRoute-AI_Demo/
+backend/uploads/*
+!backend/uploads/.gitkeep

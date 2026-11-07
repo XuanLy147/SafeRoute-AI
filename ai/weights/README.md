@@ -5,7 +5,7 @@
 **Measured size:** 18,930,714 bytes (~18.06 MiB)  
 **SHA-256:** `ab42e303396857560995dd0fd4d54262015ef77851709220c2f20ca5fc6a4f4c`
 
-> **STATUS: AWAITING BINARY UPLOAD.** This README and checksum **do not contain the model weights**. Do not claim the model has been uploaded until `best.pt` is present and its SHA-256 matches. The checkpoint was not unpickled or run while preparing this metadata.
+> **STATUS (2026-11-07 integration): VERIFIED CPU SMOKE.** The existing approved `best.pt` is present, SHA-256 and five classes match, and real CPU inference ran with PyTorch 2.6.0+cpu / Ultralytics 8.4.21. See `docs/integration/evidence/ai-cpu.txt`. This is not an accuracy/evaluation claim. Upload instructions below are retained for provenance.
 
 ## Upload to the `backend` branch
 
