@@ -13,7 +13,7 @@
 </FrameLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:orientation="horizontal" android:layout_marginTop="8dp">
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/prompt_no_account" android:textSize="12sp" android:textColor="@color/ink"/>
-<TextView android:id="@+id/tvGoToRegister" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:gravity="center" android:paddingHorizontal="8dp" android:text="@string/action_register_link" android:textColor="@color/primary" android:textSize="12sp" android:fontFamily="sans-serif-medium" android:background="?attr/selectableItemBackground"/>
+<TextView android:id="@+id/tvGoToRegister" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:gravity="center" android:paddingHorizontal="8dp" android:text="@string/action_register_link" android:textColor="@color/primary" android:textSize="12sp" android:fontFamily="sans-serif" android:background="?attr/selectableItemBackground"/>
 </LinearLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:layout_marginTop="40dp">
 <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="1dp" android:background="@color/soft_line"/>
