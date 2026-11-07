@@ -17,6 +17,9 @@ android/local.properties
 *.key
 *service-account*.json
 *.pt
+# Checkpoint v1.1 được owner chủ động chia sẻ với team backend.
+# Ngoại lệ duy nhất được track: ai/weights/best.pt
+!ai/weights/best.pt
 *.pth
 *.onnx
 *.tflite
