@@ -32,7 +32,7 @@ public class WelcomeFragment extends Fragment {
 
         // Click "Bắt đầu" -> Go to Login Screen
         binding.btnStart.setOnClickListener(v -> {
-            Tv2Navigation.navigate(this, R.id.action_welcome_to_login);
+            ((com.comeforfood.saferoute.MainActivity)requireActivity()).openTv2Fragment(OnboardingFragment.at(0));
         });
     }
 

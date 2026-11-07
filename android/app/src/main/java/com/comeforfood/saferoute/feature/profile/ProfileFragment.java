@@ -29,9 +29,12 @@ public class ProfileFragment extends Fragment {
         binding.btnBack.setOnClickListener(v -> Tv2Navigation.back(this));
         SessionManager session = new SessionManager(requireContext());
         binding.btnAccount.setOnClickListener(v -> {
-            if (session.isLoggedIn()) session.clearSession();
+            if (session.isLoggedIn()) { ((com.comeforfood.saferoute.MainActivity)requireActivity()).logout(); return; }
             ((com.comeforfood.saferoute.MainActivity) requireActivity()).openTv2Fragment(new com.comeforfood.saferoute.feature.auth.LoginFragment());
         });
+        binding.btnAccount.setText(session.isLoggedIn() ? R.string.flow_logout : R.string.profile_sign_in);
+        binding.btnSaved.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.SAVED));
+        binding.btnNotifications.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.NOTIFICATIONS));
         binding.tvRole.setVisibility(session.isLoggedIn() ? View.VISIBLE : View.GONE);
         String name = session.getFullName();
         String email = session.getEmail();
@@ -45,8 +48,8 @@ public class ProfileFragment extends Fragment {
         binding.btnReviewer.setVisibility(session.isReviewerOrAdmin() ? View.VISIBLE : View.GONE);
         binding.btnReviewer.setOnClickListener(v ->
                 Tv2Navigation.navigate(this, R.id.action_profile_to_reviewer));
-        binding.btnSettings.setOnClickListener(v -> showSection(binding.settingsContent));
-        binding.btnPrivacy.setOnClickListener(v -> showSection(binding.privacyContent));
+        binding.btnSettings.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.SETTINGS));
+        binding.btnPrivacy.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openFlow(com.comeforfood.saferoute.feature.shared.FlowPageFragment.Page.PRIVACY));
         binding.btnSectionBack.setOnClickListener(v -> showSection(null));
     }
 

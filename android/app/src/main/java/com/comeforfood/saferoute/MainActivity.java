@@ -4,112 +4,140 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
+import androidx.core.view.*;
+import androidx.fragment.app.*;
 import androidx.lifecycle.ViewModelProvider;
 import com.comeforfood.saferoute.databinding.ActivityMainBinding;
+import com.comeforfood.saferoute.core.session.SessionManager;
+import com.comeforfood.saferoute.feature.auth.*;
 import com.comeforfood.saferoute.feature.map.MapFragment;
-import com.comeforfood.saferoute.feature.routing.RouteSearchFragment;
-import com.comeforfood.saferoute.feature.routing.RouteResultFragment;
-import com.comeforfood.saferoute.feature.shared.Point;
-import com.comeforfood.saferoute.feature.shared.Tv1ViewModel;
+import com.comeforfood.saferoute.feature.routing.*;
+import com.comeforfood.saferoute.feature.report.ReportWizardFragment;
+import com.comeforfood.saferoute.feature.reports.MyReportsFragment;
+import com.comeforfood.saferoute.feature.profile.ProfileFragment;
+import com.comeforfood.saferoute.feature.shared.*;
 import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends AppCompatActivity {
-    /** TV2 emits this on the activity FragmentManager after a successful report/review write. */
     public static final String REPORTS_CHANGED = "saferoute.reports.changed";
     private static final String TAB_TAG = "saferoute.tab.";
     private ActivityMainBinding binding;
-    @Override protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    private boolean keyboardVisible;
+    private String menuRole = "";
+    @Override protected void onCreate(Bundle saved) {
+        super.onCreate(saved);
         WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        binding = ActivityMainBinding.inflate(getLayoutInflater()); setContentView(binding.getRoot());
         ViewCompat.setOnApplyWindowInsetsListener(binding.root, (view, insets) -> {
             Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
             Insets ime = insets.getInsets(WindowInsetsCompat.Type.ime());
             view.setPadding(bars.left, bars.top, bars.right, Math.max(bars.bottom, ime.bottom));
-            binding.navigation.setVisibility(insets.isVisible(WindowInsetsCompat.Type.ime()) ? View.GONE : View.VISIBLE);
+            keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime()); syncNavigation();
             return WindowInsetsCompat.CONSUMED;
         });
         binding.navigation.setOnItemSelectedListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.nav_role_home) { openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_HOME:FlowPageFragment.Page.REVIEW_HOME,id);return true; }
+            if (id == R.id.nav_role_reports) { openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_REPORTS:FlowPageFragment.Page.REVIEW_QUEUE,id);return true; }
+            if (id == R.id.nav_role_history) { openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_AUDIT:FlowPageFragment.Page.REVIEW_HISTORY,id);return true; }
+            if (id == R.id.nav_role_users) { openRoleRoot(FlowPageFragment.Page.ADMIN_USERS,id);return true; }
             Fragment current = getSupportFragmentManager().findFragmentById(R.id.content);
-            if (item.getItemId() == R.id.nav_map) {
-                if (!(current instanceof MapFragment)) openRoot(new MapFragment(), R.id.nav_map);
+            if (id == R.id.nav_map) {
+                if (!(current instanceof MapFragment)) openRoot(new MapFragment(), id);
                 return true;
             }
-            if (item.getItemId() == R.id.nav_routes) {
-                if (!(current instanceof RouteSearchFragment) && !(current instanceof RouteResultFragment))
-                    openRoot(new RouteSearchFragment(), R.id.nav_routes);
-                return true;
-            }
-            com.comeforfood.saferoute.feature.shared.Tv2Screens screens =
-                    ((SafeRouteApp) getApplication()).getTv2Screens();
-            Fragment destination = item.getItemId() == R.id.nav_report ? screens.report()
-                    : item.getItemId() == R.id.nav_profile ? screens.profile() : null;
-            if (destination != null) {
-                openRoot(destination, item.getItemId());
-                return true;
-            }
-            Snackbar.make(binding.getRoot(), R.string.coming_later, Snackbar.LENGTH_LONG).show();
-            return false;
+            if (id == R.id.nav_my_reports) { openRoot(new MyReportsFragment(), id); return true; }
+            Tv2Screens screens = ((SafeRouteApp)getApplication()).getTv2Screens();
+            Fragment target = id == R.id.nav_report ? screens.report() : id == R.id.nav_profile ? screens.profile() : null;
+            if (target == null) { Snackbar.make(binding.getRoot(), R.string.coming_later, Snackbar.LENGTH_LONG).show(); return false; }
+            openRoot(target, id); return true;
         });
         binding.navigation.setOnItemReselectedListener(item -> {
             if (getSupportFragmentManager().getBackStackEntryCount() > 0)
                 getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         });
-        getSupportFragmentManager().setFragmentResultListener(REPORTS_CHANGED, this, (key, result) ->
+        getSupportFragmentManager().setFragmentResultListener(REPORTS_CHANGED, this, (key,result) ->
                 new ViewModelProvider(this).get(Tv1ViewModel.class).onReportsChanged());
         getSupportFragmentManager().addOnBackStackChangedListener(this::syncNavigation);
         getSupportFragmentManager().registerFragmentLifecycleCallbacks(new FragmentManager.FragmentLifecycleCallbacks() {
             @Override public void onFragmentResumed(FragmentManager manager, Fragment fragment) { syncNavigation(); }
         }, false);
-        if (savedInstanceState == null) openRoot(new MapFragment(), R.id.nav_map);
+        if (saved == null) {
+            if (new SessionManager(this).isLoggedIn()) openSessionHome();
+            else if (getPreferences(MODE_PRIVATE).getBoolean("intro.complete", false)) openRoot(new LoginFragment(), R.id.nav_profile);
+            else openRoot(new WelcomeFragment(), R.id.nav_profile);
+        }
     }
-    private void openRoot(Fragment fragment, int tabId) {
+    private void openRoot(Fragment fragment, int tab) {
         getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment, TAB_TAG + tabId).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment, TAB_TAG + tab).commit();
+    }
+    private boolean isAdmin() { return new SessionManager(this).isReviewerOrAdmin() && "ADMIN".equalsIgnoreCase(new SessionManager(this).getRole()); }
+    public void openSessionHome() {
+        SessionManager session = new SessionManager(this);
+        if (session.isReviewerOrAdmin()) openRoleRoot(isAdmin()?FlowPageFragment.Page.ADMIN_HOME:FlowPageFragment.Page.REVIEW_HOME,R.id.nav_role_home);
+        else openMap();
+    }
+    private void openRoleRoot(FlowPageFragment.Page page,int tab) { openRoot(FlowPageFragment.at(page),tab); }
+    public void openFlow(FlowPageFragment.Page page) { openTv2Fragment(FlowPageFragment.at(page)); }
+    public void logout() { new ViewModelProvider(this).get(com.comeforfood.saferoute.feature.report.ReportDraft.class).clear();new SessionManager(this).clearSession();openRoot(new LoginFragment(),R.id.nav_profile); }
+    public void openMapAt(Point point) {
+        MapFragment fragment=new MapFragment();Bundle b=new Bundle();b.putDouble("center.lat",point.latitude);b.putDouble("center.lon",point.longitude);fragment.setArguments(b);openRoot(fragment,R.id.nav_map);
+    }
+    public void openMap() { openRoot(new MapFragment(), R.id.nav_map); }
+    public void finishIntroduction() {
+        getPreferences(MODE_PRIVATE).edit().putBoolean("intro.complete", true).apply();
+        openRoot(new LoginFragment(), R.id.nav_profile);
     }
     public void openRoutes(Point destination) {
-        if (destination != null) {
-            Tv1ViewModel model = new ViewModelProvider(this).get(Tv1ViewModel.class);
-            model.selectEndpoint(false, destination.format(), destination);
-        }
-        openRoot(new RouteSearchFragment(), R.id.nav_routes);
+        if (destination != null) new ViewModelProvider(this).get(Tv1ViewModel.class).selectEndpoint(false, destination.format(), destination);
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, new RouteSearchFragment(), TAB_TAG + R.id.nav_map)
+                .addToBackStack("route-search").commit();
     }
     public void openResults() {
-        getSupportFragmentManager().beginTransaction().replace(R.id.content, new RouteResultFragment(), TAB_TAG + R.id.nav_routes)
+        getSupportFragmentManager().beginTransaction().replace(R.id.content, new RouteResultFragment(), TAB_TAG + R.id.nav_map)
                 .addToBackStack("route-results").commit();
     }
     public void openTv2Fragment(Fragment fragment) {
-        if (fragment instanceof com.comeforfood.saferoute.feature.profile.ProfileFragment) {
-            openRoot(fragment, R.id.nav_profile); return;
-        }
-        if (fragment instanceof com.comeforfood.saferoute.feature.report.ReportWizardFragment) {
-            openRoot(fragment, R.id.nav_report); return;
-        }
+        if (fragment instanceof ProfileFragment) { openRoot(fragment, R.id.nav_profile); return; }
+        if (fragment instanceof ReportWizardFragment) { openRoot(fragment, R.id.nav_report); return; }
+        if (fragment instanceof MyReportsFragment) { openRoot(fragment, R.id.nav_my_reports); return; }
         int tab = binding.navigation.getSelectedItemId();
         getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment, TAB_TAG + tab)
-                .addToBackStack("tv2-detail").commit();
+                .addToBackStack("detail").commit();
     }
     public void navigateBack() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-            getSupportFragmentManager().popBackStack();
-        else openRoot(new MapFragment(), R.id.nav_map);
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) getSupportFragmentManager().popBackStack();
+        else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof FlowPageFragment && ((FlowPageFragment)getSupportFragmentManager().findFragmentById(R.id.content)).page().admin() && isAdmin()) openSessionHome();
+        else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof LoginFragment) openRoot(new WelcomeFragment(),R.id.nav_profile);
+        else openMap();
     }
     private void syncNavigation() {
         Fragment current = getSupportFragmentManager().findFragmentById(R.id.content);
+        SessionManager session = new SessionManager(this);
+        String role = session.isReviewerOrAdmin() ? (isAdmin()?"ADMIN":"REVIEWER") : "USER";
+        if (!role.equals(menuRole)) {
+            menuRole=role;binding.navigation.getMenu().clear();
+            if ("USER".equals(role)) binding.navigation.inflateMenu(R.menu.main_navigation);
+            else {
+                android.view.Menu menu=binding.navigation.getMenu();
+                menu.add(0,R.id.nav_role_home,0,isAdmin()?R.string.tab_admin:R.string.tab_overview).setIcon(R.drawable.ic_person);
+                menu.add(0,R.id.nav_role_reports,1,isAdmin()?R.string.nav_report:R.string.tab_queue).setIcon(R.drawable.ic_report);
+                menu.add(0,R.id.nav_role_history,2,isAdmin()?R.string.tab_audit:R.string.tab_history).setIcon(R.drawable.ic_history);
+                menu.add(0,isAdmin()?R.id.nav_role_users:R.id.nav_map,3,isAdmin()?R.string.nav_account:R.string.nav_map).setIcon(isAdmin()?R.drawable.ic_person:R.drawable.ic_map);
+            }
+        }
+        boolean fullScreen = current instanceof WelcomeFragment || current instanceof OnboardingFragment
+                || current instanceof LoginFragment || current instanceof RegisterFragment || current instanceof ReportWizardFragment
+                || (current instanceof FlowPageFragment && ((FlowPageFragment)current).isDecision());
+        binding.navigation.setVisibility(keyboardVisible || fullScreen ? View.GONE : View.VISIBLE);
         if (current == null) return;
-        int tabId = current instanceof MapFragment ? R.id.nav_map : R.id.nav_routes;
         String tag = current.getTag();
         if (tag != null && tag.startsWith(TAB_TAG)) {
-            try { tabId = Integer.parseInt(tag.substring(TAB_TAG.length())); }
-            catch (NumberFormatException ignored) { return; }
+            try {
+                android.view.MenuItem item = binding.navigation.getMenu().findItem(Integer.parseInt(tag.substring(TAB_TAG.length())));
+                if (item != null) item.setChecked(true);
+            } catch (NumberFormatException ignored) {}
         }
-        android.view.MenuItem item = binding.navigation.getMenu().findItem(tabId);
-        if (item != null) item.setChecked(true);
     }
 }

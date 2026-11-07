@@ -89,3 +89,11 @@ Nguồn kỹ thuật: [Android Geocoder](https://developer.android.com/reference
 ## Giao diện TV1 + TV2 đã ghép tại local
 
 Tab Báo cáo và Cá nhân hiện mở các màn TV2, dùng chung navigation và theme sáng/tối của TV1. Auth, báo cáo, AI, góp ý và reviewer chưa nối backend; UI thông báo đúng trạng thái chưa kết nối. Chi tiết nguồn, giới hạn và kiểm thử: [bàn giao tích hợp](../docs/integration/tv1-tv2-merge.md).
+
+## Luồng theo HTML — cập nhật 2026-11-07
+
+Luồng hiện tại thay thế mô tả tab/điểm vào cũ: Welcome → giới thiệu → quyền → Login; USER có Bản đồ / Báo cáo / Của tôi / Tài khoản. Tìm đường mở từ Bản đồ. Báo cáo đi theo từng bước ảnh → GPS → AI/manual → kiểm tra → gửi/thử lại, có giữ draft. Reviewer/admin có workspace và menu riêng theo quyền của phiên.
+
+Backend auth chưa kết nối nên có nút **Xem bản đồ với tư cách khách**. App không có nút tự chọn vai trò; reviewer/admin chỉ xuất hiện khi có phiên hợp lệ. Tests dùng fixture riêng, không lưu quyền thử nghiệm vào app sau khi chạy.
+
+Xem [đối chiếu đầy đủ với HTML](../docs/integration/html-frontend-flow.md), gồm cả các màn mở rộng chưa có API. Không đổi Google Routes sang OSRM của bản mẫu HTML.

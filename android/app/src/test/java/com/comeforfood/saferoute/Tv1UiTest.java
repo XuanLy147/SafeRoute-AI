@@ -44,7 +44,7 @@ public class Tv1UiTest {
     }
     private void launch() {
         controller = Robolectric.buildActivity(MainActivity.class).setup();
-        activity = controller.get(); settle();
+        activity = controller.get(); settle(); activity.openMap(); settle();
     }
     private void settle() {
         shadowOf(Looper.getMainLooper()).idle();
@@ -53,7 +53,7 @@ public class Tv1UiTest {
     }
     @After public void stop() { if (controller != null) controller.pause().stop().destroy(); }
     private void openSearch() {
-        ((BottomNavigationView) activity.findViewById(R.id.navigation)).setSelectedItemId(R.id.nav_routes);
+        activity.openRoutes(null);
         settle();
     }
     private void enterPoints() {

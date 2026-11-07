@@ -27,7 +27,7 @@ public class Tv2IntegrationTest {
     private MainActivity activity;
     @Before public void start() {
         controller = Robolectric.buildActivity(MainActivity.class).setup();
-        activity = controller.get(); settle();
+        activity = controller.get(); settle(); activity.openMap(); settle();
     }
     @After public void finish() { controller.pause().stop().destroy(); }
     private void settle() {

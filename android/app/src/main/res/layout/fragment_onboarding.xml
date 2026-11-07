@@ -1,0 +1,10 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+<com.google.android.material.button.MaterialButton android:id="@+id/introBack" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:textAllCaps="false" android:text="@string/flow_back" app:icon="@drawable/ic_back"/>
+<ImageView android:id="@+id/introIcon" android:layout_width="96dp" android:layout_height="96dp" android:layout_gravity="center_horizontal" android:layout_marginTop="40dp" android:importantForAccessibility="no" app:tint="@color/primary"/>
+<TextView android:id="@+id/introTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:textAppearance="@style/Text.SafeRoute.Title"/>
+<TextView android:id="@+id/introBody" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:lineSpacingExtra="4dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
+<TextView android:id="@+id/introProgress" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:textAppearance="@style/Text.SafeRoute.Note"/>
+<com.google.android.material.button.MaterialButton android:id="@+id/introNext" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/flow_continue"/>
+<com.google.android.material.button.MaterialButton android:id="@+id/introSkip" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:textAllCaps="false" android:text="@string/intro_skip"/>
+</LinearLayout></ScrollView>

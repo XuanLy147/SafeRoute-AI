@@ -22,10 +22,18 @@ public final class Tv2Navigation {
         if (action == R.id.action_welcome_to_login) target = new LoginFragment();
         else if (action == R.id.action_login_to_register) target = new RegisterFragment();
         else if (action == R.id.action_register_to_login) { back(from); return; }
-        else if (action == R.id.action_login_to_report) target = new ReportWizardFragment();
+        else if (action == R.id.action_login_to_report) {
+            if(new com.comeforfood.saferoute.core.session.SessionManager(from.requireContext()).isLoggedIn())
+                ((MainActivity)from.requireActivity()).openSessionHome();
+            return;
+        }
         else if (action == R.id.action_report_to_profile || action == R.id.action_myReports_to_profile) target = new ProfileFragment();
         else if (action == R.id.action_report_to_myReports || action == R.id.action_profile_to_myReports) target = new MyReportsFragment();
-        else if (action == R.id.action_report_to_reviewer || action == R.id.action_profile_to_reviewer) target = new ReviewerFragment();
+        else if (action == R.id.action_report_to_reviewer || action == R.id.action_profile_to_reviewer) {
+            if(new com.comeforfood.saferoute.core.session.SessionManager(from.requireContext()).isReviewerOrAdmin()) ((MainActivity)from.requireActivity()).openSessionHome();
+            else ((MainActivity)from.requireActivity()).openTv2Fragment(new ReviewerFragment());
+            return;
+        }
         else if (action == R.id.action_profile_to_feedback || action == R.id.action_report_to_feedback) target = new CommunityFeedbackFragment();
         else throw new IllegalArgumentException("Unknown TV2 navigation action");
         ((MainActivity) from.requireActivity()).openTv2Fragment(target);

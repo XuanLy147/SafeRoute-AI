@@ -96,3 +96,18 @@ Cập nhật này thay thế trạng thái thiếu Maps key/nền Maps NOT_RUN �
 - Xiaomi Android 13: Tv2DeviceTest **PASS, OK (1 test), 16.82s**, kiểm tra auth/history/community/reviewer guest, tab reselect và sáng/tối. Hai lượt trước bị màn hình khóa chặn Activity RESUMED; lượt cuối sau mở khóa thành công.
 - Log trong android/build/reports/tv1/: tv2-merge-tests.log, tv2-merge-build.log, tv2-device-final.log. Ảnh cuối device-final/merged-*.png; đã xem xác nhận report sáng, profile tối, login, history, community.
 - APK cuối đã cài và mở lại. Chưa kiểm thử backend E2E, gửi ảnh/AI/auth/routing thật. Thay đổi mới nằm local, chưa commit/push. Xem [bàn giao](../integration/tv1-tv2-merge.md).
+
+## Luồng Full Mobile Prototype — 2026-11-07
+
+- Phạm vi người dùng xác nhận: USER + REVIEWER + ADMIN, dựa trên SafeRoute_AI_Full_Mobile_Prototype.html.
+- JVM: **53/53 PASS**, gồm 6 HtmlFlowTest kiểm tra welcome/onboarding/permissions/login/guest, tab và Back, bản nháp nhiều bước/recreate, không gửi thành công giả, role gate và night/large text.
+- APK/app-test build PASS, lint **0 errors, 138 warnings** (107 unused resources trong bộ resource cũ được giữ). git diff --check PASS.
+- Native Xiaomi 2201117TG / Android 13: HtmlFlowDeviceTest **PASS (1 test), 30.909s** trong lượt kiểm tra đầu thành công. Lượt trước đó không chụp được do bảng điều khiển nhanh chiếm focus; người dùng đóng bảng và giữ app trước khi chạy lại.
+- Đã xem đủ 19 ảnh ở android/build/reports/tv1/html-flow-device/flow-*.png: welcome, onboarding/permissions/login, map, các bước report, history/account, reviewer/admin và admin night. Sau đó sửa một lượt nút Back, bo góc nút phụ, độ ưu tiên action và nhãn điều hướng.
+- Ảnh có hậu tố fixture và các bước report dùng ảnh drawable/toạ độ thử nghiệm trong androidTest; không phải report thật, không chạy AI hoặc ghi server. Role được nạp chỉ trong test và khôi phục session cũ khi kết thúc. Không dùng ảnh cá nhân của điện thoại.
+- Native test chưa thao tác chụp camera thật, chưa chọn ảnh thật từ thư viện hoặc xác minh GPS live. Kiểm thử luồng chọn/preview dùng fixture; không coi là E2E camera/upload/backend.
+- Log JVM/build: html-flow-tests.log, html-flow-build.log trong android/build/reports/tv1/. Lượt native đầu: html-flow-device-final.log; lượt xác nhận sau chỉnh: html-flow-device-confirm.log.
+- Bản đồ được chụp khi tiles đang tải; lượt này không dùng ảnh đó để tuyên bố Maps live đã tải hoàn tất. Cấu hình key local không thay đổi.
+- Thay đổi đợt này ở working tree, chưa commit/push. [Ánh xạ và giới hạn từng nhóm màn](../integration/html-frontend-flow.md).
+
+- Lượt xác nhận cuối sau chỉnh UI: **PASS, OK (1 test), 42.737s**, log html-flow-device-confirm.log. Ảnh cuối ở android/build/reports/tv1/html-flow-confirm/; đã xem lại map, report start, admin sáng/tối. APK cuối cài và app thường đã mở lại. Không thay cài đặt hệ thống; session test được khôi phục và draft fixture đã xóa.

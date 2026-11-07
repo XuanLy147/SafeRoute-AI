@@ -57,6 +57,9 @@ public class MapFragment extends LocationAwareFragment {
                 map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 15f));
             }
         }));
+        binding.searchArea.setOnClickListener(v -> ((MainActivity)requireActivity()).openTv2Fragment(MapFlowFragment.at("search",null)));
+        binding.openFilters.setOnClickListener(v -> ((MainActivity)requireActivity()).openTv2Fragment(MapFlowFragment.at("filters",null)));
+        binding.openNearby.setOnClickListener(v -> ((MainActivity)requireActivity()).openTv2Fragment(MapFlowFragment.at("nearby",null)));
         model.reports().observe(getViewLifecycleOwner(), this::render);
         if (MapsSupport.configured(requireContext())) {
             binding.mapPlaceholder.setVisibility(View.GONE);
@@ -65,6 +68,7 @@ public class MapFragment extends LocationAwareFragment {
                 map = ready;
                 map.getUiSettings().setMyLocationButtonEnabled(false);
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554, 106.6782), 13f));
+                if (getArguments()!=null && getArguments().containsKey("center.lat")) map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(getArguments().getDouble("center.lat"),getArguments().getDouble("center.lon")),16f));
                 map.setOnMapLoadedCallback(() -> { if (binding != null) binding.mapStatus.setText(R.string.map_ready); });
                 map.setOnMarkerClickListener(marker -> {
                     if (marker.getTag() instanceof Hazard) { preview((Hazard) marker.getTag()); return true; }
@@ -118,6 +122,7 @@ public class MapFragment extends LocationAwareFragment {
                         + "\n\n" + hazard.description + "\n\n" + hazard.point.format()
                         + "\n\n" + getString(verified ? R.string.verified_note : R.string.pending_note))
                 .setPositiveButton(R.string.go_here, (dialog, which) -> ((MainActivity) requireActivity()).openRoutes(hazard.point))
+                .setNeutralButton(R.string.flow_alert_detail, (dialog, which) -> ((MainActivity)requireActivity()).openTv2Fragment(MapFlowFragment.at("detail",hazard.id)))
                 .setNegativeButton(R.string.close, null).show();
     }
     @Override protected void onLocating(boolean loading) {

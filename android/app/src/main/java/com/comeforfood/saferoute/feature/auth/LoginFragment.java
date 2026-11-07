@@ -36,6 +36,7 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         sessionManager = new SessionManager(requireContext());
+        binding.btnGuest.setOnClickListener(v -> ((com.comeforfood.saferoute.MainActivity)requireActivity()).openMap());
         binding.btnAuthBack.setOnClickListener(v -> Tv2Navigation.back(this));
 
         // Pre-fill email if previously registered or entered

@@ -46,14 +46,14 @@ public class Tv1DeviceTest {
         if (scenario != null) scenario.close();
         app.setDataSource(originalSource);
     }
-    private void launch() { scenario = ActivityScenario.launch(MainActivity.class); settle(); }
+    private void launch() { scenario = ActivityScenario.launch(MainActivity.class); settle(); scenario.onActivity(a -> a.openMap()); settle(); }
     private void settle() {
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         if (scenario != null) scenario.onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
     private void openSearch() {
-        scenario.onActivity(a -> ((BottomNavigationView) a.findViewById(R.id.navigation)).setSelectedItemId(R.id.nav_routes));
+        scenario.onActivity(a -> a.openRoutes(null));
         settle();
     }
     private void compare() {

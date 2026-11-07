@@ -25,6 +25,7 @@ public class CommunityFeedbackFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        if (getArguments()!=null) binding.feedbackReportTitle.setText(getArguments().getString("report.title",getString(com.comeforfood.saferoute.R.string.flow_alert_detail)));
         binding.btnBack.setOnClickListener(v -> Tv2Navigation.back(this));
         binding.btnSendFeedback.setOnClickListener(v ->
                 Toast.makeText(requireContext(),

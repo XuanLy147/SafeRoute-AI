@@ -116,7 +116,7 @@ public class AddressDeviceTest {
         launch();
         try {
             onActivity(activity -> {
-                ((BottomNavigationView) activity.findViewById(R.id.navigation)).setSelectedItemId(R.id.nav_routes);
+                activity.openRoutes(null);
                 activity.getSupportFragmentManager().executePendingTransactions();
                 ((EditText) activity.findViewById(R.id.origin)).setText("Chợ Bến Thành, TP Hồ Chí Minh");
                 ((EditText) activity.findViewById(R.id.destination)).setText("Dinh Độc Lập, TP Hồ Chí Minh");
