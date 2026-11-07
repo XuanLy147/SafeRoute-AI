@@ -24,6 +24,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
     private FragmentReportWizardBinding binding;
     private ReportDraft draft;
     private boolean busy;
+    private String previewUri;
     private retrofit2.Call<com.comeforfood.saferoute.core.model.DetectionDto.DetectionResponse> detectionCall;
     private GoogleMap map;
     private Marker pin;
@@ -91,6 +92,9 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnRetryReport.setOnClickListener(v->submit());
         binding.btnEditReport.setOnClickListener(v->go(5));
         binding.btnEditFailed.setOnClickListener(v->go(6));
+        com.google.android.material.button.MaterialButton inspect=new com.google.android.material.button.MaterialButton(requireContext());inspect.setText("Kiểm tra Báo cáo của tôi");binding.stepFailure.addView(inspect);inspect.setOnClickListener(v->((MainActivity)requireActivity()).openTv2Fragment(new MyReportsFragment()));
+        com.google.android.material.button.MaterialButton login=new com.google.android.material.button.MaterialButton(requireContext());login.setText("Đăng nhập / đổi tài khoản");binding.stepFailure.addView(login);login.setOnClickListener(v->((MainActivity)requireActivity()).openTv2Fragment(new com.comeforfood.saferoute.feature.auth.LoginFragment()));
+        com.google.android.material.button.MaterialButton discard=new com.google.android.material.button.MaterialButton(requireContext());discard.setText("Bỏ bản nháp để tạo báo cáo mới");binding.stepFailure.addView(discard);discard.setOnClickListener(v->new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext()).setTitle("Bỏ bản nháp?").setMessage("Nếu lần gửi trước chưa rõ kết quả, hãy kiểm tra Báo cáo của tôi để tránh gửi trùng.").setNegativeButton("Giữ bản nháp",null).setPositiveButton("Đã kiểm tra, bỏ bản nháp",(dialog,which)->{draft.clear();go(0);}).show());
         if(MapsSupport.configured(requireContext())) MapsSupport.attach(this,R.id.reportMap,ready->{
             map=ready;
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554,106.6782),13));
@@ -151,16 +155,25 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnUseImage.setVisibility(step==2?View.VISIBLE:View.GONE);
         binding.btnCamera.setVisibility(step==1?View.VISIBLE:View.GONE);
         binding.btnPickGallery.setText(step==2?R.string.report_change_image:R.string.report_gallery);
-        if(draft.image()!=null) {
-            try { binding.imgPreview.setImageURI(Uri.parse(draft.image())); binding.reviewImage.setImageDrawable(binding.imgPreview.getDrawable());
-                binding.aiImage.setImageDrawable(binding.imgPreview.getDrawable());
-                if(binding.imgPreview.getDrawable()!=null)binding.aiBoxes.setImageSize(binding.imgPreview.getDrawable().getIntrinsicWidth(),binding.imgPreview.getDrawable().getIntrinsicHeight());
-                binding.aiBoxes.setDetections(draft.detections()); }
-            catch(RuntimeException error) { draft.image(null);message(R.string.image_read_error); }
-        } else binding.imgPreview.setImageResource(R.drawable.ic_camera);
+        if(draft.image()!=null && !draft.image().equals(previewUri)) {
+            previewUri=draft.image();String requested=previewUri;Uri uri=Uri.parse(requested);
+            if("android.resource".equals(uri.getScheme())) {
+                // Local resource previews never become upload content; ImageUpload rejects unsupported MIME.
+                binding.imgPreview.setImageURI(uri);copyPreview();
+            } else com.comeforfood.saferoute.core.network.PhotoPreview.load(getViewLifecycleOwner(),requireContext().getContentResolver(),uri,bitmap->{
+                if(binding==null||!requested.equals(draft.image()))return;
+                if(bitmap==null){draft.image(null);previewUri=null;message(R.string.image_read_error);return;}
+                binding.imgPreview.setImageBitmap(bitmap);copyPreview();
+            });
+        } else if(draft.image()==null) binding.imgPreview.setImageResource(R.drawable.ic_camera);
         binding.confirmReport.setChecked(draft.confirmed());
         if(draft.category()>=0&&draft.point()!=null) binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],severities[draft.severity()],draft.point().format(),draft.description()));
         renderPoint();renderDetections();
+    }
+    private void copyPreview(){
+        binding.reviewImage.setImageDrawable(binding.imgPreview.getDrawable());binding.aiImage.setImageDrawable(binding.imgPreview.getDrawable());
+        if(binding.imgPreview.getDrawable()!=null)binding.aiBoxes.setImageSize(binding.imgPreview.getDrawable().getIntrinsicWidth(),binding.imgPreview.getDrawable().getIntrinsicHeight());
+        binding.aiBoxes.setDetections(draft.detections());
     }
     private void submit() {
         if(draft.image()==null) {message(R.string.report_missing_image);go(1);return;}
@@ -203,7 +216,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
             com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(),detectionCall,response->{
                 busy=false;
                 java.util.List<com.comeforfood.saferoute.core.model.DetectionDto> detections=response.getDetections();
-                if(detections==null||detections.stream().anyMatch(d->!d.valid())){aiFailed("Dữ liệu AI không hợp lệ. Hãy nhập nhãn thủ công.");return;}
+                if(detections==null||detections.stream().anyMatch(d->d==null||!d.valid())){aiFailed("Dữ liệu AI không hợp lệ. Hãy nhập nhãn thủ công.");return;}
                 draft.modelVersion(response.getModelVersion());draft.detections(detections);renderDetections();binding.aiBoxes.setDetections(detections);binding.tvAiTitle.setText(detections.isEmpty()?"Không phát hiện hư hỏng":"Đề xuất AI — cần bạn xác nhận");
                 StringBuilder text=new StringBuilder();for(com.comeforfood.saferoute.core.model.DetectionDto d:detections)text.append(d.getDisplayName()).append(" · ").append(Math.round(d.getConfidence()*100)).append("%\n");
                 binding.tvAiDetectionSummary.setText(text.length()==0?"Bạn vẫn có thể nhập nhãn thủ công.":text+"Độ tin cậy AI không phải mức độ nguy hiểm.");
@@ -236,5 +249,5 @@ public class ReportWizardFragment extends LocationAwareFragment {
     }
     private void aiFailed(String error){busy=false;if(binding!=null){binding.tvAiTitle.setText(R.string.ai_unavailable_title);binding.tvAiDetectionSummary.setText(error);}}
     @Override protected void onLocating(boolean locating) { if(binding!=null)binding.btnAdjustPin.setEnabled(!locating); }
-    @Override public void onDestroyView() { busy=false;detectionEditors=null;pin=null;map=null;binding=null;super.onDestroyView(); }
+    @Override public void onDestroyView() { busy=false;previewUri=null;detectionEditors=null;pin=null;map=null;binding=null;super.onDestroyView(); }
 }

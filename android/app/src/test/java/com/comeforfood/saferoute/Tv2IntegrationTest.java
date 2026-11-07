@@ -97,6 +97,12 @@ public class Tv2IntegrationTest {
         tab(R.id.nav_profile); activity.findViewById(R.id.btnAccount).performClick(); settle();
         assertNotNull(activity.findViewById(R.id.etEmail));
     }
+    @Test public void backFromAccountReportsReturnsToAccount() {
+        tab(R.id.nav_profile);activity.findViewById(R.id.btnMyReports).performClick();settle();
+        activity.findViewById(R.id.btnBack).performClick();settle();
+        assertTrue(activity.getSupportFragmentManager().findFragmentById(R.id.content) instanceof ProfileFragment);
+        assertNotNull(activity.findViewById(R.id.btnFeedback));
+    }
     @Test public void reselectingProfileReturnsFromNestedScreenToRoot() {
         tab(R.id.nav_profile); activity.findViewById(R.id.btnFeedback).performClick(); settle();
         assertNotNull(activity.findViewById(R.id.btnSendFeedback));

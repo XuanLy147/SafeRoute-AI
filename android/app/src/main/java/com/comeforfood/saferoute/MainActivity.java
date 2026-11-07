@@ -110,7 +110,11 @@ public class MainActivity extends AppCompatActivity {
     public void openTv2Fragment(Fragment fragment) {
         if (fragment instanceof ProfileFragment) { openRoot(fragment, R.id.nav_profile); return; }
         if (fragment instanceof ReportWizardFragment) { openRoot(fragment, R.id.nav_report); return; }
-        if (fragment instanceof MyReportsFragment) { openRoot(fragment, R.id.nav_my_reports); return; }
+        if (fragment instanceof MyReportsFragment) {
+            Bundle args=fragment.getArguments()==null?new Bundle():fragment.getArguments();
+            args.putBoolean("return.profile",getSupportFragmentManager().findFragmentById(R.id.content) instanceof ProfileFragment);
+            fragment.setArguments(args);openRoot(fragment, R.id.nav_my_reports);return;
+        }
         int tab = binding.navigation.getSelectedItemId();
         getSupportFragmentManager().beginTransaction().replace(R.id.content, fragment, TAB_TAG + tab)
                 .addToBackStack("detail").commit();
@@ -118,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
     public void navigateBack() {
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) getSupportFragmentManager().popBackStack();
         else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof FlowPageFragment && ((FlowPageFragment)getSupportFragmentManager().findFragmentById(R.id.content)).page().admin() && isAdmin()) openSessionHome();
+        else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof MyReportsFragment
+                && getSupportFragmentManager().findFragmentById(R.id.content).getArguments()!=null
+                && getSupportFragmentManager().findFragmentById(R.id.content).getArguments().getBoolean("return.profile")) openTv2Fragment(new ProfileFragment());
         else if (getSupportFragmentManager().findFragmentById(R.id.content) instanceof LoginFragment) openRoot(new WelcomeFragment(),R.id.nav_profile);
         else openMap();
     }
