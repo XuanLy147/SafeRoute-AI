@@ -58,3 +58,7 @@ returns API_KEY_ANDROID_APP_BLOCKED. Configure a separate server key restricted
 to Routes API and the authorized server egress IP; do not remove the Android
 restrictions from the Maps key as a workaround.
 Official guidance: https://developers.google.com/maps/api-security-best-practices
+
+Latest setup supersedes earlier failures: two new restricted keys are configured
+and both live provider gates PASS. See GOOGLE_PROVIDER_SETUP.md for scope,
+network limitations and evidence.

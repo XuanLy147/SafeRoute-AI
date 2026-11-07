@@ -16,9 +16,9 @@ Subsequent changes add the explicit Maps live assertion and sanitized evidence.
 | Docker | PASS build/non-root/startup/real HTTP/restart persistence |
 | Secrets | PASS Gitleaks 8.24.3 tracked source scan, no leaks |
 | Android instrumentation | PASS 8/8 regression tests on API 35 locally and in CI; fixtures are explicit |
-| Android -> backend E2E | PASS P0-A report/review/map-data flow and backend restart; map tiles excluded |
-| Google Maps/Routes live | Maps FAIL: Google Authorization failure; Routes NOT_RUN: user has no server key |
-| GitHub Actions on release | PASS Android 42370556938 and backend 42370557088 at 7c167eb |
+| Android -> backend E2E | PASS report/review/audit/map rendering/live Routes and backend restart; isolated real PostGIS/AI |
+| Google Maps/Routes live | PASS: new restricted keys, actual rendered Maps and Android/Docker/Google Routes on API 35; evidence/android-live-providers.txt |
+| GitHub Actions on release | PASS Android 42373508154 and backend 42373508117 at eacb0b9; subsequent test synchronization/evidence changes are locally verified |
 | PR review/protection | Draft PR #3 created; review/merge requirements remain pending |
 | Production cloud / risk policy | NOT_RUN / unapproved; separate from integrated demo release |
 
@@ -49,3 +49,11 @@ and the backend runtime worktree were relocated under .local-archive, ignored
 locally; frontend duplicate worktrees were unregistered. A baseline directory
 remnant was archived after Windows long-path deletion failed. Other projects
 were untouched. Main is still not merged.
+
+## Latest provider result — supersedes earlier authorization failures
+
+Both live gates PASS with newly created keys in the authorized saferoute-AI
+project. See GOOGLE_PROVIDER_SETUP.md. Initial retry exposed a test race: the
+vote button was queried before asynchronous report detail finished. Added a
+bounded wait for that button, retaining the assertion; full live E2E then passed.
+Main remains unchanged pending PR review and final merge requirements.

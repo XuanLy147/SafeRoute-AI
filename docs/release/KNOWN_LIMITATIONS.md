@@ -4,10 +4,11 @@
 - Production risk policy remains unapproved. Default risk is UNAVAILABLE and
   recommendation is ETA-based. Never enable demo policy implicitly.
 - Cloud Run/IAM/private persistent storage and cost are not verified or deployed.
-- Android device regression and real report/review E2E passed. Maps live failed
-  authorization with the supplied Android key; Routes live lacks a server key.
-  Fixtures do not prove Maps rendering or live routes. Map loading status can
-  remain pending when the SDK rejects authorization; report list remains available.
+- Maps and Routes live now pass with new restricted keys; see GOOGLE_PROVIDER_SETUP.md.
+  Routes local key permits the configured IPv4 egress only. Native Windows requests
+  preferring IPv6 are denied; tested Docker path works. Changing network/server
+  requires reviewing the allowed egress IP. Map loading can remain pending after
+  future SDK authorization failures; report list remains available.
 - No social authentication, refresh-token or password-reset contract exists.
 - Admin users/metrics/role management and aggregate review history lack endpoints;
   UI remains explicitly unavailable/read-only. Report detail has actual audit logs.

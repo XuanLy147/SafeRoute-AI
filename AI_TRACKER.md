@@ -81,9 +81,9 @@
 | Android HTTP integration | TV1/TV2 | DONE_VERIFIED | Shared client; 63 JVM tests/build/lint; 8 device regressions; HTTP report/review E2E PASS; provider gates separate |
 | Real backend re-verification | TV3–TV5 | DONE_VERIFIED | 179 tests + 12 subtests PASS; migration/PostGIS; Docker restart; AI CPU; contract; docs/release evidence |
 | Android report/review E2E | TV1–TV5 | DONE_VERIFIED | Actual Android/API/PostGIS/AI, vote/review/audit/map data and restart persistence PASS; docs/release/ANDROID_BACKEND_E2E.md |
-| Google provider gates | TV1/TV5 | BLOCKED | Maps Authorization failure; supplied Routes key rejected with API_KEY_ANDROID_APP_BLOCKED (403); backend maps error to 502 |
-| Integration CI | TV1–TV5 | DONE_VERIFIED | 373ceb8: Android 42371680002 and backend 42371680053 PASS |
-| Main release | Team | BLOCKED | Maps/Routes live and PR review incomplete; main unchanged |
+| Google provider gates | TV1/TV5 | DONE_VERIFIED | New restricted keys; Maps rendered on API 35; real Android/Docker/Google Routes PASS; evidence/android-live-providers.txt |
+| Integration CI | TV1–TV5 | DONE_VERIFIED | eacb0b9: Android 42373508154 and backend 42373508117 PASS |
+| Main release | Team | BLOCKED | Provider gates passed; final PR review/merge requirements pending; main unchanged |
 
 Original dirty TV4 worktree and historical tracker entries are preserved. New
 integration evidence is recorded in docs/release, distinct from old owner runs.

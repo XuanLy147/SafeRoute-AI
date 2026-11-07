@@ -1,0 +1,100 @@
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.comeforfood.saferoute.LiveBackendDeviceTest:
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertNotNull(Assert.java:713)
+	at org.junit.Assert.assertNotNull(Assert.java:723)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.lambda$realRegistrationPhotoAiReportVoteReviewMapAndPersistence$10(LiveBackendDeviceTest.java:64)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda3.accept(D8$$SyntheticClass:0)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda1.perform(D8$$SyntheticClass:0)
+	at androidx.test.core.app.ActivityScenario.lambda$onActivity$2$androidx-test-core-app-ActivityScenario(ActivityScenario.java:794)
+	at androidx.test.core.app.ActivityScenario$$ExternalSyntheticLambda2.run(D8$$SyntheticClass:0)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2612)
+	at android.os.Handler.handleCallback(Handler.java:959)
+	at android.os.Handler.dispatchMessage(Handler.java:100)
+	at android.os.Looper.loopOnce(Looper.java:232)
+	at android.os.Looper.loop(Looper.java:317)
+	at android.app.ActivityThread.main(ActivityThread.java:8705)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+
+INSTRUMENTATION_STATUS: stream=
+Error in realRegistrationPhotoAiReportVoteReviewMapAndPersistence(com.comeforfood.saferoute.LiveBackendDeviceTest):
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertNotNull(Assert.java:713)
+	at org.junit.Assert.assertNotNull(Assert.java:723)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.lambda$realRegistrationPhotoAiReportVoteReviewMapAndPersistence$10(LiveBackendDeviceTest.java:64)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda3.accept(D8$$SyntheticClass:0)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda1.perform(D8$$SyntheticClass:0)
+	at androidx.test.core.app.ActivityScenario.lambda$onActivity$2$androidx-test-core-app-ActivityScenario(ActivityScenario.java:794)
+	at androidx.test.core.app.ActivityScenario$$ExternalSyntheticLambda2.run(D8$$SyntheticClass:0)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2612)
+	at android.os.Handler.handleCallback(Handler.java:959)
+	at android.os.Handler.dispatchMessage(Handler.java:100)
+	at android.os.Looper.loopOnce(Looper.java:232)
+	at android.os.Looper.loop(Looper.java:317)
+	at android.app.ActivityThread.main(ActivityThread.java:8705)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 11.281
+There was 1 failure:
+1) realRegistrationPhotoAiReportVoteReviewMapAndPersistence(com.comeforfood.saferoute.LiveBackendDeviceTest)
+java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertNotNull(Assert.java:713)
+	at org.junit.Assert.assertNotNull(Assert.java:723)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.lambda$realRegistrationPhotoAiReportVoteReviewMapAndPersistence$10(LiveBackendDeviceTest.java:64)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda3.accept(D8$$SyntheticClass:0)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest$$ExternalSyntheticLambda1.perform(D8$$SyntheticClass:0)
+	at androidx.test.core.app.ActivityScenario.lambda$onActivity$2$androidx-test-core-app-ActivityScenario(ActivityScenario.java:794)
+	at androidx.test.core.app.ActivityScenario$$ExternalSyntheticLambda2.run(D8$$SyntheticClass:0)
+	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:487)
+	at java.util.concurrent.FutureTask.run(FutureTask.java:264)
+	at android.app.Instrumentation$SyncRunnable.run(Instrumentation.java:2612)
+	at android.os.Handler.handleCallback(Handler.java:959)
+	at android.os.Handler.dispatchMessage(Handler.java:100)
+	at android.os.Looper.loopOnce(Looper.java:232)
+	at android.os.Looper.loop(Looper.java:317)
+	at android.app.ActivityThread.main(ActivityThread.java:8705)
+	at java.lang.reflect.Method.invoke(Native Method)
+	at com.android.internal.os.RuntimeInit$MethodAndArgsCaller.run(RuntimeInit.java:580)
+	at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:886)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
+CLEANUP: only disposable Android E2E resources removed
+Traceback (most recent call last):
+  File "C:\dev\SafeRoute-AI-full-release\scripts\qa\verify_android_e2e.py", line 119, in <module>
+    main()
+  File "C:\dev\SafeRoute-AI-full-release\scripts\qa\verify_android_e2e.py", line 87, in main
+    assert "OK (1 test)" in output and "FAILURES" not in output, "Android UI gate failed"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Android UI gate failed

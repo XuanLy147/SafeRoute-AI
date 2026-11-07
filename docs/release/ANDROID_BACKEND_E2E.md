@@ -1,7 +1,8 @@
 # Android/backend E2E evidence
 
-Status: **P0-A PASS (map data); Maps live FAIL; Routes live NOT_RUN**.
-Do not treat map data refresh as rendered Google tiles.
+Status: **P0-A, Maps live and Routes live PASS** with the new restricted keys.
+Latest evidence: evidence/android-live-providers.txt and evidence/live-map.png.
+Earlier runs below are historical; map-data-only results remain distinguished.
 
 Harness: scripts/qa/verify_android_e2e.py. A dedicated API 35 Google APIs x86_64
 emulator is provisioned; host WHPX is available. The machine has limited free RAM,
@@ -55,3 +56,8 @@ and the backend runtime worktree were relocated under .local-archive, ignored
 locally; frontend duplicate worktrees were unregistered. A baseline directory
 remnant was archived after Windows long-path deletion failed. Other projects
 were untouched. Main is still not merged.
+
+Latest run: OK (1 test), 18.902 seconds instrumentation duration (not API latency),
+Maps live PASS, Routes live PASS, backend restart persistence PASS. Android 15
+sdk_gphone64_x86_64. Disposable resources cleaned. A synchronization wait fixes
+the initial vote-button race without removing any assertion.

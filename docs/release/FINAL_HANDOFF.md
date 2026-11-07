@@ -25,8 +25,9 @@ no synthetic routes or numeric risk are substituted. Owners remain TV1–TV5.
   approved CPU AI, Docker HTTP/restart persistence and secret scan PASS.
 - GitHub Actions at implementation 7c167eb: Android 42370556938 and backend
   42370557088 PASS. Provider tests are separate from CI regression.
-- Maps live FAIL: key reaches APK but Google returns Authorization failure.
-- Routes live NOT_RUN: user confirms no server key. PR review pending.
+- Maps live PASS: rendered Google tiles and report marker observed on Android 15.
+- Routes live PASS: Android -> real Docker backend -> Google candidates; unavailable
+  numeric risk remains explicit. Backend restart persistence PASS. PR review pending.
 
 ## Delivery and remaining gates
 
@@ -34,14 +35,14 @@ Normal local debug APK: android/app/build/outputs/apk/debug/app-debug.apk,
 backend origin http://10.0.2.2:8000/. It is not a signed production release.
 User's Maps configuration is in ignored android/local.properties. Key values
 are not tracked. See ANDROID_CONFIGURATION.md for the observed package/SHA-1
-and Google authorization diagnostic. Backend needs a separate Routes key.
+and Google authorization diagnostic history. New separate restricted keys are
+configured; see GOOGLE_PROVIDER_SETUP.md.
 
 See RELEASE_READINESS.md, ANDROID_BACKEND_E2E.md and evidence/ for detailed
 results; README, ANDROID_CONFIGURATION.md, DEMO_SCRIPT.md, KNOWN_LIMITATIONS.md
 and ../api/openapi.json provide the runbook and contract.
 
-Next gates: owner corrects Maps authorization and supplies the Routes server key;
-re-run provider E2E, complete PR review/protection checks, merge only after every
+Next gates: complete PR review/protection and final CI checks, merge only after every
 mandatory gate passes, then verify main HEAD and CI. Production risk approval,
 Cloud Run/IAM and measured cost remain unverified separate work.
 
@@ -59,3 +60,7 @@ and the backend runtime worktree were relocated under .local-archive, ignored
 locally; frontend duplicate worktrees were unregistered. A baseline directory
 remnant was archived after Windows long-path deletion failed. Other projects
 were untouched. Main is still not merged.
+
+Latest update: new authorized Maps/Routes keys and complete live E2E PASS. Earlier
+provider-retest failures below/above are historical and superseded. See
+GOOGLE_PROVIDER_SETUP.md and evidence/android-live-providers.txt.

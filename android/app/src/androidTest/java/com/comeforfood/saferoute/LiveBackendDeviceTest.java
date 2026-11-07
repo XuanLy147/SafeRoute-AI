@@ -61,6 +61,7 @@ public class LiveBackendDeviceTest {
             ui(a->{((CheckBox)a.findViewById(R.id.confirmReport)).setChecked(true);a.findViewById(R.id.btnSubmitReport).performClick();});
             waitFor(a->a.getSupportFragmentManager().findFragmentById(R.id.content) instanceof ReportDetailFragment);
             List<ReportDto.ReportResponse> mine=api.mine().execute().body();assertNotNull(mine);assertEquals(1,mine.size());String id=mine.get(0).getId();assertEquals("PENDING_VERIFICATION",mine.get(0).getStatus());assertNotNull(mine.get(0).getImageUrl());
+            waitFor(a->text(a.findViewById(R.id.flowActions),"Đồng tình")!=null);
             ui(a->{View vote=text(a.findViewById(R.id.flowActions),"Đồng tình");assertNotNull(vote);vote.performClick();});
             waitFor(a->{TextView body=a.findViewById(R.id.flowBody);return body!=null&&body.getText().toString().contains("Đồng tình: 1");});
             scenario.recreate();assertEquals(id,api.mine().execute().body().get(0).getId());
