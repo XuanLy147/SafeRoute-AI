@@ -21,7 +21,19 @@ android:layout_width="match_parent" android:layout_height="wrap_content" android
 <com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/pick_b" style="@style/Widget.SafeRoute.Secondary" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:minHeight="48dp" android:text="@string/choose_b" android:letterSpacing="0"/>
 </LinearLayout>
 <TextView android:id="@+id/map_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:padding="12dp" android:background="@drawable/bg_info_soft" android:textColor="@color/on_info" android:text="@string/map_unavailable_detail" android:textSize="14sp" android:accessibilityLiveRegion="polite"/>
-<androidx.fragment.app.FragmentContainerView android:id="@+id/map" android:background="@drawable/bg_soft_panel" android:clipToOutline="true" android:layout_width="match_parent" android:layout_height="220dp" android:layout_marginTop="12dp" android:visibility="gone"/>
+<com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout
+    android:id="@+id/map_container"
+    android:background="@drawable/bg_soft_panel"
+    android:clipToOutline="true"
+    android:layout_width="match_parent"
+    android:layout_height="350dp"
+    android:layout_marginTop="12dp"
+    android:visibility="gone">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout>
 <ProgressBar android:id="@+id/address_progress" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="4dp" android:layout_marginTop="12dp" android:indeterminate="true" android:visibility="gone"/>
 <TextView android:id="@+id/address_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/Text.SafeRoute.Note" android:accessibilityLiveRegion="polite" android:visibility="gone"/>
 <com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/compare" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:minHeight="56dp" android:text="@string/compare" android:letterSpacing="0"/>

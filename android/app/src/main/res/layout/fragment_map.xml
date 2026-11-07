@@ -11,14 +11,14 @@
 <com.google.android.material.button.MaterialButton android:id="@+id/openFilters" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textAllCaps="false" android:letterSpacing="0" android:minHeight="48dp" android:text="@string/filter_label" android:textSize="13sp"/>
 <com.google.android.material.button.MaterialButton android:id="@+id/openNearby" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:textAllCaps="false" android:letterSpacing="0" android:minHeight="48dp" android:text="@string/flow_nearby" android:textSize="13sp"/>
 </LinearLayout>
-<com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="260dp" app:cardCornerRadius="16dp" app:cardElevation="0dp" app:cardBackgroundColor="@color/info" app:strokeWidth="0dp">
-<FrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
+<com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="450dp" app:cardCornerRadius="18dp" app:cardElevation="2dp" app:cardBackgroundColor="@color/info" app:strokeWidth="1dp" app:strokeColor="@color/soft_line">
+<com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout android:layout_width="match_parent" android:layout_height="match_parent">
 <androidx.fragment.app.FragmentContainerView android:id="@+id/map" android:layout_width="match_parent" android:layout_height="match_parent"/>
 <LinearLayout android:id="@+id/map_placeholder" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="24dp">
 <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_map" app:tint="@color/primary" android:importantForAccessibility="no"/>
 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/map_unavailable" android:textColor="@color/on_info" android:textSize="16sp" android:fontFamily="sans-serif-medium"/>
 <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/map_unavailable_detail" android:gravity="center" android:textColor="@color/on_info" android:textSize="13sp"/>
-</LinearLayout></FrameLayout></com.google.android.material.card.MaterialCardView>
+</LinearLayout></com.comeforfood.saferoute.feature.shared.MapContainerFrameLayout></com.google.android.material.card.MaterialCardView>
 <TextView android:id="@+id/map_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingTop="8dp" android:textAppearance="@style/Text.SafeRoute.Note" android:textSize="12sp" android:visibility="gone"/>
 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginTop="8dp">
 <com.google.android.material.button.MaterialButton android:id="@+id/location" style="@style/Widget.SafeRoute.Secondary" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="@string/my_location" app:icon="@drawable/ic_location" app:iconSize="18dp"/>

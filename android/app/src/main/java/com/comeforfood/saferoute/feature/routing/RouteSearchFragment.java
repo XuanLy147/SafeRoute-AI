@@ -67,7 +67,7 @@ public class RouteSearchFragment extends LocationAwareFragment {
         });
         boolean configured = MapsSupport.configured(requireContext());
         binding.pickControls.setVisibility(configured ? View.VISIBLE : View.GONE);
-        binding.map.setVisibility(configured ? View.VISIBLE : View.GONE);
+        binding.mapContainer.setVisibility(configured ? View.VISIBLE : View.GONE);
         if (configured) {
             binding.mapStatus.setText(R.string.map_connecting);
             MapsSupport.attach(this, R.id.map, ready -> {

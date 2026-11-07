@@ -71,7 +71,11 @@ public class MapFragment extends LocationAwareFragment {
                 if (getArguments()!=null && getArguments().containsKey("center.lat")) map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(getArguments().getDouble("center.lat"),getArguments().getDouble("center.lon")),16f));
                 map.setOnMapLoadedCallback(() -> { if (binding != null) binding.mapStatus.setText(R.string.map_ready); });
                 map.setOnMarkerClickListener(marker -> {
-                    if (marker.getTag() instanceof Hazard) { preview((Hazard) marker.getTag()); return true; }
+                    if (marker.getTag() instanceof Hazard) {
+                        map.animateCamera(CameraUpdateFactory.newLatLng(marker.getPosition()), 300, null);
+                        preview((Hazard) marker.getTag());
+                        return true;
+                    }
                     return false;
                 });
                 enableLocation();
