@@ -1,6 +1,9 @@
 import os
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -14,6 +17,9 @@ class Settings(BaseSettings):
     RISK_POLICY_JSON: str | None = None
     ENABLE_DEMO_ACCOUNTS: bool = False
     PERSISTENT_UPLOADS: bool = False
+
+    # Google Routes API
+    GOOGLE_ROUTES_API_KEY: str | None = os.getenv("GOOGLE_ROUTES_API_KEY")
 
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres@localhost:5432/saferoute")

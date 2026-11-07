@@ -46,11 +46,36 @@ public final class NetworkDataSource implements Tv1DataSource {
             int verified=risk==null?0:risk.get("verified_hazards_count").getAsInt();
             int pending=risk==null?0:risk.get("pending_hazards_count").getAsInt();
             if(risk!=null && verified+pending!=risk.get("hazards_count").getAsInt())throw new IllegalArgumentException("Invalid counts");
+
+            String displayReason;
+            if (risk == null) {
+                displayReason = "Chưa có đánh giá nguy cơ";
+            } else {
+                int total = verified + pending;
+                if (total == 0) {
+                    displayReason = "Tuyến đường thông thoáng, chưa ghi nhận nguy cơ mặt đường.";
+                } else {
+                    displayReason = "Phát hiện " + total + " điểm cảnh báo (" + verified + " đã xác minh"
+                            + (pending > 0 ? ", " + pending + " chờ duyệt" : "") + ").";
+                }
+            }
+
             routes.add(new Route(string(r,"id"),string(r,"summary"),r.get("duration_seconds").getAsInt(),r.get("distance_meters").getAsInt(),
-                risk==null?null:risk.get("score").getAsDouble(),verified,pending,risk==null?"Chưa có đánh giá nguy cơ":string(risk,"reason"),decode(string(r,"polyline"))));
+                risk==null?null:risk.get("score").getAsDouble(),verified,pending,displayReason,decode(string(r,"polyline"))));
         }
-        String description=status+" · "+string(body,"recommendation_basis")+"\n"+string(body,"recommendation_reason")+"\n"+string(body,"disclaimer")
-            +"\n"+string(body,"risk_policy_status")+" · "+string(body,"risk_policy_revision");
+
+        String recReason = string(body, "recommendation_reason");
+        String disclaimer = string(body, "disclaimer");
+        StringBuilder sb = new StringBuilder();
+        if (!recReason.isEmpty()) {
+            sb.append(recReason);
+        }
+        if (!disclaimer.isEmpty()) {
+            if (sb.length() > 0) sb.append("\n\n");
+            sb.append(disclaimer);
+        }
+        String description = sb.toString();
+
         String recommended=string(body,"recommended_route_id");
         return new RouteComparison(routes,recommended.isEmpty()?null:recommended,description);
     }
