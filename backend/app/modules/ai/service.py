@@ -113,8 +113,10 @@ class YoloInferenceService:
                 current_version = self.model_version
             except Exception as e:
                 print(f"[ERROR] Loi khi thuc hien inference YOLO: {e}")
-                detections = []
-                current_version = self.model_version
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Đã xảy ra lỗi trong quá trình thực thi suy luận mô hình AI.",
+                )
         else:
             # Rào chắn Production: Nghiêm cấm giả mạo kết quả hoặc chạy heuristic ngầm trong production
             if settings.ENVIRONMENT.lower() == "production":

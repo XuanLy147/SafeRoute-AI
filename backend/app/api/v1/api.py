@@ -7,6 +7,7 @@ from app.modules.images.router import router as images_router
 from app.modules.reports.router import router as reports_router
 from app.modules.review.router import review_report_status
 from app.modules.review.router import router as review_router
+from app.modules.routing.router import router as routing_router
 from app.modules.votes.router import router as votes_router
 
 api_router = APIRouter()
@@ -44,3 +45,6 @@ api_router.add_api_route(
 
 # 6. Gắn AI Inference router: /api/v1/ai/detect
 api_router.include_router(ai_router, prefix="/ai", tags=["AI Inference"])
+
+# 7. Gắn Routing router: /api/v1/routes/compare (TV5 + TV4)
+api_router.include_router(routing_router, prefix="/routes", tags=["Routing"])

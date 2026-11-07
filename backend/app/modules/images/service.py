@@ -61,6 +61,30 @@ def save_uploaded_image(file: UploadFile) -> dict:
             detail="Nội dung file không khớp với cấu trúc tệp ảnh hợp lệ (Magic bytes mismatch).",
         )
 
+    # 2.8 Kiểm định giải mã cấu trúc ảnh qua PIL (Chống corrupted data & decompression bomb)
+    try:
+        import io
+
+        from PIL import Image, UnidentifiedImageError
+        Image.MAX_IMAGE_PIXELS = 25_000_000
+        with Image.open(io.BytesIO(contents)) as img:
+            img.verify()
+    except UnidentifiedImageError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Không thể giải mã dữ liệu ảnh: Tệp ảnh bị hỏng hoặc định dạng không chuẩn.",
+        )
+    except getattr(Image, "DecompressionBombError", Exception):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kích thước giải nén của ảnh vượt ngưỡng an toàn (DecompressionBomb protection).",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Dữ liệu ảnh không hợp lệ: {e!s}",
+        )
+
     # 3. Tạo tên file duy nhất bằng UUID4
     ext = os.path.splitext(file.filename or "")[1].lower()
     if not ext:
