@@ -38,7 +38,10 @@ class Settings(BaseSettings):
         if self.ENVIRONMENT.lower() == "production":
             if not self.PERSISTENT_UPLOADS:
                 raise ValueError("Production requires persistent private photo storage")
-            if len(self.SECRET_KEY) < 32 or self.SECRET_KEY == "saferoute-hackathon-24h-super-secret-key-2026":
+            if len(self.SECRET_KEY) < 32 or self.SECRET_KEY in {
+                "saferoute-hackathon-24h-super-secret-key-2026",
+                "change-this-in-production-to-a-secure-random-key",
+            }:
                 raise ValueError(
                     "FATAL SECURITY: Không được dùng SECRET_KEY mặc định hoặc rỗng trong môi trường production!"
                 )
