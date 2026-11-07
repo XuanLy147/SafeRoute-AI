@@ -1,0 +1,66 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SafeRoute AI Backend",
+    "description": "SafeRoute AI Backend API — Hackathon 24H COME FOR FOOD.\nHỗ trợ báo cáo nguy cơ đường bộ (YOLOv12s RDD2022) và tìm kiếm tuyến đường an toàn ít nguy cơ (Google Routes + PostGIS).",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Health Check",
+        "description": "Kiểm tra trạng thái hoạt động của hệ thống backend và cơ sở dữ liệu PostGIS.\nKhông làm sập app nếu DB tạm thời chưa sẵn sàng.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ping": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "Ping",
+        "operationId": "ping_api_v1_ping_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PingResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": "SafeRoute AI API v1 ready"
+          }
+        },
+        "type": "object",
+        "title": "PingResponse"
+      }
+    }
+  }
+}
