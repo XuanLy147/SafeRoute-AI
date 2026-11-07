@@ -1,0 +1,5 @@
+Creating new Ultralytics Settings v0.0.6 file
+View Ultralytics Settings with 'yolo settings' or at 'C:\Users\vhn\AppData\Roaming\Ultralytics\settings.json'
+Update Settings with 'yolo settings key=value', i.e. 'yolo settings runs_dir=path/to/dir'. For help see https://docs.ultralytics.com/quickstart/#ultralytics-settings.
+[OK] Da nap thanh cong YOLOv12s checkpoint (SafeRoute-YOLOv12s-v1.1) len cpu.
+{"status": "PASS", "input": "synthetic gray image; NOT accuracy evaluation", "torch": "2.6.0+cpu", "ultralytics": "8.4.21", "cuda_available": false, "result": {"model_version": "SafeRoute-YOLOv12s-v1.1", "inference_time_ms": 585.28, "device": "cpu", "detections": []}}

@@ -71,3 +71,19 @@
 - **P0-B:** Điểm A/B → Google Routes trả tuyến → PostGIS risk scorer → hiển thị giải thích theo nguy cơ ghi nhận.
 - Chỉ tick DONE nếu thực sự demo/test được. Mock data phải có nhãn; không giới thiệu demo mock như backend thật.
 - Mọi thông tin còn chưa biết phải được ghi rõ `UNKNOWN` hoặc `UNVERIFIED`, không điền ước lượng như số đo thật.
+
+
+## Full-release integration — 2026-11-07 (supersedes scaffold status above)
+
+| Task | Owners | Status | Evidence / next gate |
+|---|---|---|---|
+| Release reconciliation | TV1–TV5 | DONE_VERIFIED | 3b70333; backend source tree restored; frontend preserved; docs/release/MERGE_PROVENANCE.md |
+| Android HTTP integration | TV1/TV2 | DONE_VERIFIED | Shared client; 63 JVM tests/build/lint; 8 device regressions; HTTP report/review E2E PASS; provider gates separate |
+| Real backend re-verification | TV3–TV5 | DONE_VERIFIED | 179 tests + 12 subtests PASS; migration/PostGIS; Docker restart; AI CPU; contract; docs/release evidence |
+| Android report/review E2E | TV1–TV5 | DONE_VERIFIED | Actual Android/API/PostGIS/AI, vote/review/audit/map data and restart persistence PASS; docs/release/ANDROID_BACKEND_E2E.md |
+| Google provider gates | TV1/TV5 | DONE_VERIFIED | New restricted keys; Maps rendered on API 35; real Android/Docker/Google Routes PASS; evidence/android-live-providers.txt |
+| Integration CI | TV1–TV5 | DONE_VERIFIED | eacb0b9: Android 42373508154 and backend 42373508117 PASS |
+| Main release | Team | BLOCKED | Provider gates passed; final PR review/merge requirements pending; main unchanged |
+
+Original dirty TV4 worktree and historical tracker entries are preserved. New
+integration evidence is recorded in docs/release, distinct from old owner runs.

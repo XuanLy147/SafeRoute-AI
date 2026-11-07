@@ -1,0 +1,12 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp" app:cardCornerRadius="12dp" app:cardElevation="0dp" app:strokeWidth="1dp" app:strokeColor="@color/outline">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+<TextView android:id="@+id/name" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" android:textColor="@color/ink"/>
+<TextView android:id="@+id/recommended" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/recommended" android:textAppearance="@style/Text.SafeRoute.Body" android:textColor="@color/primary" android:textStyle="bold" android:visibility="gone"/>
+<TextView android:id="@+id/metrics" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
+<TextView android:id="@+id/risk" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="@style/Text.SafeRoute.Body" android:textStyle="bold"/>
+<TextView android:id="@+id/hazards" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="@style/Text.SafeRoute.Note"/>
+<TextView android:id="@+id/reason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
+<com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/select" style="@style/Widget.SafeRoute.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:minHeight="48dp" android:text="@string/view_route" android:letterSpacing="0"/>
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

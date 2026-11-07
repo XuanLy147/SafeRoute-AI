@@ -1,39 +1,58 @@
 # SafeRoute AI — COME FOR FOOD
 
-Repository chính của nhóm **COME FOR FOOD** cho Hackathon SGU 2026–2027.
+Ứng dụng Android Java 17/XML kết nối FastAPI, PostgreSQL/PostGIS, YOLOv12s v1.1
+và Google Routes. Báo cáo cộng đồng được người dùng xác nhận trước khi gửi ở
+trạng thái PENDING_VERIFICATION; chỉ REVIEWER/ADMIN xác minh hoặc từ chối.
+So sánh tuyến dựa trên nguy cơ đã ghi nhận, không cam kết tuyến tuyệt đối an toàn.
 
-SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng mặt đường bằng ảnh và GPS, dùng YOLOv12s hỗ trợ nhận diện để người dùng xác nhận, hiển thị cảnh báo trên bản đồ và so sánh các tuyến theo **nguy cơ đã được ghi nhận** (không cam kết an toàn tuyệt đối).
+## Trạng thái tích hợp
 
-## Phân công & công nghệ
+Nhánh `integration/saferoute-full-release` khôi phục backend sau revert frontend
+và nối Android với HTTP API thật. Đây không còn là scaffold. Chỉ merge main khi
+các mandatory gates đạt; không suy diễn production-ready từ build thành công.
+Xem [Release readiness](docs/release/RELEASE_READINESS.md),
+[audit](docs/release/FULL_PROJECT_AUDIT.md) và
+[provenance](docs/release/MERGE_PROVENANCE.md).
 
-| Vai trò | Phạm vi | Công nghệ |
-|---|---|---|
-| TV1 | Android bản đồ, GPS, marker, tuyến đường, navigation | Java + XML, AndroidX, Google Maps SDK |
-| TV2 | Android báo cáo ảnh/AI, tài khoản, bình chọn, kiểm duyệt | Java + XML, Retrofit |
-| TV3 | API, xác thực, database, reports/review | FastAPI, PostgreSQL/PostGIS |
-| TV4 | AI inference, kiểm thử và model card | YOLOv12s v1.1, Python |
-| TV5 | Google Routes, risk scoring, Cloud, CI/CD | Routes API, Docker, Cloud Run |
+## Khởi chạy
 
-## Cấu trúc thư mục
+```powershell
+git clone https://github.com/XuanLy147/SafeRoute-AI.git
+cd SafeRoute-AI
+git checkout integration/saferoute-full-release
+```
 
-- `android/` — **Một** Android Studio project dùng chung cho TV1/TV2 (Java + XML).
-- `backend/` — **Một** FastAPI modular monolith; sở hữu API và DB migrations.
-- `ai/` — Model metadata, đánh giá, tài liệu nguồn weights/dataset; runtime AI gắn vào backend.
-- `infra/` — Hạ tầng Cloud Run, Docker/triển khai.
-- `docs/` — Kiến trúc, hợp đồng API, bản mẫu UI, kiểm thử, demo.
-- `scripts/` — Lệnh dùng chung và smoke test.
-- `.github/workflows/` — CI/CD sau khi có mã chạy và credentials cấu hình an toàn.
+- Android: mở `android/` bằng Android Studio, SDK 35; Java source 17.
+  Cấu hình Maps key và backend origin theo [Android runbook](docs/release/ANDROID_CONFIGURATION.md).
+- Backend: Python 3.11, cài `backend/requirements.txt` và runtime AI đã pin trong
+  `backend/requirements-ai.txt`; xem [local development](docs/handoff/LOCAL_DEVELOPMENT.md).
+- PostGIS/Docker: đặt POSTGRES_PASSWORD và SECRET_KEY ngẫu nhiên trong môi trường,
+  chạy `docker compose -f backend/docker-compose.yml up --build`. Compose chạy
+  migrations, không dùng create_all để thay Alembic. `/health` là liveness,
+  `/ready` kiểm tra DB migration và báo trạng thái AI/risk.
+- Tạo USER bằng đăng ký thật trong app. Reviewer phải được owner cấp quyền trong DB.
+  Chỉ harness E2E mới tự cấp quyền trong database test dùng một lần.
+- Google Routes dùng server key riêng; Maps dùng Android-restricted key. Không
+  đưa keys vào Git. Risk policy mặc định chưa khả dụng; không tự bật DEMO policy.
 
-> **Trạng thái:** Repo vừa được khởi tạo cấu trúc. File đánh dấu thư mục và tài liệu không chứng minh chức năng đã triển khai. Code chạy thật được phát triển và kiểm thử sau.
+## Kiểm thử và bàn giao
 
-## Nguyên tắc phối hợp
+Android: `android/gradlew.bat -p android :app:testDebugUnitTest :app:assembleDebug
+:app:assembleDebugAndroidTest :app:lintDebug --console=plain` (một dòng).
+Backend: `python scripts/qa/verify_postgis.py --backend backend --runxfail`,
+`python scripts/qa/verify_contract.py`, `python scripts/qa/verify_ai.py`,
+`ruff check backend`.
 
-1. Làm việc trên nhánh `feature/*`, mở Pull Request để tích hợp lên `main`.
-2. TV1 sở hữu `MainActivity`, navigation và Map/Routing UI; TV2 sở hữu Report/Auth/Review và client/network dùng chung.
-3. TV3 xuất `openapi.json` từ backend thực tế. Không tự tạo nhiều hợp đồng JSON khác nhau.
-4. Giữ nguyên Java/XML. Không tự chuyển Kotlin, Compose, Flutter, React Native.
-5. Không commit API keys, token, `.env`, `local.properties`, `.venv/`, build output, ảnh cá nhân, model weights nếu chưa có chính sách lưu trữ.
-6. Báo cáo mới có trạng thái chưa xác minh; AI confidence không phải mức độ nguy hiểm; không có detection vẫn cho báo cáo thủ công.
-7. Chỉ ghi DONE/PASS nếu đã build/test có bằng chứng.
+Docker: `docker build -f backend/Dockerfile -t saferoute-tv345:integration .`,
+sau đó `python scripts/qa/verify_container.py`.
+Android/backend thật: `python scripts/qa/verify_android_e2e.py` với emulator đang
+boot, ANDROID_HOME/JAVA_HOME đã cấu hình. Xem runbook để phân biệt regression
+fixtures và Google live tests. GitHub Actions chạy Android và backend trên PR/main/release.
 
-Tham khảo code thử nghiệm tại repository riêng `SafeRoute-AI_Demo`; **không mặc định code demo đã có trong repo chính**.
+[OpenAPI](docs/api/openapi.json) · [API lock](docs/handoff/API_CONTRACT_LOCK.md) ·
+[Demo](docs/release/DEMO_SCRIPT.md) · [Giới hạn](docs/release/KNOWN_LIMITATIONS.md) ·
+[Final handoff](docs/release/FINAL_HANDOFF.md) · [Tracker](AI_TRACKER.md).
+
+Một Android project, một shared HTTP client, một schema/migration source.
+Không commit `.env`, `local.properties`, tokens, ảnh cá nhân hay build outputs.
+Cloud Run production chưa được triển khai/xác minh trong task này.

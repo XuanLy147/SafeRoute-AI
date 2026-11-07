@@ -23,3 +23,10 @@ android/local.properties
 *.pth
 *.onnx
 *.tflite
+SafeRoute-AI_Demo/
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Local release execution logs; sanitized evidence lives in docs/release/evidence.
+/*.log
+/.release-scan/

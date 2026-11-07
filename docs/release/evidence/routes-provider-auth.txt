@@ -1,0 +1,31 @@
+{
+  "http_status": 403,
+  "route_count": 0,
+  "routes": [],
+  "error": {
+    "code": 403,
+    "message": "Requests from this Android client application <empty> are blocked.",
+    "status": "PERMISSION_DENIED",
+    "details": [
+      {
+        "@type": "type.googleapis.com/google.rpc.ErrorInfo",
+        "reason": "API_KEY_ANDROID_APP_BLOCKED",
+        "domain": "googleapis.com",
+        "metadata": {
+          "androidPackage": "<empty>",
+          "service": "routes.googleapis.com"
+        }
+      },
+      {
+        "@type": "type.googleapis.com/google.rpc.LocalizedMessage",
+        "locale": "en-US",
+        "message": "Requests from this Android client application <empty> are blocked."
+      }
+    ]
+  }
+}
+
+Actual backend GoogleRoutesAdapter: RouteServiceAuthError, mapped HTTP 502.
+No route returned; live success gate remains BLOCKED.
+Maps retest on Android 15: Authorization failure reproduced; blank map observed.
+See maps-retest.txt (key redacted).

@@ -1,0 +1,72 @@
+{
+  "frontend_baseline": {
+    "TEST-com.comeforfood.saferoute.AuthDtoTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.HtmlFlowTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.RouteAndHazardTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.Tv1UiTest": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.Tv2IntegrationTest": {
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "integration": {
+    "TEST-com.comeforfood.saferoute.ApiContractTest": {
+      "tests": 9,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.AuthDtoTest": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.HtmlFlowTest": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.RouteAndHazardTest": {
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.Tv1UiTest": {
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "TEST-com.comeforfood.saferoute.Tv2IntegrationTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

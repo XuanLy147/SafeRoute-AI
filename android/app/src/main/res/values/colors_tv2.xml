@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <color name="brand_primary">@color/primary</color>
+    <color name="brand_primary_variant">@color/primary</color>
+    <color name="brand_accent">@color/primary</color>
+    <color name="brand_dark">@color/ink</color>
+    <color name="white">@color/on_primary</color>
+    <color name="bg_screen">@color/background</color>
+    <color name="bg_card">@color/surface</color>
+    <color name="bg_input">@color/surface</color>
+    <color name="border_input">@color/outline</color>
+    <color name="border_input_focused">@color/primary</color>
+    <color name="text_title">@color/ink</color>
+    <color name="text_body">@color/ink</color>
+    <color name="text_label">@color/muted</color>
+    <color name="text_hint">@color/muted</color>
+    <color name="text_link">@color/primary</color>
+    <color name="divider_color">@color/outline</color>
+    <color name="status_pending_bg">@color/info</color>
+    <color name="status_pending_text">@color/warning</color>
+    <color name="status_verified_bg">@color/info</color>
+    <color name="status_verified_text">@color/verified</color>
+    <color name="status_rejected_bg">@color/info</color>
+    <color name="status_rejected_text">@color/error</color>
+    <color name="color_danger">@color/error</color>
+    <color name="color_danger_bg">@color/info</color>
+    <color name="color_success">@color/verified</color>
+    <color name="color_warning">@color/warning</color>
+    <color name="color_info">@color/on_info</color>
+    <color name="color_info_bg">@color/info</color>
+    <color name="facebook_blue">#1877F2</color>
+    <color name="google_red">#EA4335</color>
+</resources>

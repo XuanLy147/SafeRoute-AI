@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "transport": "IPv4; configured IP restriction",
+  "candidates": [
+    {
+      "id": "route_1",
+      "distance_meters": 3061,
+      "duration_seconds": 728,
+      "geometry_points": 40
+    },
+    {
+      "id": "route_2",
+      "distance_meters": 2917,
+      "duration_seconds": 893,
+      "geometry_points": 48
+    }
+  ]
+}

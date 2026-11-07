@@ -1,0 +1,75 @@
+{
+  "provenance": "Routing MOCK_FOR_DEV serialized by real service (risk unconfigured); AI real CPU synthetic gray image",
+  "route_request": {
+    "origin": {
+      "latitude": 10.7725,
+      "longitude": 106.698
+    },
+    "destination": {
+      "latitude": 10.7599,
+      "longitude": 106.6823
+    },
+    "travel_mode": "TWO_WHEELER"
+  },
+  "route_response": {
+    "origin": {
+      "latitude": 10.7725,
+      "longitude": 106.698
+    },
+    "destination": {
+      "latitude": 10.7599,
+      "longitude": 106.6823
+    },
+    "travel_mode": "TWO_WHEELER",
+    "risk_diagnostic": "POLICY_NOT_CONFIGURED",
+    "risk_policy_revision": null,
+    "risk_policy_status": null,
+    "routes": [
+      {
+        "id": "route_1",
+        "summary": "Đ. Trần Hưng Đạo",
+        "distance_meters": 2950,
+        "duration_seconds": 450,
+        "polyline": "c_w`AomfjSb[nd@f^nd@jRbV",
+        "risk": null
+      },
+      {
+        "id": "route_2",
+        "summary": "Đ. Võ Văn Kiệt và Đ. Nguyễn Văn Cừ",
+        "distance_meters": 3480,
+        "duration_seconds": 510,
+        "polyline": "c_w`AomfjSzT_Xvj@vj@vj@~p@s]j\\",
+        "risk": null
+      }
+    ],
+    "recommended_route_id": "route_1",
+    "recommendation_reason": "Tuyến 'Đ. Trần Hưng Đạo' được đề xuất dựa trên thời gian di chuyển dự kiến ngắn nhất (7 phút). Dữ liệu đánh giá nguy cơ mặt đường hiện chưa khả dụng.",
+    "disclaimer": "Tuyến đường được đề xuất dựa trên các nguy cơ mặt đường đã ghi nhận trong hệ thống. SafeRoute AI không cam kết tuyến đường an toàn tuyệt đối.",
+    "risk_assessment_status": "UNAVAILABLE",
+    "recommendation_basis": "DURATION_ETA_ONLY"
+  },
+  "ai_response": {
+    "model_version": "SafeRoute-YOLOv12s-v1.1",
+    "inference_time_ms": 585.28,
+    "device": "cpu",
+    "detections": []
+  },
+  "report_request": {
+    "latitude": 10.005,
+    "longitude": 106,
+    "category_user": "Repair",
+    "severity": "MEDIUM",
+    "ai_detections": [
+      {
+        "class_code": "D40",
+        "confidence": 0.8,
+        "bbox": [
+          0.1,
+          0.2,
+          0.6,
+          0.7
+        ]
+      }
+    ]
+  }
+}
