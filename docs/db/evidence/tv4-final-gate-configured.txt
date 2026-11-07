@@ -1,0 +1,331 @@
+IMAGE: sha256:44126d872ac91993766c341e369c539e8196614321765d36a6f1bab0419a5fa5
+POSTGRES: 16.4 (Debian 16.4-1.pgdg110+2)
+POSTGIS: POSTGIS="3.4.3 e365945" [EXTENSION] PGSQL="160" GEOS="3.9.0-CAPI-1.16.2" PROJ="7.2.1 NETWORK_ENABLED=OFF URL_ENDPOINT=https://cdn.proj.org USER_WRITABLE_DIRECTORY=/var/lib/postgresql/.local/share/proj DATABASE_PATH=/usr/share/proj/proj.db" LIBXML="2.9.10" LIBJSON="0.15" LIBPROTOBUF="1.3.3" WAGYU="0.5.0 (Internal)" TOPOLOGY
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial_schema, initial schema with postgis and 8 core tables
+
+SCHEMA_PASS: 8 model tables, 8 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running downgrade 0001_initial_schema -> , initial schema with postgis and 8 core tables
+
+ROLLBACK_PASS: model tables/enums removed, Alembic revision empty, PostGIS retained
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001_initial_schema, initial schema with postgis and 8 core tables
+
+SCHEMA_PASS: 8 model tables, 8 FKs, 3 enums, geography POINT/4326, GiST; metadata diff=[]
+7b31aa75021baeb8f7ea992171d87419de9e02b1586ca8ca701e077e4a84c8f3
+CLEANUP: disposable container stopped/auto-removed
+Traceback (most recent call last):
+  File "C:\dev\SafeRoute-AI\scripts\qa\verify_postgis.py", line 129, in <module>
+    main()
+  File "C:\dev\SafeRoute-AI\scripts\qa\verify_postgis.py", line 119, in main
+    print(run([sys.executable, "-m", "pytest", "tests", "-q", "-ra", *pytest_args], cwd=backend, env=env), flush=True)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\dev\SafeRoute-AI\scripts\qa\verify_postgis.py", line 37, in run
+    raise RuntimeError(output)
+RuntimeError: ........................................................................................................F.............F.FF.F....F.F. [ 94%]
+FFFF..F                                                                  [100%]
+================================== FAILURES ===================================
+_________________ test_cardinality_order_and_keyed_adapter[0] _________________
+
+n = 0
+
+    @pytest.mark.parametrize("n",[0,1,3])
+    def test_cardinality_order_and_keyed_adapter(n):
+        scorer=adapter()
+        google=Mock(); google.compute_routes.return_value=candidates(n)
+>       result=RoutingService(google,scorer).compare_routes(LatLng(latitude=10,longitude=106),LatLng(latitude=10.01,longitude=106))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_tv4_crossbranch_contract.py:42: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <app.modules.routing.service.RoutingService object at 0x000001E41C098A90>
+origin = LatLng(latitude=10.0, longitude=106.0)
+destination = LatLng(latitude=10.01, longitude=106.0)
+travel_mode = <TravelMode.TWO_WHEELER: 'TWO_WHEELER'>
+
+    def compare_routes(
+        self,
+        origin: LatLng,
+        destination: LatLng,
+        travel_mode: TravelMode = TravelMode.TWO_WHEELER,
+    ) -> RouteCompareResponse:
+        """Fetch candidate routes and evaluate risks against recorded hazards.
+    
+        Business rules strictly applied:
+        - Exactly the number of routes returned by Google is passed through (0 -> 404, 1 -> 1, N -> N).
+        - No invented routes or fake hazards.
+        - Preserves all candidate IDs, counts, and exact ordering.
+        - No sentinel 999.0; explicit risk availability semantics.
+        - Recommended route is selected by lowest risk score only when all routes are assessed.
+        - Legal disclaimer always included.
+        """
+        # 1. Fetch real candidates from Google Routes API
+        candidates: list[RouteCandidate] = self.adapter.compute_routes(
+            origin=origin,
+            destination=destination,
+            travel_mode=travel_mode,
+        )
+    
+        if not candidates:
+>           raise NoRouteFoundError(
+                f"No route found between ({origin.latitude}, {origin.longitude}) "
+                f"and ({destination.latitude}, {destination.longitude})"
+            )
+E           app.modules.routing.exceptions.NoRouteFoundError: No route found between (10.0, 106.0) and (10.01, 106.0)
+
+app\modules\routing\service.py:105: NoRouteFoundError
+_____________ test_partial_risk_does_not_claim_comparative_safety _____________
+
+    @pytest.mark.xfail(strict=True,reason="TV5: partial scores cannot justify lowest recorded risk across all candidates")
+    def test_partial_risk_does_not_claim_comparative_safety():
+        response=compare({"0":risk(4)})
+>       assert response.recommended_route_id is None
+E       AssertionError: assert '0' is None
+E        +  where '0' = RouteCompareResponse(origin=LatLng(latitude=10.0, longitude=106.0), destination=LatLng(latitude=10.01, longitude=106.0...ng cam k\u1ebft tuy\u1ebfn \u0111\u01b0\u1eddng an to\xe0n tuy\u1ec7t \u0111\u1ed1i.', risk_assessment_status='PARTIAL', recommendation_basis='DURATION_ETA_ONLY').recommended_route_id
+
+tests\test_tv4_crossbranch_contract.py:98: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  app.modules.routing.service:service.py:155 Risk scorer missing scores for route IDs: ['1']
+________________________ test_extra_risk_keys_rejected ________________________
+
+    @pytest.mark.xfail(strict=True,reason="TV5 silently accepts extra keys instead of explicit contract error")
+    def test_extra_risk_keys_rejected():
+>       with pytest.raises(ValueError): compare({"0":risk(1),"1":risk(2),"extra":risk(3)})
+E       Failed: DID NOT RAISE ValueError
+
+tests\test_tv4_crossbranch_contract.py:109: Failed
+------------------------------ Captured log call ------------------------------
+ERROR    app.modules.routing.service:service.py:148 Contract violation: Risk scorer returned extra route IDs not in candidate list: ['extra']
+______________ test_http_auth_image_report_vote_review_persisted ______________
+
+http = <starlette.testclient.TestClient object at 0x000001E41C0C35D0>
+db = <sqlalchemy.orm.session.Session object at 0x000001E41AABD350>
+
+    def test_http_auth_image_report_vote_review_persisted(http, db):
+        credentials={"email":"tv4-gate@example.com","password":"synthetic-test-password"}
+        registration=http.post("/api/v1/auth/register",json=credentials)
+        assert registration.status_code == 200
+        user_id=registration.json()["user_id"]
+        assert db.get(User,user_id).email == credentials["email"]
+        login=http.post("/api/v1/auth/login",json=credentials)
+        assert login.status_code == 200
+        headers={"Authorization":"Bearer "+login.json()["access_token"]}
+        png=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aN1sAAAAASUVORK5CYII=")
+        uploaded=http.post("/api/v1/images",headers=headers,files={"file":("fixture.png",png,"image/png")})
+        assert uploaded.status_code == 200
+        created=http.post("/api/v1/reports",headers=headers,json={"latitude":10.005,"longitude":106,
+            "category_user":"D40","severity":"HIGH","image_id":uploaded.json()["image_id"]})
+        assert created.status_code == 201
+        id_=created.json()["id"]
+        persisted=db.get(Report,id_)
+        assert persisted is not None and persisted.status.value == "PENDING_VERIFICATION"
+        assert db.scalar(select(ReportImage).where(ReportImage.report_id==id_)) is not None
+        voted=http.post(f"/api/v1/reports/{id_}/votes",headers=headers,json={"vote":"SUPPORT"})
+        assert voted.status_code in (200,201)
+        assert db.scalar(select(CommunityVote).where(CommunityVote.report_id==id_)) is not None
+        decision={"status":"VERIFIED","reason":"Synthetic reviewer verification"}
+        assert http.patch(f"/api/v1/reports/{id_}/status",headers=headers,json=decision).status_code == 403
+        reviewer=User(email="tv4-reviewer@example.com",password_hash=get_password_hash("synthetic-review-password"),role=UserRole.REVIEWER)
+        db.add(reviewer); db.flush()
+        review_login=http.post("/api/v1/auth/login",json={"email":reviewer.email,"password":"synthetic-review-password"})
+        assert review_login.status_code == 200
+        reviewed=http.patch(f"/api/v1/reports/{id_}/status",headers={"Authorization":"Bearer "+review_login.json()["access_token"]},json=decision)
+        assert reviewed.status_code == 200
+        db.expire_all()
+        assert db.get(Report,id_).status.value == "VERIFIED"
+        assert db.scalar(select(ReviewLog).where(ReviewLog.report_id==id_)) is not None
+        detail=http.get(f"/api/v1/reports/{id_}")
+        assert detail.status_code == 200 and detail.json()["status"] == "VERIFIED"
+        # Uploaded PNG must not turn into an invented .jpg URL in the report DTO.
+>       assert created.json()["image_url"] == uploaded.json()["url"]
+E       AssertionError: assert '/uploads/ad8...25e831be2.jpg' == '/uploads/ad8...25e831be2.png'
+E         
+E         - /uploads/ad8e4996ea09455480b616e25e831be2.png
+E         ?                                            -
+E         + /uploads/ad8e4996ea09455480b616e25e831be2.jpg
+E         ?                                           +
+
+tests\test_tv4_final_integration_gate.py:71: AssertionError
+____________________ test_routing_public_endpoint_is_wired ____________________
+
+http = <starlette.testclient.TestClient object at 0x000001E41C090790>
+
+    def test_routing_public_endpoint_is_wired(http):
+>       assert "/api/v1/routes/compare" in http.get("/api/v1/openapi.json").json()["paths"], "BLOCKED: routing endpoint absent"
+E       AssertionError: BLOCKED: routing endpoint absent
+E       assert '/api/v1/routes/compare' in {'/health': {'get': {'tags': ['System'], 'summary': 'Health Check', 'description': 'Ki\u1ec3m tra tr\u1ea1ng th\xe1i ho\u1ea1t \u0111\u1ed9ng c\u1ee7a ...n': 'T\u1ea1o t\xe0i kho\u1ea3n m\u1edbi v\u1edbi vai tr\xf2 m\u1eb7c \u0111\u1ecbnh l\xe0 USER.', 'operationId': 'register_api_v1_auth_register_post', ...}}, ...}
+
+tests\test_tv4_final_integration_gate.py:85: AssertionError
+___________________ test_risk_status_contract[raw4-INVALID] ___________________
+
+raw = {'extra': RouteRiskScore(score=1.0, level='LOW', hazards_count=1, verified_hazards_count=0, pending_hazards_count=0, reason='MOCK_FOR_DEV')}
+expected = 'INVALID'
+
+    @pytest.mark.parametrize("raw,expected",[
+        ({"b":score(2),"a":score(1)},"AVAILABLE"),
+        ({"a":score()},"PARTIAL"),
+        ({},"UNAVAILABLE"),
+        ({"a":score(),"b":score(),"extra":score()},"INVALID"),
+        ({"extra":score()},"INVALID"),
+        ([score()],"PARTIAL"),
+        ([score(),score(),score()],"INVALID"),
+    ])
+    def test_risk_status_contract(raw,expected):
+        result=compare(raw)
+        assert [r.id for r in result.routes]==["a","b"]
+>       assert result.risk_assessment_status == expected
+E       AssertionError: assert 'UNAVAILABLE' == 'INVALID'
+E         
+E         - INVALID
+E         + UNAVAILABLE
+
+tests\test_tv4_final_integration_gate.py:112: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    app.modules.routing.service:service.py:148 Contract violation: Risk scorer returned extra route IDs not in candidate list: ['extra']
+___________________ test_risk_status_contract[raw6-INVALID] ___________________
+
+raw = [RouteRiskScore(score=1.0, level='LOW', hazards_count=1, verified_hazards_count=0, pending_hazards_count=0, reason='MO...ore(score=1.0, level='LOW', hazards_count=1, verified_hazards_count=0, pending_hazards_count=0, reason='MOCK_FOR_DEV')]
+expected = 'INVALID'
+
+    @pytest.mark.parametrize("raw,expected",[
+        ({"b":score(2),"a":score(1)},"AVAILABLE"),
+        ({"a":score()},"PARTIAL"),
+        ({},"UNAVAILABLE"),
+        ({"a":score(),"b":score(),"extra":score()},"INVALID"),
+        ({"extra":score()},"INVALID"),
+        ([score()],"PARTIAL"),
+        ([score(),score(),score()],"INVALID"),
+    ])
+    def test_risk_status_contract(raw,expected):
+        result=compare(raw)
+        assert [r.id for r in result.routes]==["a","b"]
+>       assert result.risk_assessment_status == expected
+E       AssertionError: assert 'AVAILABLE' == 'INVALID'
+E         
+E         - INVALID
+E         + AVAILABLE
+
+tests\test_tv4_final_integration_gate.py:112: AssertionError
+------------------------------ Captured log call ------------------------------
+WARNING  app.modules.routing.service:service.py:168 Risk scorer returned 3 scores for 2 candidates
+____________ test_zero_weighted_score_does_not_claim_zero_hazards _____________
+
+    def test_zero_weighted_score_does_not_claim_zero_hazards():
+        result=compare({"a":score(0,2),"b":score(1,1)})
+>       assert "ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o" not in result.recommendation_reason.lower()
+E       assert 'ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o' not in "tuy\u1ebfn '' \u0111\u01b0...\u1ec3n: 1 ph\xfat)."
+E         
+E         'ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o' is contained here:
+E           tuy\u1ebfn '' \u0111\u01b0\u1ee3c \u0111\u1ec1 xu\u1ea5t v\xec ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o tr\xean h\u1ec7 th\u1ed1ng (th\u1eddi gian di chuy\u1ec3n: 1 ph\xfat).
+E         ?                          +++++++++++++++++++++++++
+
+tests\test_tv4_final_integration_gate.py:125: AssertionError
+______________ test_ai_inference_exception_not_successful_empty _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x000001E41C0841D0>
+
+    def test_ai_inference_exception_not_successful_empty(monkeypatch):
+        from app.modules.ai.service import YoloInferenceService
+        # Fault injection into a ready model; not a live YOLO accuracy test.
+        service=object.__new__(YoloInferenceService)
+        service.model=Mock();service.model.predict.side_effect=RuntimeError("synthetic inference failure")
+        service.checksum_valid=True;service.model_version="synthetic-ready";service.device="cpu"
+        fake_image=Mock();fake_image.open.return_value.convert.return_value=object()
+        monkeypatch.setitem(sys.modules,"PIL",SimpleNamespace(Image=fake_image))
+>       with pytest.raises(HTTPException): service.predict(b"fixture")
+E       Failed: DID NOT RAISE HTTPException
+
+tests\test_tv4_final_integration_gate.py:136: Failed
+---------------------------- Captured stdout call -----------------------------
+[ERROR] Loi khi thuc hien inference YOLO: synthetic inference failure
+________________ test_community_vote_and_duplicate_prevention _________________
+
+user_header = {'Authorization': 'Bearer [REDACTED_TEST_JWT]'}
+created_report_id = 102
+
+    def test_community_vote_and_duplicate_prevention(user_header, created_report_id):
+        """
+        Quy t\u1eafc nghi\u1ec7p v\u1ee5:
+        1. Vote SUPPORT/OPPOSE/UNSURE.
+        2. M\u1ed9t user ch\u1ec9 \u0111\u01b0\u1ee3c vote 1 l\u1ea7n / report -> l\u1ea7n 2 tr\u1ea3 409 Conflict.
+        3. Vote KH\xd4NG l\xe0m thay \u0111\u1ed5i status c\u1ee7a report sang VERIFIED.
+        """
+        report_id = created_report_id
+    
+        # Vote l\u1ea7n 1 -> Th\xe0nh c\xf4ng 201 Created
+        vote_res = client.post(
+            f"/api/v1/reports/{report_id}/votes",
+            json={"vote": "SUPPORT", "note": "H\xf4m qua \u0111i qua su\xfdt ng\xe3"},
+            headers=user_header,
+        )
+>       assert vote_res.status_code == 201
+E       assert 404 == 201
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_votes_review.py:54: AssertionError
+____________________ test_vote_with_tv2_vote_type_contract ____________________
+
+created_report_id = 103
+
+    def test_vote_with_tv2_vote_type_contract(created_report_id):
+        """
+        Nhi\u1ec7m v\u1ee5 2: Ki\u1ec3m tra t\u01b0\u01a1ng th\xedch contract TV2 Android (tr\u01b0\u1eddng vote_type).
+        """
+        token = create_access_token(
+            data={"sub": "99", "role": UserRole.USER.value, "email": "tv2_user@saferoute.ai"}
+        )
+        vote_res = client.post(
+            f"/api/v1/reports/{created_report_id}/votes",
+            json={"vote_type": "SUPPORT", "note": "G\u1eedi t\u1eeb Android Retrofit c\u1ee7a TV2"},
+            headers={"Authorization": f"Bearer {token}"},
+        )
+>       assert vote_res.status_code == 201
+E       assert 404 == 201
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_votes_review.py:83: AssertionError
+________________ test_reviewer_verifies_report_with_audit_log _________________
+
+reviewer_header = {'Authorization': 'Bearer [REDACTED_TEST_JWT]'}
+created_report_id = 106
+
+    def test_reviewer_verifies_report_with_audit_log(reviewer_header, created_report_id):
+        """
+        Reviewer duy\u1ec7t b\xe1o c\xe1o v\u1edbi l\xfd do h\u1ee3p l\u1ec7 -> C\u1eadp nh\u1eadt VERIFIED v\xe0 ghi audit log.
+        """
+        res = client.patch(
+            f"/api/v1/reports/{created_report_id}/status",
+            json={"status": "VERIFIED", "reason": "\u1ea2nh r\xf5 \u1ed5 g\xe0 s\xe2u nguy hi\u1ec3m, \u0111\xfang v\u1ecb tr\xed"},
+            headers=reviewer_header,
+        )
+>       assert res.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_votes_review.py:122: AssertionError
+============================== warnings summary ===============================
+..\..\SafeRoute-AI-tv4-integration-20261107\.venv\Lib\site-packages\starlette\testclient.py:37
+  C:\dev\SafeRoute-AI-tv4-integration-20261107\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_tv4_crossbranch_contract.py::test_cardinality_order_and_keyed_adapter[0]
+FAILED tests/test_tv4_crossbranch_contract.py::test_partial_risk_does_not_claim_comparative_safety
+FAILED tests/test_tv4_crossbranch_contract.py::test_extra_risk_keys_rejected
+FAILED tests/test_tv4_final_integration_gate.py::test_http_auth_image_report_vote_review_persisted
+FAILED tests/test_tv4_final_integration_gate.py::test_routing_public_endpoint_is_wired
+FAILED tests/test_tv4_final_integration_gate.py::test_risk_status_contract[raw4-INVALID]
+FAILED tests/test_tv4_final_integration_gate.py::test_risk_status_contract[raw6-INVALID]
+FAILED tests/test_tv4_final_integration_gate.py::test_zero_weighted_score_does_not_claim_zero_hazards
+FAILED tests/test_tv4_final_integration_gate.py::test_ai_inference_exception_not_successful_empty
+FAILED tests/test_votes_review.py::test_community_vote_and_duplicate_prevention
+FAILED tests/test_votes_review.py::test_vote_with_tv2_vote_type_contract - as...
+FAILED tests/test_votes_review.py::test_reviewer_verifies_report_with_audit_log
+12 failed, 127 passed, 1 warning, 12 subtests passed in 6.75s
+

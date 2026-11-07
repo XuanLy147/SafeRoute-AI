@@ -1,13 +1,30 @@
-# FastAPI & PostgreSQL/PostGIS — TV3 (TV4/TV5 tích hợp)
+# SafeRoute backend — TV345 integration
 
-Một backend FastAPI. TV3 quản lý API, Auth, Report, Vote, Review, migrations và schema.
-TV4 phụ trách service AI, TV5 phụ trách service routing và scoring trong cùng backend.
+Python 3.11/FastAPI, real PostgreSQL/PostGIS, approved YOLO checkpoint and Google
+Routes adapter. Current assignments: TV3 API/AI HTTP; TV4 DB/risk/infrastructure;
+TV5 routing. Android is unchanged.
 
-Các thư mục dự kiến khi triển khai:
-- `app/core/`, `app/db/`, `app/api/v1/`, `app/models/`
-- `app/modules/{auth,users,reports,images,votes,review,ai,routing}/`
-- `migrations/versions/`, `tests/`
+Start with [local setup](../docs/handoff/LOCAL_DEVELOPMENT.md) and
+[release evidence](../docs/handoff/RELEASE_READINESS.md). API contract is generated
+in docs/api/openapi.json; handoff documents are in docs/handoff/.
 
-Endpoint dự kiến: `GET /health`, `POST /api/v1/ai/detect`, `POST /api/v1/routes/compare`. Dữ liệu request/response phải theo OpenAPI được xuất từ code thật.
+From repository root, supply random POSTGRES_PASSWORD and SECRET_KEY then run:
+`docker compose -f backend/docker-compose.yml up --build`.
+Root build context is required to package ai/weights/best.pt. Alembic owns schema;
+no create_all, implicit demo accounts or in-memory persistence fallback exists.
 
-Đừng tạo `main.py`, requirements hoặc migrations rỗng như thể API đã hoạt động.
+Host development: install requirements.txt plus requirements-ai.txt in an isolated
+Python 3.11 venv. Configure DATABASE_URL/SECRET_KEY in environment or backend/.env,
+then from backend run `python -m alembic upgrade head` and
+`python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`.
+
+/health is liveness; /ready checks DB/schema and reports AI/risk readiness.
+Private image URLs require uploader/reviewer Bearer. Risk configuration is absent
+by default; production numeric approval remains outstanding. Google Routes key
+must be provided explicitly; no fixture fallback. AI unavailable returns 503 and
+manual reporting remains available.
+
+Verification from repository root: `python scripts/qa/verify_postgis.py --backend
+backend --runxfail`, `python scripts/qa/verify_ai.py`, `python scripts/qa/verify_contract.py`,
+and `ruff check backend`. Do not run HTTP suites against a personal/production DB.
+Cloud template and operational constraints are in infra/cloud-run/RUNBOOK.md.
