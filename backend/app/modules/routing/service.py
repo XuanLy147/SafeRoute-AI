@@ -160,8 +160,18 @@ class RoutingService:
                     else:
                         assessment_status = RiskAssessmentStatus.AVAILABLE
 
+                    # Validate values are RouteRiskScore instances
                     for c in candidates:
-                        risk_map[c.id] = raw_risk.get(c.id)
+                        score_obj = raw_risk.get(c.id)
+                        if score_obj is not None and not isinstance(score_obj, RouteRiskScore):
+                            logger.error(
+                                "Contract violation: Risk score for %s is not a RouteRiskScore instance (got %s)",
+                                c.id,
+                                type(score_obj),
+                            )
+                            assessment_status = RiskAssessmentStatus.INVALID
+                            score_obj = None
+                        risk_map[c.id] = score_obj
 
                 elif isinstance(raw_risk, (list, tuple)):
                     if len(raw_risk) != len(candidates):
@@ -175,10 +185,19 @@ class RoutingService:
                         assessment_status = RiskAssessmentStatus.AVAILABLE
 
                     for idx, c in enumerate(candidates):
-                        risk_map[c.id] = raw_risk[idx] if idx < len(raw_risk) else None
+                        score_obj = raw_risk[idx] if idx < len(raw_risk) else None
+                        if score_obj is not None and not isinstance(score_obj, RouteRiskScore):
+                            logger.error(
+                                "Contract violation: Risk score at index %d is not a RouteRiskScore instance (got %s)",
+                                idx,
+                                type(score_obj),
+                            )
+                            assessment_status = RiskAssessmentStatus.INVALID
+                            score_obj = None
+                        risk_map[c.id] = score_obj
                 else:
                     logger.warning("Risk scorer returned unrecognized type: %s", type(raw_risk))
-                    assessment_status = RiskAssessmentStatus.UNAVAILABLE
+                    assessment_status = RiskAssessmentStatus.INVALID
 
             except Exception as exc:  # noqa: BLE001 (Intentional: shield routing response from arbitrary scorer failures)
                 logger.error("Risk scorer execution failed: %s. Preserving routes without synthetic risk.", exc)
@@ -200,13 +219,20 @@ class RoutingService:
             )
 
         # Consolidate status based on actual assigned risk objects
-        scored_count = sum(1 for r in evaluated_routes if r.risk is not None)
-        if scored_count == 0:
-            assessment_status = RiskAssessmentStatus.UNAVAILABLE
-        elif scored_count == len(evaluated_routes) and assessment_status != RiskAssessmentStatus.INVALID:
-            assessment_status = RiskAssessmentStatus.AVAILABLE
-        elif scored_count < len(evaluated_routes) and assessment_status != RiskAssessmentStatus.INVALID:
-            assessment_status = RiskAssessmentStatus.PARTIAL
+        if assessment_status != RiskAssessmentStatus.INVALID:
+            scored_count = sum(1 for r in evaluated_routes if r.risk is not None)
+            if scored_count == 0:
+                assessment_status = RiskAssessmentStatus.UNAVAILABLE
+            elif scored_count == len(evaluated_routes):
+                assessment_status = RiskAssessmentStatus.AVAILABLE
+            else:
+                assessment_status = RiskAssessmentStatus.PARTIAL
+        else:
+            # When assessment_status is INVALID (contract violation):
+            # Risk data is untrusted / corrupted.
+            # Strictly clear all risk scores so no invalid risk score is exposed as valid!
+            for r in evaluated_routes:
+                r.risk = None
 
         # 4. Recommendation Logic (No sentinel 999, explicit availability semantics)
         recommended_route_id: str | None = None
@@ -217,7 +243,12 @@ class RoutingService:
             single = evaluated_routes[0]
             recommended_route_id = single.id
             recommendation_basis = RecommendationBasis.SINGLE_ROUTE
-            if single.risk is not None:
+            if assessment_status == RiskAssessmentStatus.INVALID:
+                recommendation_reason = (
+                    f"Tuyến duy nhất tìm thấy ({single.summary}). "
+                    "Lưu ý: Dữ liệu nguy cơ không hợp lệ do lỗi định dạng từ hệ thống đánh giá."
+                )
+            elif single.risk is not None:
                 if single.risk.hazards_count > 0:
                     recommendation_reason = (
                         f"Tuyến duy nhất tìm thấy ({single.summary}). "

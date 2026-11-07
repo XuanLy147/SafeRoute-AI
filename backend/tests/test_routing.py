@@ -763,6 +763,100 @@ def test_regression_bug04_extra_risk_keys_detected():
 
     assert len(response.routes) == 2
     assert [r.id for r in response.routes] == ["route_1", "route_2"]
+    # All routes must have risk=None because invalid contract data cannot be trusted
+    assert all(r.risk is None for r in response.routes)
+    assert response.risk_assessment_status == RiskAssessmentStatus.INVALID.value
+    assert response.recommendation_basis == RecommendationBasis.DURATION_ETA_ONLY.value
+    assert "không hợp lệ do lỗi định dạng" in response.recommendation_reason
+
+
+def test_regression_invalid_no_matching_candidate_ids():
+    """Verify INVALID state when scorer returns ONLY unknown route IDs (0 valid scores).
+
+    Ensures scored_count==0 does NOT overwrite INVALID to UNAVAILABLE.
+    All routes have risk=None and recommendation falls back to ETA.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_1", summary="Tuyến 1", distance_meters=3000, duration_seconds=500, polyline="p1"),
+        RouteCandidate(id="route_2", summary="Tuyến 2", distance_meters=2800, duration_seconds=450, polyline="p2"),
+    ]
+
+    mock_scorer = MagicMock()
+    # Scorer returns only a ghost route ID, none of the candidate IDs exist
+    mock_scorer.evaluate_by_id.return_value = {
+        "route_GHOST_1": RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="Ghost"),
+    }
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 2
+    assert [r.id for r in response.routes] == ["route_1", "route_2"]
+    assert all(r.risk is None for r in response.routes)
+    # MUST stay INVALID, never overwritten to UNAVAILABLE
+    assert response.risk_assessment_status == RiskAssessmentStatus.INVALID.value
+    assert response.recommendation_basis == RecommendationBasis.DURATION_ETA_ONLY.value
+    assert response.recommended_route_id == "route_2"  # shortest duration (450s vs 500s)
+    assert "không hợp lệ do lỗi định dạng" in response.recommendation_reason
+
+
+def test_regression_invalid_single_candidate_route():
+    """Verify INVALID state on a single route when scorer returns foreign route IDs.
+
+    Status must be INVALID, route.risk must be None, and reason must explicitly state format error.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=300, polyline="p1"),
+    ]
+
+    mock_scorer = MagicMock()
+    mock_scorer.evaluate_by_id.return_value = {
+        "route_FOREIGN": RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="Foreign"),
+    }
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 1
+    assert response.routes[0].id == "route_1"
+    assert response.routes[0].risk is None
+    assert response.risk_assessment_status == RiskAssessmentStatus.INVALID.value
+    assert response.recommendation_basis == RecommendationBasis.SINGLE_ROUTE.value
+    assert "Tuyến duy nhất" in response.recommendation_reason
+    assert "không hợp lệ do lỗi định dạng" in response.recommendation_reason
+
+
+def test_regression_invalid_score_value_type():
+    """Verify INVALID state when scorer returns dict with invalid value types (not RouteRiskScore)."""
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_1", summary="Tuyến 1", distance_meters=3000, duration_seconds=500, polyline="p1"),
+        RouteCandidate(id="route_2", summary="Tuyến 2", distance_meters=2800, duration_seconds=450, polyline="p2"),
+    ]
+
+    mock_scorer = MagicMock()
+    # String instead of RouteRiskScore object
+    mock_scorer.evaluate_by_id.return_value = {
+        "route_1": "INVALID_SCORE_STRING",
+        "route_2": 12345,
+    }
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 2
+    assert all(r.risk is None for r in response.routes)
     assert response.risk_assessment_status == RiskAssessmentStatus.INVALID.value
     assert response.recommendation_basis == RecommendationBasis.DURATION_ETA_ONLY.value
     assert "không hợp lệ do lỗi định dạng" in response.recommendation_reason
