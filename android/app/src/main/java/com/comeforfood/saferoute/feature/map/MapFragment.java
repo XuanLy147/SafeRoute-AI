@@ -67,6 +67,8 @@ public class MapFragment extends LocationAwareFragment {
             MapsSupport.attach(this, R.id.map, ready -> {
                 map = ready;
                 map.getUiSettings().setMyLocationButtonEnabled(false);
+                float density = getResources().getDisplayMetrics().density;
+                map.setPadding(0, Math.round(180 * density), 0, Math.round(130 * density));
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554, 106.6782), 13f));
                 if (getArguments()!=null && getArguments().containsKey("center.lat")) map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(getArguments().getDouble("center.lat"),getArguments().getDouble("center.lon")),16f));
                 map.setOnMapLoadedCallback(() -> { if (binding != null) binding.mapStatus.setText(R.string.map_ready); });
