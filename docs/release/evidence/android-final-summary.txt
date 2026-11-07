@@ -1,0 +1,7 @@
+Final local verification: implementation 7c167eb plus live Maps assertion.
+JVM XML totals: 63 tests, 0 failures, 0 errors, 0 skipped.
+assembleDebug and assembleDebugAndroidTest completed; default origin restored to http://10.0.2.2:8000/.
+Lint initially failed PropertyEscape in ignored local.properties.
+Escaped SDK drive colon; forced fresh lint analysis: BUILD SUCCESSFUL, 0 errors.
+Maps key matches supplied file and is present in manifest (values omitted).
+Maps authorization FAIL; Routes NOT_RUN, no server key.

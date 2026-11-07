@@ -76,6 +76,12 @@ public class LiveBackendDeviceTest {
             ui(MainActivity::openMap);
             waitFor(a->{Tv1ViewModel.State<List<com.comeforfood.saferoute.feature.map.Hazard>> state=new ViewModelProvider(a).get(Tv1ViewModel.class).reports().getValue();return state!=null&&state.data!=null&&state.data.stream().anyMatch(h->id.equals(h.id)&&h.status==com.comeforfood.saferoute.feature.map.Hazard.Status.VERIFIED);});
             assertFalse(api.queue().execute().body().stream().anyMatch(r->id.equals(r.getId())));
+            if("true".equals(args.getString("liveMaps"))) {
+                waitFor(a->{TextView status=a.findViewById(R.id.map_status);return status!=null&&a.getString(R.string.map_ready).contentEquals(status.getText());});
+                File screenshots=new File(app.getExternalFilesDir(null),"release-evidence");assertTrue(screenshots.isDirectory()||screenshots.mkdirs());
+                Bitmap screen=InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();assertNotNull(screen);
+                try(FileOutputStream out=new FileOutputStream(new File(screenshots,"live-map.png"))){assertTrue(screen.compress(Bitmap.CompressFormat.PNG,100,out));}screen.recycle();
+            }
             assertEquals(409,api.review(id,new ReportDto.ReviewDecisionRequest("VERIFIED","Repeat must fail",null)).execute().code());
             if("true".equals(args.getString("liveRoutes"))) {
                 ui(a->a.openRoutes(null));

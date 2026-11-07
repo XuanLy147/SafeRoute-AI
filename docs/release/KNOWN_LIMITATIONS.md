@@ -4,8 +4,10 @@
 - Production risk policy remains unapproved. Default risk is UNAVAILABLE and
   recommendation is ETA-based. Never enable demo policy implicitly.
 - Cloud Run/IAM/private persistent storage and cost are not verified or deployed.
-- Android device/provider tests must complete on final code; fixtures do not prove
-  Google billing, Maps rendering or live routes.
+- Android device regression and real report/review E2E passed. Maps live failed
+  authorization with the supplied Android key; Routes live lacks a server key.
+  Fixtures do not prove Maps rendering or live routes. Map loading status can
+  remain pending when the SDK rejects authorization; report list remains available.
 - No social authentication, refresh-token or password-reset contract exists.
 - Admin users/metrics/role management and aggregate review history lack endpoints;
   UI remains explicitly unavailable/read-only. Report detail has actual audit logs.

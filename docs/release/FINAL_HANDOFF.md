@@ -1,26 +1,46 @@
-# Full release handoff — work in progress
+# Full release handoff — BLOCKED
 
-Verdict **BLOCKED**. Main is unchanged and no main merge is claimed.
+Main is unchanged. Draft PR: https://github.com/XuanLy147/SafeRoute-AI/pull/3.
+Branch integration/saferoute-full-release; worktree C:/dev/SafeRoute-AI-full-release.
+Source ancestry and backend revert reconciliation: MERGE_PROVENANCE.md.
+Original dirty TV4 worktree is preserved. No cloud deployment or main merge.
 
-Integrated branch: integration/saferoute-full-release. Worktree:
-C:/dev/SafeRoute-AI-full-release. Source SHAs and revert reconciliation are in
-MERGE_PROVENANCE.md. Original dirty TV4 worktree is untouched.
+## Implementation
 
-Android P0 placeholders now call one shared authenticated HTTP client. Auth/me,
-private images, upload/AI/manual report, detail/vote/review, map and routes use the
-locked backend. Existing native layouts/navigation retained. Tests cover new
-contract mapping and preserve prior regression assertions.
+One native Java/XML app and one authenticated Retrofit client now connect auth/me,
+private images, upload/AI/manual report, detail/vote/review, map data and route
+comparison to the locked backend. Keystore token protection, lifecycle cleanup,
+bounded photo decoding, ambiguous-write recovery and profile back navigation
+are implemented. Route counts/geometry/risk availability remain backend-owned;
+no synthetic routes or numeric risk are substituted. Owners remain TV1–TV5.
 
-Current local verification: 53 baseline tests; 62 integrated JVM/Robolectric;
-179 backend + 12 subtests; real PostGIS/migration; approved CPU AI; Docker restart;
-OpenAPI; secrets scan. APK build and lint 0 errors PASS. See RELEASE_READINESS.md
-for incomplete device/live/CI gates. Current APK is a debug artifact in
-android/app/build/outputs/apk/debug/app-debug.apk; no signed release published.
+## Verification
 
-Delivery docs: ANDROID_CONFIGURATION.md, ANDROID_BACKEND_E2E.md, DEMO_SCRIPT.md,
-KNOWN_LIMITATIONS.md, generated ../api/openapi.json and ../handoff documents.
-Cloud deployment and production risk approval remain separate pending owner work.
+- Baseline frontend: 53 JVM/Robolectric tests PASS.
+- Integrated Android: 63 JVM/Robolectric tests, debug APK, test APK and lint PASS.
+- Device regression: 8/8 PASS locally and CI on API 35.
+- Real Android/backend: register/photo/AI/manual/create/vote/review/audit/map-data
+  refresh and backend restart persistence PASS; synthetic image, no accuracy claim.
+- Backend: 179 tests + 12 subtests PASS, real PostGIS/migrations, runtime OpenAPI,
+  approved CPU AI, Docker HTTP/restart persistence and secret scan PASS.
+- GitHub Actions at implementation 7c167eb: Android 42370556938 and backend
+  42370557088 PASS. Provider tests are separate from CI regression.
+- Maps live FAIL: key reaches APK but Google returns Authorization failure.
+- Routes live NOT_RUN: user confirms no server key. PR review pending.
 
-Next: finish emulator regression and real UI E2E, configure authorized provider
-keys, collect final CI/review, update this handoff. Merge only when every mandatory
-gate passes; otherwise retain draft PR and report the concrete blockers.
+## Delivery and remaining gates
+
+Normal local debug APK: android/app/build/outputs/apk/debug/app-debug.apk,
+backend origin http://10.0.2.2:8000/. It is not a signed production release.
+User's Maps configuration is in ignored android/local.properties. Key values
+are not tracked. See ANDROID_CONFIGURATION.md for the observed package/SHA-1
+and Google authorization diagnostic. Backend needs a separate Routes key.
+
+See RELEASE_READINESS.md, ANDROID_BACKEND_E2E.md and evidence/ for detailed
+results; README, ANDROID_CONFIGURATION.md, DEMO_SCRIPT.md, KNOWN_LIMITATIONS.md
+and ../api/openapi.json provide the runbook and contract.
+
+Next gates: owner corrects Maps authorization and supplies the Routes server key;
+re-run provider E2E, complete PR review/protection checks, merge only after every
+mandatory gate passes, then verify main HEAD and CI. Production risk approval,
+Cloud Run/IAM and measured cost remain unverified separate work.

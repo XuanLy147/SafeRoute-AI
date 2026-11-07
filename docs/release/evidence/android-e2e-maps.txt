@@ -1,0 +1,49 @@
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.comeforfood.saferoute.LiveBackendDeviceTest:
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.lang.AssertionError: UI condition timed out; no success claimed
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.waitFor(LiveBackendDeviceTest.java:38)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.realRegistrationPhotoAiReportVoteReviewMapAndPersistence(LiveBackendDeviceTest.java:80)
+
+INSTRUMENTATION_STATUS: stream=
+Error in realRegistrationPhotoAiReportVoteReviewMapAndPersistence(com.comeforfood.saferoute.LiveBackendDeviceTest):
+java.lang.AssertionError: UI condition timed out; no success claimed
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.waitFor(LiveBackendDeviceTest.java:38)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.realRegistrationPhotoAiReportVoteReviewMapAndPersistence(LiveBackendDeviceTest.java:80)
+
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 52.954
+There was 1 failure:
+1) realRegistrationPhotoAiReportVoteReviewMapAndPersistence(com.comeforfood.saferoute.LiveBackendDeviceTest)
+java.lang.AssertionError: UI condition timed out; no success claimed
+	at org.junit.Assert.fail(Assert.java:89)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.waitFor(LiveBackendDeviceTest.java:38)
+	at com.comeforfood.saferoute.LiveBackendDeviceTest.realRegistrationPhotoAiReportVoteReviewMapAndPersistence(LiveBackendDeviceTest.java:80)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
+CLEANUP: only disposable Android E2E resources removed
+Traceback (most recent call last):
+  File "C:\dev\SafeRoute-AI-full-release\scripts\qa\verify_android_e2e.py", line 118, in <module>
+    main()
+  File "C:\dev\SafeRoute-AI-full-release\scripts\qa\verify_android_e2e.py", line 86, in main
+    assert "OK (1 test)" in output and "FAILURES" not in output, "Android UI gate failed"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Android UI gate failed

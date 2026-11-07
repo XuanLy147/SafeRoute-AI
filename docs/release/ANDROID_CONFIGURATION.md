@@ -36,3 +36,19 @@ in that disposable DB, builds for the allocated emulator endpoint, installs APKs
 and performs real UI/HTTP/persistence. Synthetic gray image is not accuracy data.
 The special E2E APK points to an ephemeral port; rebuild normal debug afterward.
 No cloud resources are created. Normal registered accounts always start USER.
+
+## Local provider diagnostic — 2026-11-07
+
+The supplied Downloads/local.properties was applied to this release worktree's
+android/local.properties, with SDK path corrected to the installed Android SDK.
+The file is Git-ignored. It contains only the Maps key, not a Routes server key.
+Google rejected authorization on the actual debug device. Check Maps SDK for
+Android enablement and the Android key restriction against:
+
+- Package: com.comeforfood.saferoute
+- Local debug SHA-1: EE:A7:B6:C9:45:45:F3:EA:E8:02:89:B3:2C:70:90:44:A7:47:02:6B
+
+Official setup: https://developers.google.com/maps/documentation/android-sdk/get-api-key
+Other developers/CI may use different debug signing certificates. No key values
+are recorded in tracked evidence. Re-run the live gate after owner fixes Cloud
+configuration; a successful build does not establish provider authorization.

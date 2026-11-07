@@ -6,10 +6,11 @@ Reviewer is registered through HTTP and granted a real DB role only in this
 disposable test database. No token, password or uploaded image is printed.
 """
 import os
-from pathlib import Path
 import secrets
 import subprocess
 import time
+from pathlib import Path
+
 import httpx
 
 
@@ -27,6 +28,13 @@ def main():
     key = dotenv_values(root / "backend/.env").get("GOOGLE_ROUTES_API_KEY") or env.get("GOOGLE_ROUTES_API_KEY")
     if key:
         env["GOOGLE_ROUTES_API_KEY"] = key
+    maps_key = ""
+    properties = root / "android/local.properties"
+    if properties.exists():
+        for line in properties.read_text(encoding="utf-8-sig").splitlines():
+            if line.startswith("MAPS_API_KEY="):
+                maps_key = line.split("=", 1)[1].strip()
+    maps_key = env.get("MAPS_API_KEY") or maps_key
     suffix = secrets.token_hex(5)
     network = "saferoute-android-" + suffix
     volume = "saferoute-android-photos-" + suffix
@@ -34,9 +42,9 @@ def main():
     created_network = created_volume = False
 
     def run(command):
-        result = subprocess.run(command, cwd=root, env=env, text=True, capture_output=True, encoding="utf-8", errors="replace")
+        result = subprocess.run(command, cwd=root, env=env, text=True, check=False, capture_output=True, encoding="utf-8", errors="replace")
         output = result.stdout + result.stderr
-        for value in (password, secret, key):
+        for value in (password, secret, key, maps_key):
             if value:
                 output = output.replace(value, "[REDACTED]")
         if result.returncode:
@@ -49,7 +57,7 @@ def main():
         run(["docker", "volume", "create", volume]); created_volume = True
         db = run(["docker", "run", "-d", "--rm", "--network", network, "--network-alias", "db", "-e", "POSTGRES_PASSWORD", "-e", "POSTGRES_DB", "postgis/postgis:16-3.4"]); ids.append(db)
         for _ in range(60):
-            if subprocess.run(["docker", "exec", db, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"], capture_output=True).returncode == 0:
+            if subprocess.run(["docker", "exec", db, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"], check=False, capture_output=True).returncode == 0:
                 break
             time.sleep(1)
         run(["docker", "run", "--rm", "--network", network, "-e", "DATABASE_URL", "saferoute-tv345:integration", "alembic", "upgrade", "head"])
@@ -74,7 +82,7 @@ def main():
             run([gradle, "-p", str(root / "android"), "-PAPI_BASE_URL=http://10.0.2.2:" + port + "/", ":app:assembleDebug", ":app:assembleDebugAndroidTest", "--console=plain", "--no-daemon", "--max-workers=2", "-Dorg.gradle.jvmargs=-Xmx1024m"])
             run([adb, "install", "-r", str(root / "android/app/build/outputs/apk/debug/app-debug.apk")])
             run([adb, "install", "-r", str(root / "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")])
-            output = run([adb, "shell", "am", "instrument", "-w", "-r", "-e", "class", "com.comeforfood.saferoute.LiveBackendDeviceTest", "-e", "backendE2E", "true", "-e", "liveRoutes", "true" if key else "false", "com.comeforfood.saferoute.test/androidx.test.runner.AndroidJUnitRunner"])
+            output = run([adb, "shell", "am", "instrument", "-w", "-r", "-e", "class", "com.comeforfood.saferoute.LiveBackendDeviceTest", "-e", "backendE2E", "true", "-e", "liveRoutes", "true" if key else "false", "-e", "liveMaps", "true" if maps_key else "false", "com.comeforfood.saferoute.test/androidx.test.runner.AndroidJUnitRunner"])
             print(output, flush=True)
             assert "OK (1 test)" in output and "FAILURES" not in output, "Android UI gate failed"
             rows = client.get("/api/v1/reports").json()
@@ -94,15 +102,16 @@ def main():
             detail = client.get(f"/api/v1/reports/{rid}").json()
             assert detail["status"] == "VERIFIED" and len(detail["audit_logs"]) == 1
             print("PASS: Android UI register -> photo/AI/manual -> create -> vote -> reviewer login/review -> map; backend restart persistence", flush=True)
+            print("GOOGLE_MAPS_LIVE:", "PASS" if maps_key else "NOT_RUN (key not configured)", flush=True)
             print("GOOGLE_ROUTES_LIVE:", "PASS" if key else "NOT_RUN (key not configured)", flush=True)
             print("DEVICE:", run([adb, "shell", "getprop", "ro.build.version.release"]), run([adb, "shell", "getprop", "ro.product.model"]), flush=True)
     finally:
         for container in reversed(ids):
-            subprocess.run(["docker", "stop", container], capture_output=True)
+            subprocess.run(["docker", "stop", container], check=False, capture_output=True)
         if created_network:
-            subprocess.run(["docker", "network", "rm", network], capture_output=True)
+            subprocess.run(["docker", "network", "rm", network], check=False, capture_output=True)
         if created_volume:
-            subprocess.run(["docker", "volume", "rm", volume], capture_output=True)
+            subprocess.run(["docker", "volume", "rm", volume], check=False, capture_output=True)
         print("CLEANUP: only disposable Android E2E resources removed", flush=True)
 
 

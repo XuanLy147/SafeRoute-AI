@@ -48,8 +48,8 @@ writes are not retried blindly. Review/votes reload authoritative server state.
 
 ## Backlog / release gates
 
-P0: verify Android UI end-to-end on emulator; verify Maps/Google provider keys;
-rerun all final-source tests, secrets scan and remote CI. Main merge blocked until
+P0: correct Maps provider authorization and supply a separate Routes server key.
+Android/backend UI flow and regression CI passed at 7c167eb. Main merge blocked until
 all mandatory gates and GitHub review requirements pass.
 P1: exhaustive offline/rotation/permission/accessibility matrix and real photo
 camera/picker testing; image and draft recovery across all OEM process behavior.

@@ -78,10 +78,12 @@
 | Task | Owners | Status | Evidence / next gate |
 |---|---|---|---|
 | Release reconciliation | TV1–TV5 | DONE_VERIFIED | 3b70333; backend source tree restored; frontend preserved; docs/release/MERGE_PROVENANCE.md |
-| Android HTTP integration | TV1/TV2 | IN_PROGRESS | Shared client, auth/session, images/AI/report, detail/vote/review, map/routes; final tests ongoing |
+| Android HTTP integration | TV1/TV2 | DONE_VERIFIED | Shared client; 63 JVM tests/build/lint; 8 device regressions; HTTP report/review E2E PASS; provider gates separate |
 | Real backend re-verification | TV3–TV5 | DONE_VERIFIED | 179 tests + 12 subtests PASS; migration/PostGIS; Docker restart; AI CPU; contract; docs/release evidence |
-| Android device E2E | TV1–TV5 | IN_PROGRESS | Dedicated real backend emulator harness; results must be recorded after execution |
-| Main release | Team | BLOCKED | Mandatory live gates, final CI/review not yet complete; main unchanged |
+| Android report/review E2E | TV1–TV5 | DONE_VERIFIED | Actual Android/API/PostGIS/AI, vote/review/audit/map data and restart persistence PASS; docs/release/ANDROID_BACKEND_E2E.md |
+| Google provider gates | TV1/TV5 | BLOCKED | Maps Authorization failure; user confirms no Routes server key |
+| Integration CI | TV1–TV5 | DONE_VERIFIED | 7c167eb: Android 42370556938 and backend 42370557088 PASS |
+| Main release | Team | BLOCKED | Maps/Routes live and PR review incomplete; main unchanged |
 
 Original dirty TV4 worktree and historical tracker entries are preserved. New
 integration evidence is recorded in docs/release, distinct from old owner runs.

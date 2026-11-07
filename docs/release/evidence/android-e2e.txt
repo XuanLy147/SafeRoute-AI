@@ -1,0 +1,27 @@
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+com.comeforfood.saferoute.LiveBackendDeviceTest:
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=com.comeforfood.saferoute.LiveBackendDeviceTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realRegistrationPhotoAiReportVoteReviewMapAndPersistence
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 7.36
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+PASS: Android UI register -> photo/AI/manual -> create -> vote -> reviewer login/review -> map; backend restart persistence
+GOOGLE_ROUTES_LIVE: NOT_RUN (key not configured)
+DEVICE: 15 sdk_gphone64_x86_64
+CLEANUP: only disposable Android E2E resources removed

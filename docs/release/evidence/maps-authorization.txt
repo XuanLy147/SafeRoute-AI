@@ -1,0 +1,6 @@
+11-07 19:04:37.403  6494  6562 E Google Maps Android API: Authorization failure.  Please see https://developers.google.com/maps/documentation/android-api/start for how to correctly set up the map.
+11-07 19:04:37.409  6494  6562 E Google Maps Android API: In the Google Developer Console (https://console.developers.google.com)
+11-07 19:04:37.409  6494  6562 E Google Maps Android API: Ensure that the "Google Maps Android API v2" is enabled.
+11-07 19:04:37.409  6494  6562 E Google Maps Android API: Ensure that the following Android Key exists:
+11-07 19:04:37.409  6494  6562 E Google Maps Android API: 	API Key: [REDACTED_MAPS_KEY]
+11-07 19:04:37.409  6494  6562 E Google Maps Android API: 	Android Application (<cert_fingerprint>;<package_name>): EE:A7:B6:C9:45:45:F3:EA:E8:02:89:B3:2C:70:90:44:A7:47:02:6B;com.comeforfood.saferoute
