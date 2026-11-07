@@ -1,0 +1,49 @@
+# Render placeholders with your approved staging values; no deployment performed.
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: saferoute-staging
+  annotations:
+    run.googleapis.com/ingress: internal-and-cloud-load-balancing
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/maxScale: '2'
+        run.googleapis.com/cloudsql-instances: PROJECT:REGION:INSTANCE
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: SAFEROUTE_RUNTIME_SERVICE_ACCOUNT
+      containerConcurrency: 2
+      timeoutSeconds: 60
+      containers:
+        - image: REGION-docker.pkg.dev/PROJECT/REPOSITORY/saferoute:IMMUTABLE_COMMIT
+          ports: [{containerPort: 8000}]
+          resources:
+            limits: {cpu: '2', memory: 4Gi}
+          env:
+            - {name: ENVIRONMENT, value: production}
+            - {name: UPLOAD_DIR, value: /srv/uploads}
+            - {name: PERSISTENT_UPLOADS, value: 'true'}
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef: {name: saferoute-jwt-key, key: PINNED_VERSION}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef: {name: saferoute-database-url, key: PINNED_VERSION}
+            - name: GOOGLE_ROUTES_API_KEY
+              valueFrom:
+                secretKeyRef: {name: saferoute-google-routes-key, key: PINNED_VERSION}
+          volumeMounts: [{name: private-photos, mountPath: /srv/uploads}]
+          startupProbe:
+            httpGet: {path: /health, port: 8000}
+            periodSeconds: 10
+            failureThreshold: 24
+          livenessProbe:
+            httpGet: {path: /health, port: 8000}
+            periodSeconds: 30
+      volumes:
+        - name: private-photos
+          csi:
+            driver: gcsfuse.run.googleapis.com
+            volumeAttributes: {bucketName: PRIVATE_PHOTO_BUCKET}

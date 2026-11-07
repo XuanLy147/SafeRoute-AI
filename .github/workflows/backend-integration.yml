@@ -1,0 +1,41 @@
+name: TV345 backend integration
+on:
+  push:
+    branches: [integration/tv345-backend-handoff]
+  pull_request:
+    paths: ['backend/**', 'ai/**', 'scripts/qa/**', 'docs/handoff/**', '.github/workflows/backend-integration.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Install approved runtime
+        run: |
+          pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r backend/requirements.txt -r backend/requirements-ai.txt
+      - name: Ruff
+        run: ruff check backend
+      - name: Real PostGIS, migrations, regression and HTTP E2E
+        run: python scripts/qa/verify_postgis.py --backend backend --runxfail > postgis-evidence.txt 2>&1
+      - name: Real checkpoint CPU smoke
+        run: python scripts/qa/verify_ai.py > ai-evidence.txt 2>&1
+      - name: Contract and handoff artifacts
+        run: python scripts/qa/verify_contract.py
+      - name: Secrets scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build runtime image
+        run: docker build -f backend/Dockerfile -t saferoute-ci .
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: backend-verification
+          path: '*-evidence.txt'
