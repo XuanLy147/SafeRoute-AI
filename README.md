@@ -10,9 +10,9 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 |---|---|---|
 | TV1 | Android bản đồ, GPS, marker, tuyến đường, navigation | Java + XML, AndroidX, Google Maps SDK |
 | TV2 | Android báo cáo ảnh/AI, tài khoản, bình chọn, kiểm duyệt | Java + XML, Retrofit |
-| TV3 | API, xác thực, database, reports/review | FastAPI, PostgreSQL/PostGIS |
-| TV4 | AI inference, kiểm thử và model card | YOLOv12s v1.1, Python |
-| TV5 | Google Routes, risk scoring, Cloud, CI/CD | Routes API, Docker, Cloud Run |
+| TV3 | API, Auth/Reports/Images/Votes/Review, AI HTTP | FastAPI |
+| TV4 | Database/PostGIS, Alembic, Risk, Docker, Cloud, CI/CD | PostgreSQL/PostGIS, Docker, Cloud Run |
+| TV5 | Google Routes, Routing Service, Geometry, Recommendation | Google Routes API |
 
 ## Cấu trúc thư mục
 
@@ -24,7 +24,7 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 - `scripts/` — Lệnh dùng chung và smoke test.
 - `.github/workflows/` — CI/CD sau khi có mã chạy và credentials cấu hình an toàn.
 
-> **Trạng thái:** Repo vừa được khởi tạo cấu trúc. File đánh dấu thư mục và tài liệu không chứng minh chức năng đã triển khai. Code chạy thật được phát triển và kiểm thử sau.
+> **Trạng thái nhánh tích hợp:** Backend đã có kiểm chứng local; xem `docs/handoff/RELEASE_READINESS.md`. Cloud/live Google/policy production chưa được phê duyệt hoặc kiểm chứng. Lịch sử scaffold được giữ trong Git/tracker.
 
 ## Nguyên tắc phối hợp
 

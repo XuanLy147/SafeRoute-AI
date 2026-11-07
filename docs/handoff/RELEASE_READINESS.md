@@ -2,7 +2,7 @@
 
 Verdict: **READY_WITH_DOCUMENTED_LIMITATIONS** for backend/Android integration;
 **not Production Ready**. Branch `integration/tv345-backend-handoff`.
-Implementation snapshot: `005366bfb9dde5a6512195ee27768a4273db4592`.
+Implementation snapshot: `aefef2acc2046de37076455d06fe5774040648e1`.
 CI refinement: `c4ba25d`. Final delivery SHA is in Git/final handoff message;
 documentation and evidence commits follow this implementation snapshot.
 
@@ -19,7 +19,7 @@ backed up separately. No main/frontend/Android edits or pushes.
 
 | Gate | Observed result |
 |---|---|
-| Combined regression/HTTP/PostGIS | PASS 172 tests + 12 subtests; 0 failures/skips/xfail |
+| Combined regression/HTTP/PostGIS | PASS 178 tests + 12 subtests; 0 failures/skips/xfail |
 | Original live spatial suite | PASS 5 tests within combined count, not added twice |
 | Alembic | PASS upgrade/rollback/re-upgrade, existing-row preservation, metadata diff=[] |
 | PostGIS | PostgreSQL 16.4/PostGIS 3.4.3; geography SRID4326/GiST/ST_DWithin meters PASS |
@@ -37,7 +37,7 @@ backed up separately. No main/frontend/Android edits or pushes.
 
 Evidence in `docs/integration/evidence/`: postgis-http.txt, container-http.txt,
 docker-build.txt, ai-cpu.txt, secrets.txt. Container verified image:
-`sha256:02261033c32b06b1dfab3ee6f04084da47812bb58483ee091f1ce2230b16226c`.
+`sha256:c9f8efb8fc8a6ef6a9213b10849aa896d59a7f61ac5680ecb9b81afa4a0cad09`.
 The AI input is a synthetic gray image, not an accuracy benchmark or cloud latency
 measurement. Runtime matches checkpoint metadata; see official YOLO12 guidance
 https://docs.ultralytics.com/models/yolo12/ . No model substitution or training.

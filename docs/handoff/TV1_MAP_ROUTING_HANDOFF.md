@@ -1,7 +1,7 @@
 # TV1 — Map and routing handoff
 
 Backend branch: `integration/tv345-backend-handoff`.
-Implementation snapshot: `005366b` (source/security/runtime commits b7c0b87, 828f1ef, 005366b).
+Implementation snapshot: `aefef2acc2046de37076455d06fe5774040648e1` (source/security/runtime commits b7c0b87, 828f1ef, 005366b).
 Final delivery SHA is reported by Git and the final handoff message; subsequent
 contract documentation changes do not change this provenance anchor.
 Contract revision: `tv345-contract-2026-11-07`, API `/api/v1`.

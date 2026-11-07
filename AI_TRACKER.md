@@ -132,7 +132,7 @@ Routing/Geometry/Recommendation. Android remains TV1/TV2.
 
 | Task | Owner | Status | Evidence |
 |---|---|---|---|
-| Durable API/private images/security/DTO | TV3 | DONE_VERIFIED | b7c0b87; 172 combined tests PASS; container HTTP/restart PASS |
+| Durable API/private images/security/DTO | TV3 | DONE_VERIFIED | b7c0b87; 178 combined tests PASS; container HTTP/restart PASS |
 | PostGIS/migrations/keyed risk | TV4 | DONE_VERIFIED | cycle/data preservation/diff=[]; 5 live spatial + HTTP risk PASS |
 | Routing/Google adapter regression | TV5 | DONE_VERIFIED | b5c81b4 retained; unavailable/partial/invalid/zero tested |
 | Production risk approval | TV4 + owners | BLOCKED | numeric approval absent; explicit demo profile |
