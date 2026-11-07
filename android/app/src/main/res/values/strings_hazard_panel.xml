@@ -1,0 +1,4 @@
+<resources>
+    <string name="hazard_panel_collapse">Thu gọn cảnh báo. Vuốt xuống hoặc chạm để ẩn danh sách.</string>
+    <string name="hazard_panel_expand">Mở danh sách cảnh báo. Vuốt lên hoặc chạm để xem.</string>
+</resources>

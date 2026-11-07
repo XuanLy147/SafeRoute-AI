@@ -45,6 +45,34 @@ public class HtmlFlowTest {
     private void back(){activity.getOnBackPressedDispatcher().onBackPressed();settle();}
     private void recreate(){controller.recreate();activity=controller.get();settle();}
     private Object screen(){return activity.getSupportFragmentManager().findFragmentById(R.id.content);}
+    @Test public void hazardPanelCollapsesAndRestoresAcrossRecreation() {
+        activity.openMap();settle();
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+        click(R.id.hazardPanelToggle);
+        assertEquals(View.GONE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.status).getVisibility());
+        click(R.id.refresh);
+        assertEquals(View.GONE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+        recreate();
+        assertEquals(View.GONE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+        click(R.id.hazardPanelToggle);
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+    }
+    @Test public void hazardPanelSupportsBothSwipeDirections() {
+        activity.openMap();settle();
+        swipePanel(20f,100f);
+        assertEquals(View.GONE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+        swipePanel(100f,20f);
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.hazardPanelContent).getVisibility());
+    }
+    private void swipePanel(float from, float to) {
+        View handle=activity.findViewById(R.id.hazardPanelToggle);
+        long now=android.os.SystemClock.uptimeMillis();
+        android.view.MotionEvent down=android.view.MotionEvent.obtain(now,now,android.view.MotionEvent.ACTION_DOWN,20f,from,0);
+        android.view.MotionEvent up=android.view.MotionEvent.obtain(now,now+100,android.view.MotionEvent.ACTION_UP,20f,to,0);
+        handle.dispatchTouchEvent(down);handle.dispatchTouchEvent(up);
+        down.recycle();up.recycle();settle();
+    }
     @Test public void firstRunFollowsIntroductionPermissionsLoginAndExplicitGuest() {
         assertTrue(screen() instanceof WelcomeFragment);
         assertEquals(View.GONE,activity.findViewById(R.id.navigation).getVisibility());

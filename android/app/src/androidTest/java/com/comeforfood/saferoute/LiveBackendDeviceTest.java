@@ -140,8 +140,10 @@ public class LiveBackendDeviceTest {
                 ui(a->{((EditText)a.findViewById(R.id.etEmail)).setText("android-admin@example.com");((EditText)a.findViewById(R.id.etPassword)).setText("local-device-test-password");a.findViewById(R.id.btnLogin).performClick();});
                 waitFor(a->"ADMIN".equals(session.getRole())&&session.isVerified());
                 ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_REPORTS));
-                waitFor(a->text(a.findViewById(R.id.content),"#"+id+" · D40 · Đã xác minh\n")!=null
-                    || (a.findViewById(R.id.flowBody) instanceof TextView && ((TextView)a.findViewById(R.id.flowBody)).getText().toString().startsWith("Báo cáo ·")));
+                String expectedAdminRow="#"+id+" \u00b7 "+com.comeforfood.saferoute.core.model.HazardLabel.display(detail.getCategoryUser())
+                        +" \u00b7 "+detail.getStatusDisplay()+"\n"+com.comeforfood.saferoute.feature.shared.DisplayText.time(detail.getCreatedAt())
+                        +"\n"+(detail.getDescription()==null?"":detail.getDescription());
+                waitFor(a->text(a.findViewById(R.id.content),expectedAdminRow)!=null);
                 ui(a->a.openFlow(FlowPageFragment.Page.ADMIN_AUDIT));
                 waitFor(a->text(a.findViewById(R.id.content),"Lịch sử quyền tài khoản")!=null);
                 ui(a->text(a.findViewById(R.id.content),"Lịch sử quyền tài khoản").performClick());

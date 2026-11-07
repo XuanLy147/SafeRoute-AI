@@ -13,6 +13,12 @@ public final class DisplayText {
             .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm",Locale.forLanguageTag("vi-VN")));}
         catch(java.time.format.DateTimeParseException ignored){return value;}
     }
+    public static String severity(String value) {
+        if ("LOW".equals(value)) return "Thấp";
+        if ("MEDIUM".equals(value)) return "Trung bình";
+        if ("HIGH".equals(value)) return "Cao";
+        return "Chưa có mức độ";
+    }
     public static String status(String value) {
         if("VERIFIED".equals(value))return "Đã xác minh";
         if("REJECTED".equals(value))return "Từ chối";

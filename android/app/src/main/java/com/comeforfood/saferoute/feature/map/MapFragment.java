@@ -33,16 +33,18 @@ public class MapFragment extends LocationAwareFragment {
     private final HazardMarkerRenderer markers = new HazardMarkerRenderer();
     private List<Hazard> visibleReports = Collections.emptyList();
     private boolean hasUnreadNotification = true;
+    private boolean panelExpanded = true;
+    private float panelTouchY;
+    private static final String PANEL_EXPANDED = "map.hazardPanelExpanded";
 
     @Nullable @Override public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle saved) {
         binding = FragmentMapBinding.inflate(inflater, parent, false); return binding.getRoot();
     }
     @Override public void onViewCreated(@NonNull View view, @Nullable Bundle saved) {
+        if (saved != null) panelExpanded = saved.getBoolean(PANEL_EXPANDED, true);
+        configureHazardPanel();
         model = new ViewModelProvider(requireActivity()).get(Tv1ViewModel.class);
-        binding.categories.check(model.category() == HazardFilter.Category.POTHOLE ? R.id.pothole
-                : model.category() == HazardFilter.Category.CRACKS ? R.id.cracks : R.id.all);
         binding.verified.setChecked(model.verifiedOnly());
-        binding.categories.setOnCheckedStateChangeListener((group, checked) -> updateFilters());
         binding.verified.setOnCheckedChangeListener((button, checked) -> updateFilters());
         binding.refresh.setOnClickListener(v -> model.refreshReports());
         binding.badgeNotification.setVisibility(hasUnreadNotification ? View.VISIBLE : View.GONE);
@@ -70,7 +72,6 @@ public class MapFragment extends LocationAwareFragment {
         model.reports().observe(getViewLifecycleOwner(), this::render);
         if (MapsSupport.configured(requireContext())) {
             binding.mapPlaceholder.setVisibility(View.GONE);
-            binding.mapStatus.setVisibility(View.VISIBLE);
             MapsSupport.attach(this, R.id.map, ready -> {
                 map = ready;
                 map.getUiSettings().setMyLocationButtonEnabled(false);
@@ -92,6 +93,43 @@ public class MapFragment extends LocationAwareFragment {
             });
         }
     }
+    @SuppressLint("ClickableViewAccessibility")
+    private void configureHazardPanel() {
+        binding.hazardPanelToggle.setOnClickListener(v -> setPanelExpanded(!panelExpanded));
+        binding.hazardPanelToggle.setOnTouchListener((v, event) -> {
+            switch (event.getActionMasked()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    panelTouchY = event.getRawY();
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
+                    return true;
+                case android.view.MotionEvent.ACTION_MOVE:
+                    return true;
+                case android.view.MotionEvent.ACTION_UP:
+                    float delta = event.getRawY() - panelTouchY;
+                    float threshold = android.view.ViewConfiguration.get(v.getContext()).getScaledTouchSlop();
+                    if (Math.abs(delta) > threshold) setPanelExpanded(delta < 0);
+                    else v.performClick();
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
+                    return true;
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    v.getParent().requestDisallowInterceptTouchEvent(false);
+                    return true;
+                default: return false;
+            }
+        });
+        setPanelExpanded(panelExpanded);
+    }
+    private void setPanelExpanded(boolean expanded) {
+        panelExpanded = expanded;
+        binding.hazardPanelContent.setVisibility(expanded ? View.VISIBLE : View.GONE);
+        binding.hazardPanelToggle.setRotation(expanded ? 0f : 180f);
+        binding.hazardPanelToggle.setContentDescription(getString(expanded
+                ? R.string.hazard_panel_collapse : R.string.hazard_panel_expand));
+    }
+    @Override public void onSaveInstanceState(@NonNull Bundle out) {
+        super.onSaveInstanceState(out);
+        out.putBoolean(PANEL_EXPANDED, panelExpanded);
+    }
     @Override public void onResume() { super.onResume(); model.refreshReports(); }
     @SuppressLint("MissingPermission")
     private void enableLocation() {
@@ -100,9 +138,7 @@ public class MapFragment extends LocationAwareFragment {
         }
     }
     private void updateFilters() {
-        int id = binding.categories.getCheckedChipId();
-        model.filters(id == R.id.pothole ? HazardFilter.Category.POTHOLE
-                : id == R.id.cracks ? HazardFilter.Category.CRACKS : HazardFilter.Category.ALL, binding.verified.isChecked());
+        model.filters(model.category(), binding.verified.isChecked());
         render(model.reports().getValue());
     }
     private void render(Tv1ViewModel.State<List<Hazard>> state) {

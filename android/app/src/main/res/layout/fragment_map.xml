@@ -222,60 +222,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Floating Category Chips Row -->
-            <HorizontalScrollView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:scrollbars="none"
-                android:clipToPadding="false">
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/categories"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:singleSelection="true"
-                    app:selectionRequired="true"
-                    app:singleLine="true">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/all"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:checked="true"
-                        android:text="@string/filter_all"
-                        android:elevation="3dp"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="@color/soft_line"
-                        app:ensureMinTouchTargetSize="true" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/pothole"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_pothole"
-                        android:elevation="3dp"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="@color/soft_line"
-                        app:ensureMinTouchTargetSize="true" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/cracks"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/filter_cracks"
-                        android:elevation="3dp"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipStrokeWidth="1dp"
-                        app:chipStrokeColor="@color/soft_line"
-                        app:ensureMinTouchTargetSize="true" />
-                </com.google.android.material.chip.ChipGroup>
-            </HorizontalScrollView>
         </LinearLayout>
 
         <!-- 3. FLOATING BOTTOM CONTROLS & ACTIONS -->
@@ -288,116 +235,12 @@
             android:paddingBottom="12dp"
             android:clipToPadding="false">
 
-            <!-- Floating Status / Hazards Panel -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#F7FFFFFF"
-                app:strokeWidth="1dp"
-                app:strokeColor="@color/soft_line">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="14dp"
-                    android:paddingVertical="8dp">
-
-                    <!-- Status & Refresh Row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical">
-
-                        <TextView
-                            android:id="@+id/status"
-                            android:layout_width="0dp"
-                            android:layout_weight="1"
-                            android:layout_height="wrap_content"
-                            android:textAppearance="@style/Text.SafeRoute.Note"
-                            android:textColor="@color/ink"
-                            android:fontFamily="sans-serif"
-                            android:accessibilityLiveRegion="polite" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/refresh"
-                            style="@style/Widget.MaterialComponents.Button.TextButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="36dp"
-                            android:minHeight="36dp"
-                            android:textAllCaps="false"
-                            android:letterSpacing="0"
-                            android:textSize="13sp"
-                            android:text="@string/refresh" />
-                    </LinearLayout>
-
-                    <!-- Verified switch -->
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/verified"
-                        android:layout_width="match_parent"
-                        android:layout_height="36dp"
-                        android:minHeight="36dp"
-                        android:text="@string/filter_verified"
-                        android:textSize="13sp" />
-
-                    <!-- Loading bar -->
-                    <ProgressBar
-                        android:id="@+id/loading"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="3dp"
-                        android:indeterminate="true"
-                        android:visibility="gone" />
-
-                    <!-- Hazards report list (collapsible/scrollable) -->
-                    <LinearLayout
-                        android:id="@+id/report_scroll"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <androidx.core.widget.NestedScrollView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:maxHeight="160dp"
-                            android:scrollbars="vertical">
-
-                            <LinearLayout
-                                android:id="@+id/report_list"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:paddingTop="4dp" />
-                        </androidx.core.widget.NestedScrollView>
-                    </LinearLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Map Status Label: "Bản đồ Google - Dữ liệu cảnh báo..." -->
-            <TextView
-                android:id="@+id/map_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="6dp"
-                android:paddingHorizontal="10dp"
-                android:paddingVertical="3dp"
-                android:background="@drawable/bg_info_soft"
-                android:textColor="@color/on_info"
-                android:textSize="11sp"
-                android:fontFamily="sans-serif"
-                android:text="@string/map_unavailable_detail"
-                android:visibility="gone" />
-
             <!-- 2 Main Floating Action Buttons: My Location & Routes -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/location"
@@ -435,6 +278,125 @@
                     app:icon="@drawable/ic_route"
                     app:iconSize="18dp" />
             </LinearLayout>
+
+            <!-- Floating Status / Hazards Panel -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                app:cardBackgroundColor="#F7FFFFFF"
+                app:strokeWidth="1dp"
+                app:strokeColor="@color/soft_line">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="14dp"
+                    android:paddingVertical="8dp">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/hazardPanelToggle"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_panel_chevron"
+                        app:tint="@color/primary"
+                        android:contentDescription="@string/hazard_panel_collapse" />
+                    <!-- Status & Refresh Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/status"
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/Text.SafeRoute.Note"
+                            android:textColor="@color/ink"
+                            android:fontFamily="sans-serif"
+                            android:accessibilityLiveRegion="polite" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/refresh"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:minHeight="36dp"
+                            android:textAllCaps="false"
+                            android:letterSpacing="0"
+                            android:textSize="13sp"
+                            android:text="@string/refresh" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/hazardPanelContent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+                    <!-- Verified switch -->
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/verified"
+                        android:layout_width="match_parent"
+                        android:layout_height="36dp"
+                        android:minHeight="36dp"
+                        android:text="@string/filter_verified"
+                        android:textSize="13sp" />
+
+                    <!-- Loading bar -->
+                    <ProgressBar
+                        android:id="@+id/loading"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="3dp"
+                        android:indeterminate="true"
+                        android:visibility="gone" />
+
+                    <!-- Hazards report list (collapsible/scrollable) -->
+                    <LinearLayout
+                        android:id="@+id/report_scroll"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <com.comeforfood.saferoute.feature.map.HazardListScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:scrollbars="vertical">
+
+                            <LinearLayout
+                                android:id="@+id/report_list"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingTop="4dp" />
+                        </com.comeforfood.saferoute.feature.map.HazardListScrollView>
+                    </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Map Status Label: "Bản đồ Google - Dữ liệu cảnh báo..." -->
+            <TextView
+                android:id="@+id/map_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="6dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:background="@drawable/bg_info_soft"
+                android:textColor="@color/on_info"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif"
+                android:visibility="gone" />
+
+
         </LinearLayout>
     </FrameLayout>
 </androidx.core.widget.NestedScrollView>

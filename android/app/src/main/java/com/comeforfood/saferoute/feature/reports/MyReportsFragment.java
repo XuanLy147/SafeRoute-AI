@@ -43,7 +43,7 @@ public class MyReportsFragment extends Fragment {
                 retry.setEnabled(true);binding.reportsUnavailable.setText(reports.isEmpty()?"Chưa có báo cáo":"Báo cáo: "+reports.size());
                 for(com.comeforfood.saferoute.core.model.ReportDto.ReportResponse r:reports){
                     com.google.android.material.button.MaterialButton row=new com.google.android.material.button.MaterialButton(requireContext());row.setAllCaps(false);
-                    row.setText("#"+r.getId()+" · "+r.getCategoryUser()+" · "+r.getStatusDisplay()+"\n"+r.getCreatedAt());rows.addView(row);
+                    row.setText("#"+r.getId()+" · "+com.comeforfood.saferoute.core.model.HazardLabel.display(r.getCategoryUser())+" · "+r.getStatusDisplay()+"\n"+r.getCreatedAt());rows.addView(row);
                     row.setOnClickListener(v->((com.comeforfood.saferoute.MainActivity)requireActivity()).openTv2Fragment(ReportDetailFragment.at(r.getId())));
                 }
             },error->{retry.setEnabled(true);binding.reportsUnavailable.setText(error);});

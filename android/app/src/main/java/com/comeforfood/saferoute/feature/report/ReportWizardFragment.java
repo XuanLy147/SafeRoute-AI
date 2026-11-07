@@ -497,7 +497,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
         for(int i=0;i<detections.size();i++){
             final int index=i;com.comeforfood.saferoute.core.model.DetectionDto detection=detections.get(i);
             android.widget.Spinner label=new android.widget.Spinner(requireContext());String[] codes={"D00","D10","D20","D40","Repair"};
-            label.setContentDescription("Sửa nhãn phát hiện AI "+(i+1));label.setAdapter(new android.widget.ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_dropdown_item,codes));
+            label.setContentDescription("Sửa nhãn phát hiện AI "+(i+1));label.setAdapter(new android.widget.ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_dropdown_item,java.util.Arrays.stream(codes).map(com.comeforfood.saferoute.core.model.HazardLabel::display).toArray(String[]::new)));
             label.setSelection(java.util.Arrays.asList(codes).indexOf(detection.getClassCode()));detectionEditors.addView(label);
             label.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
                 public void onNothingSelected(android.widget.AdapterView<?> p){}

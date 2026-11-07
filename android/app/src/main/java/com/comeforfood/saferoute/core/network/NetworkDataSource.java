@@ -23,7 +23,7 @@ public final class NetworkDataSource implements Tv1DataSource {
                 if("Nứt đường".equalsIgnoreCase(r.getCategoryUser())) type=Hazard.Type.CRACK;
                 else try { type=Hazard.Type.valueOf(r.getCategoryUser().toUpperCase(Locale.ROOT)); }
                 catch(IllegalArgumentException e) {type=Hazard.Type.MANUAL;}
-                result.add(new Hazard(r.getId(),r.getCategoryUser(),r.getDescription(),new Point(r.getLatitude(),r.getLongitude()),type,status));
+                result.add(new Hazard(r.getId(),com.comeforfood.saferoute.core.model.HazardLabel.display(r.getCategoryUser()),r.getDescription(),new Point(r.getLatitude(),r.getLongitude()),type,status));
             }
             return result;
         });
@@ -54,7 +54,7 @@ public final class NetworkDataSource implements Tv1DataSource {
             } else {
                 int total = verified + pending;
                 if (total == 0) {
-                    displayReason = "Tuyến đường thông thoáng, chưa ghi nhận nguy cơ mặt đường.";
+                    displayReason = "Chưa ghi nhận nguy cơ gần tuyến. Dữ liệu có thể chưa đầy đủ.";
                 } else {
                     displayReason = "Phát hiện " + total + " điểm cảnh báo (" + verified + " đã xác minh"
                             + (pending > 0 ? ", " + pending + " chờ duyệt" : "") + ").";

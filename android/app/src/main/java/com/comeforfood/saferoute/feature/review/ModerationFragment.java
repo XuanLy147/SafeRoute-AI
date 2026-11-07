@@ -90,7 +90,7 @@ public class ModerationFragment extends Fragment {
                 ApiCalls.enqueueDetailed(getViewLifecycleOwner(),api.adminReports(query,statuses[statusIndex],offset,30),list->{
                     finish(list.size(),"Không có báo cáo phù hợp.","Báo cáo");
                     for(com.comeforfood.saferoute.core.model.ReportDto.ReportResponse r:list)
-                        reportButton(Long.parseLong(r.getId()),"#"+r.getId()+" · "+r.getCategoryUser()+" · "+r.getStatusDisplay()
+                        reportButton(Long.parseLong(r.getId()),"#"+r.getId()+" · "+com.comeforfood.saferoute.core.model.HazardLabel.display(r.getCategoryUser())+" · "+r.getStatusDisplay()
                             +"\n"+DisplayText.time(r.getCreatedAt())+"\n"+(r.getDescription()==null?"":r.getDescription()));
                 },this::failure);break;
             case DUPLICATES:
@@ -98,7 +98,7 @@ public class ModerationFragment extends Fragment {
                     finish(list.size(),"Không tìm thấy cặp báo cáo theo tiêu chí.","Cặp cần kiểm tra");
                     b.flowBody.append("\nGợi ý: cùng loại, cách nhau tối đa 30 m, đều trong 7 ngày gần nhất và còn ít nhất một báo cáo chờ duyệt. Cần xem bằng chứng; không tự gộp báo cáo.");
                     for(com.comeforfood.saferoute.core.model.ModerationDto.Pair p:list) {
-                        label(rows,p.category+" · Cách nhau "+String.format(java.util.Locale.forLanguageTag("vi-VN"),"%.1f",p.distance)+" m");
+                        label(rows,com.comeforfood.saferoute.core.model.HazardLabel.display(p.category)+" · Cách nhau "+String.format(java.util.Locale.forLanguageTag("vi-VN"),"%.1f",p.distance)+" m");
                         reportButton(p.reportId,"Xem báo cáo #"+p.reportId);
                         reportButton(p.candidateId,"Đối chiếu báo cáo #"+p.candidateId);
                     }

@@ -33,12 +33,12 @@
 <string name="report_location_or">Hoặc</string>
 <string name="report_analyze">Xác nhận</string>
 <string name="report_address_searching">Đang tìm địa chỉ…</string>
-<string name="report_address_choose">Chọn địa chỉ vị trí báo cáo</string>
+<string name="report_address_choose">Chọn địa chỉ nơi xảy ra nguy cơ</string>
 <string name="report_address_loading">Đang tìm địa chỉ…</string>
 <string name="report_address_unavailable">Chưa xác định được địa chỉ</string>
 <string name="report_location_address">Địa chỉ: %1$s</string>
 <string name="report_ai_title">Kết quả phân tích</string>
-<string name="report_manual">Nhận diện thủ công</string>
+<string name="report_manual">Tự chọn loại nguy cơ</string>
 <string name="report_type_title">Chỉnh loại nguy cơ</string>
 <string name="report_category_label">Loại nguy cơ</string>
 <string name="report_severity_label">Mức độ nghiêm trọng</string>
@@ -49,7 +49,7 @@
 <string name="report_send">Gửi báo cáo</string>
 <string name="report_edit">Chỉnh sửa nội dung</string>
 <string name="report_failure_title">Chưa gửi được báo cáo</string>
-<string name="report_failure_body">Dịch vụ tạo báo cáo chưa được kết nối. Nội dung đang được giữ trong phiên này để bạn kiểm tra hoặc thử lại.</string>
+<string name="report_failure_body">Chưa xác nhận được báo cáo đã gửi thành công. Bản nháp vẫn được giữ; hãy kiểm tra Báo cáo của tôi trước khi gửi lại để tránh trùng lặp.</string>
 <string name="report_retry">Thử gửi lại</string>
 <string name="report_missing_image">Hãy chọn hoặc chụp ảnh trước khi tiếp tục.</string>
 <string name="report_missing_category">Hãy chọn loại nguy cơ.</string>
@@ -59,7 +59,7 @@
 <string name="report_pin">Vị trí báo cáo</string>
 <string name="report_no_map">Bản đồ chưa được cấu hình. Bạn có thể lấy vị trí hiện tại.</string>
 <string name="report_summary">Loại: %1$s\nMức độ: %2$s\nVị trí: %3$s\n\n%4$s</string>
-<string name="role_review_home">Tổng quan reviewer</string>
+<string name="role_review_home">Tổng quan kiểm duyệt</string>
 <string name="role_review_queue">Danh sách chờ duyệt</string>
 <string name="role_review_history">Lịch sử xét duyệt</string>
 <string name="role_admin_home">Tổng quan quản trị</string>
@@ -92,7 +92,7 @@
 <string name="flow_notifications">Thông báo</string>
 <string name="flow_settings">Cài đặt</string>
 <string name="flow_privacy">Quyền riêng tư</string>
-<string name="flow_privacy_body">Ứng dụng chỉ lấy vị trí khi bạn yêu cầu và chỉ đọc ảnh bạn chọn. Quyền của hệ thống được quản lý trong Cài đặt Android.\n\nChưa kết nối dịch vụ tải ảnh; chưa xác nhận chính sách lưu trữ hoặc xử lý EXIF của máy chủ.</string>
+<string name="flow_privacy_body">Ứng dụng lấy vị trí khi bạn yêu cầu và chỉ đọc ảnh bạn chọn. Khi dùng phân tích AI hoặc gửi báo cáo, ảnh được tải lên máy chủ để xử lý. Bạn có thể quản lý quyền truy cập trong Cài đặt Android.</string>
 <string name="flow_settings_body">Quản lý quyền truy cập của SafeRoute trong cài đặt Android hoặc xem lại phần giới thiệu.</string>
 <string name="flow_android_settings">Mở cài đặt quyền Android</string>
 <string name="flow_replay_intro">Xem lại giới thiệu</string>

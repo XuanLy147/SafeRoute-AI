@@ -55,10 +55,10 @@
     <string name="tv2_report_wizard_22_text">Vị trí ghi nhận</string>
     <string name="tv2_report_wizard_24_text">📍</string>
     <string name="tv2_report_wizard_27_text">Loại hư hỏng (Xác nhận của bạn)</string>
-    <string name="tv2_report_wizard_29_text">D40 · Ổ gà</string>
-    <string name="tv2_report_wizard_30_text">D00 · Nứt dọc</string>
-    <string name="tv2_report_wizard_31_text">D10 · Nứt ngang</string>
-    <string name="tv2_report_wizard_32_text">D20 · Nứt mạng nhện</string>
+    <string name="tv2_report_wizard_29_text">Ổ gà</string>
+    <string name="tv2_report_wizard_30_text">Nứt dọc</string>
+    <string name="tv2_report_wizard_31_text">Nứt ngang</string>
+    <string name="tv2_report_wizard_32_text">Nứt mạng nhện</string>
     <string name="tv2_report_wizard_33_text">Vết sửa chữa</string>
     <string name="tv2_report_wizard_34_text">Ngập nước (Thủ công)</string>
     <string name="tv2_report_wizard_35_text">Vật cản (Thủ công)</string>
@@ -82,7 +82,7 @@
     <string name="tv2_reviewer_24_text">Kiểm tra hồ sơ</string>
     <string name="tv2_reviewer_26_text">HỒ SƠ MINH HỌA · Ảnh và vị trí thật chưa tải</string>
     <string name="tv2_reviewer_28_text">Ảnh báo cáo và bounding box</string>
-    <string name="tv2_reviewer_29_text">D40 · Ổ gà\nTrạng thái: PENDING_VERIFICATION\nVị trí: Chưa tải\nAI: Chưa tải</string>
+    <string name="tv2_reviewer_29_text">Ổ gà\nTrạng thái: PENDING_VERIFICATION\nVị trí: Chưa tải\nAI: Chưa tải</string>
     <string name="tv2_reviewer_30_text">Xem lựa chọn quyết định</string>
     <string name="tv2_reviewer_31_text">Quay lại hàng chờ</string>
     <string name="tv2_reviewer_33_text">Chưa gửi quyết định · API review chưa tích hợp</string>

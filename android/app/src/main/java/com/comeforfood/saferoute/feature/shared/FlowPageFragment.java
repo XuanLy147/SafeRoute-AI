@@ -106,7 +106,7 @@ public class FlowPageFragment extends Fragment {
             binding.flowBody.setText(reports.isEmpty()?"Không có báo cáo chờ duyệt":"Báo cáo chờ duyệt: "+reports.size());
             for(com.comeforfood.saferoute.core.model.ReportDto.ReportResponse r:reports) {
                 MaterialButton row=action(R.string.role_detail,r.getId(),()->((MainActivity)requireActivity()).openTv2Fragment(com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(r.getId())));
-                row.setText("#"+r.getId()+" · "+r.getCategoryUser()+" · "+r.getCreatedAt());
+                row.setText("#"+r.getId()+" · "+com.comeforfood.saferoute.core.model.HazardLabel.display(r.getCategoryUser())+" · "+r.getCreatedAt());
             }
             action(R.string.role_retry,"retry",this::loadQueue);
         },error->{binding.flowBody.setText(error);action(R.string.role_retry,"retry",this::loadQueue);});

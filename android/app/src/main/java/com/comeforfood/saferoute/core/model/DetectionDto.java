@@ -51,15 +51,7 @@ public class DetectionDto implements Serializable {
      * Vietnamese display name corresponding to RDD2022 / YOLOv12s classes
      */
     public String getDisplayName() {
-        if (classCode == null) return "Hư hỏng mặt đường";
-        switch (classCode.toUpperCase()) {
-            case "D00": return "D00 · Nứt dọc";
-            case "D10": return "D10 · Nứt ngang";
-            case "D20": return "D20 · Nứt mạng nhện";
-            case "D40": return "D40 · Ổ gà";
-            case "REPAIR": return "Vết sửa chữa";
-            default: return classCode;
-        }
+        return HazardLabel.display(classCode);
     }
 
     public static class DetectionResponse implements Serializable {

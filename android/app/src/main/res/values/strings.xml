@@ -11,7 +11,7 @@
     <string name="map_unavailable_detail">Bạn vẫn có thể nhập tên địa điểm hoặc địa chỉ A/B để chuẩn bị tìm đường. Bản đồ cần được cấu hình trước khi sử dụng.</string>
     <string name="map_connecting">Đang tải nền bản đồ… Nếu bản đồ vẫn trống, hãy kiểm tra kết nối và cấu hình Maps.</string>
     <string name="map_ready">Bản đồ Google · Dữ liệu cảnh báo hiển thị bên dưới</string>
-    <string name="reports_disconnected">Chưa kết nối dữ liệu cảnh báo. Không có marker không có nghĩa là đường an toàn.</string>
+    <string name="reports_disconnected">Chưa tải được dữ liệu cảnh báo. Đường không có cảnh báo vẫn có thể có nguy cơ.</string>
     <string name="reports_loading">Đang tải cảnh báo…</string>
     <string name="reports_error">Không tải được cảnh báo. Kiểm tra kết nối rồi thử lại.</string>
     <string name="reports_empty">Chưa có cảnh báo phù hợp bộ lọc. Dữ liệu có thể chưa đầy đủ.</string>
@@ -19,7 +19,7 @@
     <string name="filter_all">Tất cả</string>
     <string name="filter_pothole">Ổ gà</string>
     <string name="filter_cracks">Vết nứt</string>
-    <string name="filter_verified">Chỉ đã xác minh</string>
+    <string name="filter_verified">Chỉ hiện cảnh báo đã xác minh</string>
     <string name="refresh">Làm mới</string>
     <string name="my_location">Vị trí của tôi</string>
     <string name="locating">Đang lấy vị trí…</string>
@@ -45,7 +45,7 @@
     <string name="route_loading">Đang tìm và đánh giá tuyến…</string>
     <string name="route_empty">Chưa tìm thấy tuyến phù hợp. Hãy kiểm tra A/B hoặc thử lại sau.</string>
     <string name="route_network">Không tải được tuyến. Kiểm tra mạng và thử lại.</string>
-    <string name="route_auth">Phiên đăng nhập chưa hợp lệ. Vui lòng đăng nhập lại khi tính năng tài khoản sẵn sàng.</string>
+    <string name="route_auth">Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại.</string>
     <string name="route_forbidden">Tài khoản chưa có quyền tìm tuyến này.</string>
     <string name="route_limit">Dịch vụ đang nhận quá nhiều yêu cầu. Vui lòng thử lại sau.</string>
     <string name="route_invalid">Dữ liệu tuyến chưa hợp lệ nên chưa thể hiển thị. Vui lòng thử lại sau.</string>
@@ -74,7 +74,7 @@
     <string name="hazard_preview">Chi tiết cảnh báo</string>
     <string name="go_here">Chọn làm điểm đến</string>
     <string name="close">Đóng</string>
-    <string name="pending_note">Thông tin này chưa được reviewer xác minh.</string>
+    <string name="pending_note">Thông tin này chưa được người kiểm duyệt xác minh.</string>
     <string name="verified_note">Đã được xác minh; hãy chú ý điều kiện thực tế trên đường.</string>
     <string name="filter_label">Lọc loại nguy cơ</string>
     <string name="location_origin_saved">Đã lưu %1$s làm điểm xuất phát A. Chọn Tìm đường để tiếp tục.</string>

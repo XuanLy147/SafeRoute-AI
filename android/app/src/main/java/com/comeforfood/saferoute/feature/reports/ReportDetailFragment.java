@@ -37,7 +37,7 @@ public class ReportDetailFragment extends Fragment {
     }
     private void render(ReportDto.ReportResponse r) {
         binding.flowActions.removeAllViews();
-        StringBuilder text=new StringBuilder(r.getStatusDisplay()+"\n"+r.getCategoryUser()+" · "+r.getSeverity()+"\n"+r.getLatitude()+", "+r.getLongitude()+"\n"+DisplayText.time(r.getCreatedAt())+"\n"+(r.getDescription()==null?"":r.getDescription())
+        StringBuilder text=new StringBuilder(r.getStatusDisplay()+"\n"+com.comeforfood.saferoute.core.model.HazardLabel.display(r.getCategoryUser())+" · "+DisplayText.severity(r.getSeverity())+"\n"+r.getLatitude()+", "+r.getLongitude()+"\n"+DisplayText.time(r.getCreatedAt())+"\n"+(r.getDescription()==null?"":r.getDescription())
             +"\nĐồng tình: "+r.getSupportVotes()+" · Phản đối: "+r.getOpposeVotes()+" · Chưa rõ: "+r.getUnsureVotes());
         if(r.getModelVersion()!=null)text.append("\nAI: ").append(r.getModelVersion());
         if(r.getAiDetections()!=null)for(DetectionDto d:r.getAiDetections())text.append("\n").append(d.getDisplayName()).append(" · ").append(Math.round(d.getConfidence()*100)).append("% (độ tin cậy AI)");
