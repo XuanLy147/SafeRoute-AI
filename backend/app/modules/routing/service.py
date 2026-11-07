@@ -174,9 +174,17 @@ class RoutingService:
                         risk_map[c.id] = score_obj
 
                 elif isinstance(raw_risk, (list, tuple)):
-                    if len(raw_risk) != len(candidates):
+                    if len(raw_risk) > len(candidates):
+                        # Cardinality mismatch: extra scores returned -> contract violation!
+                        logger.error(
+                            "Contract violation: Risk scorer returned %d scores for %d candidates (extra items)",
+                            len(raw_risk),
+                            len(candidates),
+                        )
+                        assessment_status = RiskAssessmentStatus.INVALID
+                    elif len(raw_risk) < len(candidates):
                         logger.warning(
-                            "Risk scorer returned %d scores for %d candidates",
+                            "Risk scorer returned %d scores for %d candidates (missing items)",
                             len(raw_risk),
                             len(candidates),
                         )
@@ -249,15 +257,21 @@ class RoutingService:
                     "Lưu ý: Dữ liệu nguy cơ không hợp lệ do lỗi định dạng từ hệ thống đánh giá."
                 )
             elif single.risk is not None:
-                if single.risk.hazards_count > 0:
+                if single.risk.hazards_count == 0:
                     recommendation_reason = (
                         f"Tuyến duy nhất tìm thấy ({single.summary}). "
-                        f"Ghi nhận {single.risk.hazards_count} nguy cơ trên lộ trình."
+                        "Chưa ghi nhận nguy cơ mặt đường nào trên hệ thống."
+                    )
+                elif single.risk.score == 0.0:
+                    recommendation_reason = (
+                        f"Tuyến duy nhất tìm thấy ({single.summary}). "
+                        f"Điểm nguy cơ bằng 0 theo chính sách đánh giá hiện hành "
+                        f"(ghi nhận {single.risk.hazards_count} báo cáo gần tuyến)."
                     )
                 else:
                     recommendation_reason = (
                         f"Tuyến duy nhất tìm thấy ({single.summary}). "
-                        "Chưa ghi nhận nguy cơ mặt đường nào trên hệ thống."
+                        f"Ghi nhận {single.risk.hazards_count} nguy cơ trên lộ trình."
                     )
             else:
                 # BUG-01 Fix: When risk is None, do NOT say "Chưa ghi nhận nguy cơ"
@@ -283,10 +297,15 @@ class RoutingService:
                 recommendation_basis = RecommendationBasis.SAFETY_LOWEST_RISK
 
                 mins = max(1, best_route.duration_seconds // 60)
-                if best_route.risk.hazards_count == 0 or best_route.risk.score == 0.0:
+                if best_route.risk.hazards_count == 0:
                     recommendation_reason = (
                         f"Tuyến '{best_route.summary}' được đề xuất vì chưa ghi nhận nguy cơ nào "
                         f"trên hệ thống (thời gian di chuyển: {mins} phút)."
+                    )
+                elif best_route.risk.score == 0.0:
+                    recommendation_reason = (
+                        f"Tuyến '{best_route.summary}' được đề xuất vì có điểm nguy cơ bằng 0 theo chính sách đánh giá hiện hành "
+                        f"(ghi nhận {best_route.risk.hazards_count} báo cáo gần tuyến; thời gian di chuyển: {mins} phút)."
                     )
                 else:
                     recommendation_reason = (

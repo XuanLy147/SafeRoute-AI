@@ -915,3 +915,186 @@ def test_regression_tv4_keyed_facade_order_independence():
     assert response.routes[1].id == "route_beta"
     assert response.routes[1].risk.score == 7.0  # Correctly mapped to beta
     assert response.recommended_route_id == "route_alpha"
+
+
+# ==============================================================================
+# 7. Regression — List cardinality mismatch & Zero-score-with-hazards (TV5)
+# ==============================================================================
+
+
+def test_regression_list_scorer_extra_items_marked_invalid():
+    """List scorer returns 3 scores for 2 candidates → INVALID (not AVAILABLE/PARTIAL).
+
+    Contract rule: extra scores are a contract violation — the scorer claims knowledge of
+    routes we did not send.  Service must mark INVALID, preserve both original candidates,
+    set risk=None for all, and fall back to DURATION_ETA_ONLY recommendation.
+
+    Uses evaluate_routes (list interface) since service checks evaluate_by_id first,
+    then evaluate_routes, then callable — delete evaluate_by_id to force evaluate_routes path.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_A", summary="Đường A", distance_meters=3000, duration_seconds=600, polyline="pA"),
+        RouteCandidate(id="route_B", summary="Đường B", distance_meters=4000, duration_seconds=500, polyline="pB"),
+    ]
+
+    mock_scorer = MagicMock()
+    # Remove evaluate_by_id to force evaluate_routes path (list interface)
+    del mock_scorer.evaluate_by_id
+    # evaluate_routes returns 3 items for 2 candidates → contract violation
+    mock_scorer.evaluate_routes.return_value = [
+        RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A"),
+        RouteRiskScore(score=2.0, level="LOW", hazards_count=2, verified_hazards_count=2, pending_hazards_count=0, reason="B"),
+        RouteRiskScore(score=3.0, level="MEDIUM", hazards_count=3, verified_hazards_count=3, pending_hazards_count=0, reason="EXTRA"),
+    ]
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    # Must preserve both original candidates
+    assert len(response.routes) == 2
+    assert response.routes[0].id == "route_A"
+    assert response.routes[1].id == "route_B"
+    # All risk must be None — extra data is untrustworthy
+    assert all(r.risk is None for r in response.routes), "Extra scores must NOT be used; all risk=None"
+    # Must be INVALID, not AVAILABLE or PARTIAL
+    assert response.risk_assessment_status == RiskAssessmentStatus.INVALID.value
+    # Fallback to ETA-only since risk data is unreliable
+    assert response.recommendation_basis == RecommendationBasis.DURATION_ETA_ONLY.value
+    # Should NOT claim lowest risk
+    assert "thấp nhất" not in response.recommendation_reason
+
+
+def test_regression_list_scorer_exact_count_marked_available():
+    """List scorer returns exactly 2 scores for 2 candidates → AVAILABLE.
+
+    Verifies the boundary condition: exact match in list length is valid (not INVALID/PARTIAL).
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_A", summary="Đường A", distance_meters=3000, duration_seconds=600, polyline="pA"),
+        RouteCandidate(id="route_B", summary="Đường B", distance_meters=4000, duration_seconds=500, polyline="pB"),
+    ]
+
+    mock_scorer = MagicMock()
+    # Remove evaluate_by_id to force evaluate_routes path (list interface)
+    del mock_scorer.evaluate_by_id
+    mock_scorer.evaluate_routes.return_value = [
+        RouteRiskScore(score=1.0, level="LOW", hazards_count=1, verified_hazards_count=1, pending_hazards_count=0, reason="A risk"),
+        RouteRiskScore(score=5.0, level="HIGH", hazards_count=5, verified_hazards_count=5, pending_hazards_count=0, reason="B risk"),
+    ]
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 2
+    assert response.risk_assessment_status == RiskAssessmentStatus.AVAILABLE.value
+    assert response.recommendation_basis == RecommendationBasis.SAFETY_LOWEST_RISK.value
+    # route_A has lower risk → should be recommended
+    assert response.recommended_route_id == "route_A"
+
+
+def test_regression_zero_score_with_pending_hazards_single_route():
+    """score=0.0 with hazards_count>0 (pending excluded by policy) → must NOT say 'Chưa ghi nhận nguy cơ'.
+
+    Business rule: score=0 ≠ no hazards.  When pending_multiplier=0 is applied,
+    pending reports bring score to 0 but reports still exist.  Service must clearly state
+    'score is zero per current policy' and reference the hazard count.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_1", summary="Tuyến Duy Nhất", distance_meters=2000, duration_seconds=400, polyline="p1"),
+    ]
+
+    mock_scorer = MagicMock()
+    del mock_scorer.evaluate_by_id
+    # score=0 but hazards present (pending multiplier = 0 excluded them)
+    mock_scorer.evaluate_routes.return_value = [
+        RouteRiskScore(score=0.0, level="LOW", hazards_count=3, verified_hazards_count=0, pending_hazards_count=3, reason="All pending"),
+    ]
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 1
+    assert response.risk_assessment_status == RiskAssessmentStatus.AVAILABLE.value
+    # Must NOT claim zero hazards when there are actual reports
+    assert "Chưa ghi nhận nguy cơ mặt đường nào" not in response.recommendation_reason, (
+        "Must not claim 'no hazards recorded' when hazards_count > 0"
+    )
+    # Must acknowledge score=0 is a policy result, not absence of data
+    assert "bằng 0 theo chính sách" in response.recommendation_reason, (
+        "Must explain that score=0 is due to current scoring policy, not absence of hazards"
+    )
+    # Must reference hazard count so the user understands reports exist
+    assert "3" in response.recommendation_reason or "báo cáo" in response.recommendation_reason
+
+
+def test_regression_zero_score_with_pending_hazards_multiple_routes():
+    """Two routes both score=0.0: one truly has no hazards, one has pending-only hazards.
+
+    Service must correctly distinguish:
+    - route_A (score=0, hazards=0): "Chưa ghi nhận nguy cơ"
+    - route_B (score=0, hazards=5): "bằng 0 theo chính sách"
+
+    Tie-break by duration → route_B is faster (300s vs 400s);
+    but route_A also has score=0, so the recommended route is determined
+    by policy (both tied at score=0 → shorter duration wins → route_B recommended).
+    Assert the recommendation reason for route_B does NOT claim zero hazards.
+    """
+    mock_adapter = MagicMock()
+    mock_adapter.compute_routes.return_value = [
+        RouteCandidate(id="route_A", summary="Tuyến A - Không nguy cơ", distance_meters=3000, duration_seconds=400, polyline="pA"),
+        RouteCandidate(id="route_B", summary="Tuyến B - Pending only", distance_meters=2500, duration_seconds=300, polyline="pB"),
+    ]
+
+    mock_scorer = MagicMock()
+    del mock_scorer.evaluate_by_id
+    mock_scorer.evaluate_routes.return_value = [
+        RouteRiskScore(score=0.0, level="LOW", hazards_count=0, verified_hazards_count=0, pending_hazards_count=0, reason="A no hazard"),
+        RouteRiskScore(score=0.0, level="LOW", hazards_count=5, verified_hazards_count=0, pending_hazards_count=5, reason="B all pending"),
+    ]
+
+    service = RoutingService(adapter=mock_adapter, risk_scorer=mock_scorer)
+    response = service.compare_routes(
+        origin=LatLng(latitude=10.7725, longitude=106.6980),
+        destination=LatLng(latitude=10.7599, longitude=106.6823),
+    )
+
+    assert len(response.routes) == 2
+    assert response.risk_assessment_status == RiskAssessmentStatus.AVAILABLE.value
+
+    # Find route_A and route_B in response
+    route_map = {r.id: r for r in response.routes}
+    assert "route_A" in route_map
+    assert "route_B" in route_map
+
+    # route_A truly has no hazards; its risk.hazards_count must be 0
+    assert route_map["route_A"].risk.score == 0.0
+    assert route_map["route_A"].risk.hazards_count == 0
+
+    # route_B has pending hazards; score=0 by policy
+    assert route_map["route_B"].risk.score == 0.0
+    assert route_map["route_B"].risk.hazards_count == 5
+
+    # Recommended route is route_B (tied on score=0, shorter duration=300s wins)
+    assert response.recommended_route_id == "route_B"
+
+    # The recommendation reason must NOT claim 'no hazards' for route_B
+    # (route_B has 5 pending reports; score=0 is due to pending multiplier policy)
+    reason = response.recommendation_reason
+    assert "Chưa ghi nhận nguy cơ mặt đường nào" not in reason, (
+        "route_B has 5 pending hazards — must not claim no hazards recorded"
+    )
+    assert "bằng 0 theo chính sách" in reason, (
+        "Must explain score=0 is due to scoring policy, not absence of hazards"
+    )
