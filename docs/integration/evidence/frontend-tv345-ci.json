@@ -1,0 +1,96 @@
+{
+  "run_id": 42366695080,
+  "head_sha": "d53d6f82aa806ba60896ec9959a9a3dec780fcac",
+  "head_branch": "frontend",
+  "event": "push",
+  "status": "completed",
+  "conclusion": "success",
+  "url": "https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42366695080",
+  "created_at": "2026-11-07T11:05:31Z",
+  "updated_at": "2026-11-07T11:10:00Z",
+  "jobs": [
+    {
+      "id": 128386136353,
+      "name": "verify",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install approved runtime",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Ruff",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Real PostGIS, migrations, regression and HTTP E2E",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Real checkpoint CPU smoke",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Contract and handoff artifacts",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Secrets scan of tracked release content",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build runtime image",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Container HTTP and restart persistence",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-python@v5",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}

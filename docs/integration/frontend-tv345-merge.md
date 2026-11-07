@@ -21,3 +21,13 @@ Hợp đồng API đã có tại `docs/api/openapi.json` và `docs/handoff/`. Ap
 Các việc tiếp theo: shared HTTP/image client; auth 401/403/session; upload/AI/manual/report; danh sách/detail/vote/review; adapter reports/routes và consumer tests; cuối cùng kiểm thử hai luồng P0 trên điện thoại. Khi map routes phải mang theo nullable risk, assessment status, recommendation basis và nhãn DEMO_UNAPPROVED; không diễn giải unknown risk thành 0. Ảnh private cần Bearer header.
 
 Chưa có bằng chứng Google Routes live, Cloud Run, hay policy risk production được duyệt. Không tự thêm khóa, deploy cloud hoặc tạo dữ liệu demo như dữ liệu thật.
+
+## Kết quả chốt trên commit merge
+
+- Merge commit: `d53d6f82aa806ba60896ec9959a9a3dec780fcac`, hai parent `678e0a8` và `0877ef1`; đã push `frontend`.
+- **GitHub Actions PASS toàn bộ**: [run 42366695080](https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42366695080), chạy chính SHA merge, hoàn tất 18:10 ngày 2026-11-07 (UTC+7).
+- Gates PASS: Ruff; PostGIS/migrations/regression/HTTP E2E; checkpoint AI CPU; runtime OpenAPI + ví dụ; Gitleaks; Docker build; HTTP container + restart/persistence.
+- [Bản ghi kết quả CI](evidence/frontend-tv345-ci.json) lấy từ GitHub API. Các bài HTTP này kiểm tra backend với fixture được đánh dấu; không gọi Google Routes live và không chứng minh Android gọi API.
+- Docker local khởi động được nhưng tải base image chậm; dừng lượt build local trùng lặp sau khi chuyển xác nhận sang CI. Không ghi local Docker build là PASS; không sửa runtime hoặc hạ test gate để vượt kiểm tra.
+- Source backend/scripts so với nguồn TV345 chỉ chuẩn hóa whitespace ở docstring migration và EOF script container. Bằng chứng log lịch sử được giữ nguyên, kể cả khoảng trắng của log.
+- Commit bàn giao sau merge chỉ thay tài liệu/evidence; source Android/backend giữ nguyên bản đã kiểm thử. CI backend lọc theo source/contract/workflow, không chạy lại do bản cập nhật tài liệu integration này.

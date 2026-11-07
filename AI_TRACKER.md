@@ -162,6 +162,8 @@ Các chỉnh README/AI_TRACKER có sẵn trước merge được lưu trong stas
 | Công việc hiện hành | Trạng thái | Bằng chứng / phần còn lại |
 |---|---|---|
 | UI và logo frontend | DONE_VERIFIED | 678e0a8; 53 JVM tests; native 37.91s; docs/integration/frontend-visual-refresh.md |
-| Ghép source frontend + TV345 | IN_PROGRESS | Android PASS; kiểm tra backend/CI và push merge đang thực hiện |
+| Ghép source frontend + TV345 | DONE_VERIFIED | d53d6f8; Android 53 PASS; CI 42366695080 PASS |
 | Android gọi HTTP/private images | TODO | OpenAPI/handoff đã có; cần shared client/adapter và consumer tests |
 | P0-A/P0-B trên điện thoại | BLOCKED | Chưa nối Android API; Google Routes key và policy risk production vẫn chưa có bằng chứng |
+
+Kết quả chốt frontend–TV345: merge `d53d6f8` đã push, **DONE_VERIFIED cho ghép source**. [CI 42366695080](https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42366695080) PASS toàn bộ trên đúng SHA merge; Android 53/53 PASS. HTTP/image adapter Android và E2E điện thoại vẫn TODO/BLOCKED như bảng trên. Xem docs/integration/frontend-tv345-merge.md.
