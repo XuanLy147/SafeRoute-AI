@@ -6,7 +6,7 @@ import java.util.Objects;
 /** Presentation model. TV2 maps its approved reports DTO here. */
 public final class Hazard {
     public enum Type {
-        D00("Nứt dọc"), D10("Nứt ngang"), D20("Nứt mạng nhện"), D40("Ổ gà"),
+        D00("Nứt dọc"), D10("Nứt ngang"), D20("Nứt mạng nhện"), CRACK("Nứt đường"), D40("Ổ gà"),
         REPAIR("Vết sửa chữa"), MANUAL("Nguy cơ nhập thủ công");
         public final String label;
         Type(String label) { this.label = label; }

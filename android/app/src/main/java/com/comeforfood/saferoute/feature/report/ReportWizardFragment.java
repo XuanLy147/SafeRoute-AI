@@ -21,6 +21,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.File;
 
 public class ReportWizardFragment extends LocationAwareFragment {
+    private static final String ARG_SKIP_INTRODUCTION = "report.skip_introduction";
     private FragmentReportWizardBinding binding;
     private ReportDraft draft;
     private boolean busy;
@@ -29,6 +30,22 @@ public class ReportWizardFragment extends LocationAwareFragment {
     private GoogleMap map;
     private Marker pin;
     private String[] categories, severities;
+    private com.comeforfood.saferoute.feature.shared.Tv1DataSource.Request manualAddressRequest;
+    private androidx.appcompat.app.AlertDialog manualAddressDialog;
+    private int manualAddressGeneration;
+    private boolean resolvingManualAddress;
+    private com.comeforfood.saferoute.feature.shared.Tv1DataSource.Request locationAddressRequest;
+    private com.comeforfood.saferoute.feature.shared.Point locationLookupPoint;
+    private int locationAddressGeneration;
+    private boolean resolvingLocationAddress;
+    public static ReportWizardFragment forNavigation() {
+        ReportWizardFragment fragment = new ReportWizardFragment();
+        Bundle args = new Bundle();
+        args.putBoolean(ARG_SKIP_INTRODUCTION, true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     private final ActivityResultLauncher<String[]> gallery = registerForActivityResult(
         new ActivityResultContracts.OpenDocument(), uri -> {
             if (uri == null) return;
@@ -43,7 +60,9 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding=FragmentReportWizardBinding.inflate(inflater,parent,false); return binding.getRoot();
     }
     @Override public void onViewCreated(@NonNull View view, Bundle saved) {
+        binding.tvAiDisclaimer.setVisibility(View.GONE);
         draft=new ViewModelProvider(requireActivity()).get(ReportDraft.class);
+        if (getArguments() != null && getArguments().getBoolean(ARG_SKIP_INTRODUCTION) && draft.step() == 0) draft.step(1);
         categories=getResources().getStringArray(R.array.report_categories);
         severities=getResources().getStringArray(R.array.report_severities);
         for(int i=0;i<categories.length;i++) {
@@ -73,13 +92,47 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnPickGallery.setOnClickListener(v->gallery.launch(new String[]{"image/jpeg","image/png"}));
         binding.btnCamera.setOnClickListener(v->takePhoto());
         binding.btnUseImage.setOnClickListener(v->{ if(draft.image()==null) message(R.string.report_missing_image); else go(3); });
-        android.widget.EditText manualPoint=new android.widget.EditText(requireContext());manualPoint.setHint("Nhập vĩ độ, kinh độ nếu không lấy được GPS");manualPoint.setInputType(android.text.InputType.TYPE_CLASS_TEXT);manualPoint.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);binding.stepGps.addView(manualPoint);
-        com.google.android.material.button.MaterialButton usePoint=new com.google.android.material.button.MaterialButton(requireContext());usePoint.setText("Dùng tọa độ đã nhập");binding.stepGps.addView(usePoint);usePoint.setOnClickListener(v->{try{draft.point(Point.parse(manualPoint.getText().toString()));renderPoint();}catch(IllegalArgumentException e){manualPoint.setError("Tọa độ không hợp lệ: vĩ độ, kinh độ");}});
+        binding.mapHint.setVisibility(View.GONE);
+        binding.tvCoordinates.setVisibility(View.VISIBLE);
+        binding.btnAdjustPin.setText(R.string.my_location);
+        android.widget.EditText manualPoint=new android.widget.EditText(requireContext());
+        manualPoint.setId(R.id.manualLocation);
+        manualPoint.setHint(R.string.report_manual_location_hint);
+        manualPoint.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_POSTAL_ADDRESS);
+        manualPoint.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);
+        manualPoint.setSingleLine(true);
+        manualPoint.setGravity(android.view.Gravity.CENTER);
+        manualPoint.setMinHeight(dp(56));
+        manualPoint.setPadding(dp(18),0,dp(18),0);
+        manualPoint.setBackgroundResource(R.drawable.bg_soft_input);
+        android.widget.TextView orLabel=new android.widget.TextView(requireContext());
+        orLabel.setText(R.string.report_location_or);
+        orLabel.setGravity(android.view.Gravity.CENTER);
+        orLabel.setTextSize(14);
+        orLabel.setTextColor(requireContext().getColor(R.color.muted));
+        int manualInputIndex=binding.stepGps.indexOfChild(binding.btnAdjustPin)+1;
+        android.widget.LinearLayout.LayoutParams orParams=new android.widget.LinearLayout.LayoutParams(-1,-2);
+        orParams.topMargin=dp(8);
+        orParams.bottomMargin=dp(8);
+        binding.stepGps.addView(orLabel,manualInputIndex,orParams);
+        android.widget.LinearLayout.LayoutParams inputParams=new android.widget.LinearLayout.LayoutParams(-1,-2);
+        inputParams.bottomMargin=dp(12);
+        binding.stepGps.addView(manualPoint,manualInputIndex+1,inputParams);
         binding.btnAdjustPin.setOnClickListener(v->useLocation(location->{
             draft.point(new Point(location.getLatitude(),location.getLongitude())); renderPoint();
             if(map!=null) map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(draft.point()),17));
         }));
         binding.btnSimulateAi.setOnClickListener(v->{
+            String manualAddress=manualPoint.getText().toString().trim();
+            if(!manualAddress.isEmpty()) {
+                if(manualAddress.length()>250) {
+                    manualPoint.setError(getString(R.string.address_too_long));
+                    return;
+                }
+                manualPoint.setError(null);
+                resolveManualAddress(manualAddress,manualPoint);
+                return;
+            }
             if(draft.point()==null) message(R.string.report_location_missing);
             else analyze();
         });
@@ -94,11 +147,21 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnEditFailed.setOnClickListener(v->go(6));
         com.google.android.material.button.MaterialButton inspect=new com.google.android.material.button.MaterialButton(requireContext());inspect.setText("Kiểm tra Báo cáo của tôi");binding.stepFailure.addView(inspect);inspect.setOnClickListener(v->((MainActivity)requireActivity()).openTv2Fragment(new MyReportsFragment()));
         com.google.android.material.button.MaterialButton login=new com.google.android.material.button.MaterialButton(requireContext());login.setText("Đăng nhập / đổi tài khoản");binding.stepFailure.addView(login);login.setOnClickListener(v->((MainActivity)requireActivity()).openTv2Fragment(new com.comeforfood.saferoute.feature.auth.LoginFragment()));
-        com.google.android.material.button.MaterialButton discard=new com.google.android.material.button.MaterialButton(requireContext());discard.setText("Bỏ bản nháp để tạo báo cáo mới");binding.stepFailure.addView(discard);discard.setOnClickListener(v->new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext()).setTitle("Bỏ bản nháp?").setMessage("Nếu lần gửi trước chưa rõ kết quả, hãy kiểm tra Báo cáo của tôi để tránh gửi trùng.").setNegativeButton("Giữ bản nháp",null).setPositiveButton("Đã kiểm tra, bỏ bản nháp",(dialog,which)->{draft.clear();go(0);}).show());
+        com.google.android.material.button.MaterialButton discard=new com.google.android.material.button.MaterialButton(requireContext());discard.setText("Bỏ bản nháp để tạo báo cáo mới");binding.stepFailure.addView(discard);discard.setOnClickListener(v->new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext()).setTitle("Bỏ bản nháp?").setMessage("Nếu lần gửi trước chưa rõ kết quả, hãy kiểm tra Báo cáo của tôi để tránh gửi trùng.").setNegativeButton("Giữ bản nháp",null).setPositiveButton("Đã kiểm tra, bỏ bản nháp",(dialog,which)->{draft.clear();go(1);}).show());
         if(MapsSupport.configured(requireContext())) MapsSupport.attach(this,R.id.reportMap,ready->{
             map=ready;
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(10.7554,106.6782),13));
             map.setOnMapClickListener(p->{draft.point(new Point(p.latitude,p.longitude));renderPoint();});
+            map.setOnPoiClickListener(poi->{
+                Point point=new Point(poi.latLng.latitude,poi.latLng.longitude);
+                draft.point(point);
+                String placeName=poi.name==null?null:poi.name.trim();
+                if(placeName!=null&&placeName.isEmpty())placeName=null;
+                draft.locationLabel(placeName);
+                renderPoint();
+                resolveLocationAddress(point,placeName);
+                map.animateCamera(CameraUpdateFactory.newLatLngZoom(poi.latLng,17));
+            });
             map.setOnMarkerDragListener(new GoogleMap.OnMarkerDragListener() {
                 public void onMarkerDragStart(Marker m) {}
                 public void onMarkerDrag(Marker m) {}
@@ -125,16 +188,197 @@ public class ReportWizardFragment extends LocationAwareFragment {
         } catch(java.io.IOException|RuntimeException error) { message(R.string.report_camera_unavailable); }
     }
     private void message(int string) { if(binding!=null) Snackbar.make(binding.getRoot(),string,Snackbar.LENGTH_LONG).show(); }
+    private void resolveManualAddress(String query,android.widget.EditText field) {
+        cancelManualAddressSearch();
+        final int generation=manualAddressGeneration;
+        resolvingManualAddress=true;
+        binding.btnSimulateAi.setEnabled(false);
+        binding.btnSimulateAi.setText(R.string.report_address_searching);
+        com.comeforfood.saferoute.feature.routing.AddressSearch search=
+                ((com.comeforfood.saferoute.SafeRouteApp)requireActivity().getApplication()).getAddressSearch();
+        try {
+            com.comeforfood.saferoute.feature.shared.Tv1DataSource.Request request=search.search(query,
+                    new com.comeforfood.saferoute.feature.routing.AddressSearch.Callback() {
+                @Override public void success(java.util.List<com.comeforfood.saferoute.feature.routing.AddressSearch.Place> places) {
+                    dispatchAddressResult(()->{
+                        if(binding==null||generation!=manualAddressGeneration)return;
+                        manualAddressRequest=null;
+                        finishManualAddressSearch();
+                        if(places==null||places.isEmpty()) {
+                            field.setError(getString(R.string.address_not_found));
+                        } else if(places.size()==1) {
+                            selectManualAddress(places.get(0),field);
+                        } else {
+                            String[] labels=new String[places.size()];
+                            for(int i=0;i<places.size();i++)labels[i]=places.get(i).label;
+                            manualAddressDialog=new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                                    .setTitle(R.string.report_address_choose)
+                                    .setItems(labels,(dialog,which)->{
+                                        manualAddressDialog=null;
+                                        if(binding!=null&&generation==manualAddressGeneration)
+                                            selectManualAddress(places.get(which),field);
+                                    })
+                                    .setNegativeButton(R.string.address_cancel,(dialog,which)->manualAddressDialog=null)
+                                    .setOnCancelListener(dialog->manualAddressDialog=null)
+                                    .create();
+                            manualAddressDialog.show();
+                        }
+                    });
+                }
+                @Override public void failure(com.comeforfood.saferoute.feature.routing.AddressSearch.Failure error) {
+                    dispatchAddressResult(()->{
+                        if(binding==null||generation!=manualAddressGeneration)return;
+                        manualAddressRequest=null;
+                        finishManualAddressSearch();
+                        field.setError(getString(error==com.comeforfood.saferoute.feature.routing.AddressSearch.Failure.UNAVAILABLE
+                                ?R.string.address_unavailable:R.string.address_error));
+                    });
+                }
+            });
+            if(generation==manualAddressGeneration&&resolvingManualAddress)manualAddressRequest=request;
+            else request.cancel();
+        } catch(RuntimeException error) {
+            if(generation==manualAddressGeneration) {
+                finishManualAddressSearch();
+                field.setError(getString(R.string.address_error));
+            }
+        }
+    }
+    private void dispatchAddressResult(Runnable result) {
+        androidx.fragment.app.FragmentActivity activity=getActivity();
+        if(activity!=null)activity.runOnUiThread(result);
+    }
+    private void selectManualAddress(com.comeforfood.saferoute.feature.routing.AddressSearch.Place place,
+                                     android.widget.EditText field) {
+        field.setError(null);
+        field.setText(place.label);
+        draft.point(place.point);
+        draft.locationLabel(place.label);
+        renderPoint();
+        if(map!=null)map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(place.point),17));
+        analyze();
+    }
+    private void finishManualAddressSearch() {
+        resolvingManualAddress=false;
+        if(binding!=null) {
+            binding.btnSimulateAi.setEnabled(true);
+            binding.btnSimulateAi.setText(R.string.report_analyze);
+        }
+    }
+    private void cancelManualAddressSearch() {
+        manualAddressGeneration++;
+        if(manualAddressRequest!=null)manualAddressRequest.cancel();
+        manualAddressRequest=null;
+        if(manualAddressDialog!=null)manualAddressDialog.dismiss();
+        manualAddressDialog=null;
+        if(resolvingManualAddress)finishManualAddressSearch();
+    }
+    private void updateReviewSummary() {
+        Point point=draft.point();
+        if(draft.category()<0||point==null)return;
+        String address=draft.locationLabel();
+        if(address==null||address.trim().isEmpty()) {
+            binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],
+                    severities[draft.severity()],getString(R.string.report_address_loading),draft.description()));
+            resolveLocationAddress(point);
+            return;
+        }
+        binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],
+                severities[draft.severity()],address,draft.description()));
+    }
+    private void resolveLocationAddress(Point point) {
+        resolveLocationAddress(point,null);
+    }
+    private void resolveLocationAddress(Point point,String fallbackLabel) {
+        if(resolvingLocationAddress&&locationLookupPoint!=null&&locationLookupPoint.sameAs(point))return;
+        cancelLocationAddressLookup();
+        final int generation=locationAddressGeneration;
+        locationLookupPoint=point;
+        resolvingLocationAddress=true;
+        draft.locationLabel(fallbackLabel==null?getString(R.string.report_address_loading):fallbackLabel);
+        if(binding!=null)binding.tvCoordinates.setText(getString(R.string.report_location_address,draft.locationLabel()));
+        com.comeforfood.saferoute.feature.routing.AddressSearch search=
+                ((com.comeforfood.saferoute.SafeRouteApp)requireActivity().getApplication()).getAddressSearch();
+        try {
+            com.comeforfood.saferoute.feature.shared.Tv1DataSource.Request request=search.reverse(point,
+                    new com.comeforfood.saferoute.feature.routing.AddressSearch.Callback() {
+                @Override public void success(java.util.List<com.comeforfood.saferoute.feature.routing.AddressSearch.Place> places) {
+                    dispatchAddressResult(()->{
+                        if(!isCurrentLocationLookup(generation,point))return;
+                        locationAddressRequest=null;
+                        resolvingLocationAddress=false;
+                        locationLookupPoint=null;
+                        com.comeforfood.saferoute.feature.routing.AddressSearch.Place result=
+                                places==null||places.isEmpty()?null:places.get(0);
+                        String label=preferredLocationLabel(fallbackLabel,result);
+                        draft.locationLabel(label==null||label.trim().isEmpty()
+                                ?fallbackLabel==null?getString(R.string.report_address_unavailable):fallbackLabel:label);
+                        binding.tvCoordinates.setText(getString(R.string.report_location_address,draft.locationLabel()));
+                        updateReviewSummary();
+                    });
+                }
+                @Override public void failure(com.comeforfood.saferoute.feature.routing.AddressSearch.Failure error) {
+                    dispatchAddressResult(()->{
+                        if(!isCurrentLocationLookup(generation,point))return;
+                        locationAddressRequest=null;
+                        resolvingLocationAddress=false;
+                        locationLookupPoint=null;
+                        draft.locationLabel(fallbackLabel==null
+                                ?getString(R.string.report_address_unavailable):fallbackLabel);
+                        binding.tvCoordinates.setText(getString(R.string.report_location_address,draft.locationLabel()));
+                        updateReviewSummary();
+                    });
+                }
+            });
+            if(isCurrentLocationLookup(generation,point)&&resolvingLocationAddress)locationAddressRequest=request;
+            else request.cancel();
+        } catch(RuntimeException error) {
+            if(isCurrentLocationLookup(generation,point)) {
+                resolvingLocationAddress=false;
+                locationLookupPoint=null;
+                draft.locationLabel(fallbackLabel==null
+                        ?getString(R.string.report_address_unavailable):fallbackLabel);
+                binding.tvCoordinates.setText(getString(R.string.report_location_address,draft.locationLabel()));
+                updateReviewSummary();
+            }
+        }
+    }
+    public static String preferredLocationLabel(String fallbackLabel,
+            com.comeforfood.saferoute.feature.routing.AddressSearch.Place result) {
+        if(fallbackLabel!=null&&(result==null||!result.streetAddress))return fallbackLabel;
+        if(result!=null&&!result.label.trim().isEmpty())return result.label;
+        return fallbackLabel;
+    }
+    private boolean isCurrentLocationLookup(int generation,Point point) {
+        return binding!=null&&generation==locationAddressGeneration&&draft.point()!=null
+                &&draft.point().sameAs(point);
+    }
+    private void cancelLocationAddressLookup() {
+        locationAddressGeneration++;
+        if(locationAddressRequest!=null)locationAddressRequest.cancel();
+        locationAddressRequest=null;
+        locationLookupPoint=null;
+        resolvingLocationAddress=false;
+        if(draft!=null&&getString(R.string.report_address_loading).equals(draft.locationLabel()))
+            draft.locationLabel(null);
+    }
     private void go(int step) { draft.step(step); if(binding!=null) { render();binding.wizardScroll.smoothScrollTo(0,0); } }
     private void back() {
         if(busy){notice("Đang xử lý. Vui lòng đợi hoặc quay lại sau khi hoàn tất.");return;}
         int step=draft.step();
-        if(step==0) ((MainActivity)requireActivity()).openMap();
+        boolean skipIntroduction=getArguments()!=null&&getArguments().getBoolean(ARG_SKIP_INTRODUCTION);
+        if(step==0||(step==1&&skipIntroduction)) ((MainActivity)requireActivity()).openMap();
         else go(step==7?6:step-1);
     }
     private void renderPoint() {
         if(binding==null) return;
-        binding.tvCoordinates.setText(draft.point()==null?getString(R.string.report_location_missing):draft.point().format());
+        Point point=draft.point();
+        if(point==null)binding.tvCoordinates.setText(getString(R.string.report_location_missing));
+        else {
+            String address=draft.locationLabel();
+            if(address==null||address.trim().isEmpty())resolveLocationAddress(point);
+            else binding.tvCoordinates.setText(getString(R.string.report_location_address,address));
+        }
         if(map!=null&&draft.point()!=null) {
             if(pin!=null)pin.remove();
             pin=map.addMarker(new MarkerOptions().position(MapsSupport.latLng(draft.point())).draggable(true).title(getString(R.string.report_pin)));
@@ -167,7 +411,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
             });
         } else if(draft.image()==null) binding.imgPreview.setImageResource(R.drawable.ic_camera);
         binding.confirmReport.setChecked(draft.confirmed());
-        if(draft.category()>=0&&draft.point()!=null) binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],severities[draft.severity()],draft.point().format(),draft.description()));
+        if(step==6)updateReviewSummary();
         renderPoint();renderDetections();
     }
     private void copyPreview(){
@@ -197,7 +441,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
     private void enable(View v,boolean enabled){v.setEnabled(enabled);if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++)enable(((ViewGroup)v).getChildAt(i),enabled);}
     private void failed(String message){busy=false;if(binding!=null){enable(binding.getRoot(),true);go(7);notice(message);}}
     private void createReport(){
-        String[] codes={"D00","D10","D20","D40","Repair","Ngập nước","Vật cản"};String[] levels={"LOW","MEDIUM","HIGH"};
+        String[] codes={"Nứt đường","D40","Ngập nước","Vật cản"};String[] levels={"LOW","MEDIUM","HIGH"};
         com.comeforfood.saferoute.core.model.ReportDto.CreateRequest request=new com.comeforfood.saferoute.core.model.ReportDto.CreateRequest(draft.uploadedId(),draft.point().latitude,draft.point().longitude,codes[draft.category()],levels[draft.severity()],draft.description(),draft.detections());
         request.setModelVersion(draft.modelVersion());
         draft.uncertain(true); // Persist before sending: rotation/process death must not blindly repeat a write.
@@ -249,5 +493,5 @@ public class ReportWizardFragment extends LocationAwareFragment {
     }
     private void aiFailed(String error){busy=false;if(binding!=null){binding.tvAiTitle.setText(R.string.ai_unavailable_title);binding.tvAiDetectionSummary.setText(error);}}
     @Override protected void onLocating(boolean locating) { if(binding!=null)binding.btnAdjustPin.setEnabled(!locating); }
-    @Override public void onDestroyView() { busy=false;previewUri=null;detectionEditors=null;pin=null;map=null;binding=null;super.onDestroyView(); }
+    @Override public void onDestroyView() { cancelManualAddressSearch();cancelLocationAddressLookup();busy=false;previewUri=null;detectionEditors=null;pin=null;map=null;binding=null;super.onDestroyView(); }
 }

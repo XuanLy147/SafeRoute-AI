@@ -81,4 +81,94 @@ public final class AndroidAddressSearch implements AddressSearch {
         }
         return () -> { finished.set(true); main.removeCallbacks(timeout); };
     }
+
+    @Override public Tv1DataSource.Request reverse(Point point, Callback callback) {
+        Handler main = new Handler(Looper.getMainLooper());
+        AtomicBoolean finished = new AtomicBoolean();
+        Runnable timeout = () -> {
+            if (finished.compareAndSet(false, true)) callback.failure(Failure.NETWORK);
+        };
+        main.postDelayed(timeout, 15000);
+        class Delivery {
+            void deliver(List<Address> addresses, Failure error) {
+                main.post(() -> {
+                    if (!finished.compareAndSet(false, true)) return;
+                    main.removeCallbacks(timeout);
+                    if (error != null) { callback.failure(error); return; }
+                    Place bestPlace = null;
+                    int bestPrecision = -1;
+                    if (addresses != null) for (Address address : addresses) {
+                        if (address == null || !address.hasLatitude() || !address.hasLongitude()) continue;
+                        String label = reverseAddressLabel(address);
+                        if (label == null || label.trim().isEmpty()) continue;
+                        try {
+                            Point resultPoint = new Point(address.getLatitude(), address.getLongitude());
+                            int precision = (hasText(address.getSubThoroughfare()) ? 2 : 0)
+                                    + (hasText(address.getThoroughfare()) ? 1 : 0);
+                            if (bestPlace == null || precision > bestPrecision) {
+                                bestPlace = new Place(label, resultPoint, precision > 0);
+                                bestPrecision = precision;
+                            }
+                        } catch (IllegalArgumentException ignored) { }
+                    }
+                    List<Place> result = new ArrayList<>();
+                    if (bestPlace != null) result.add(bestPlace);
+                    callback.success(result);
+                });
+            }
+        }
+        Delivery delivery = new Delivery();
+        if (!Geocoder.isPresent()) delivery.deliver(null, Failure.UNAVAILABLE);
+        else {
+            Geocoder geocoder = new Geocoder(context, Locale.forLanguageTag("vi-VN"));
+            try {
+                if (Build.VERSION.SDK_INT >= 33) {
+                    geocoder.getFromLocation(point.latitude, point.longitude, 5, new Geocoder.GeocodeListener() {
+                        @Override public void onGeocode(List<Address> addresses) { delivery.deliver(addresses, null); }
+                        @Override public void onError(String message) { delivery.deliver(null, Failure.NETWORK); }
+                    });
+                } else {
+                    LEGACY.execute(() -> {
+                        if (finished.get()) return;
+                        try { delivery.deliver(geocoder.getFromLocation(point.latitude, point.longitude, 5), null); }
+                        catch (Exception error) { delivery.deliver(null, Failure.NETWORK); }
+                    });
+                }
+            } catch (RuntimeException error) { delivery.deliver(null, Failure.NETWORK); }
+        }
+        return () -> { finished.set(true); main.removeCallbacks(timeout); };
+    }
+
+    private static String reverseAddressLabel(Address address) {
+        String line = address.getAddressLine(0);
+        if (line != null) line = line.trim();
+        if (line != null && line.isEmpty()) line = null;
+        String number = address.getSubThoroughfare();
+        if (number != null) number = number.trim();
+        if (number != null && number.isEmpty()) number = null;
+        String street = address.getThoroughfare();
+        if (street != null) street = street.trim();
+        if (street != null && street.isEmpty()) street = null;
+        String feature = address.getFeatureName();
+        if (feature != null) feature = feature.trim();
+        if (feature != null && feature.isEmpty()) feature = null;
+
+        if (number != null) {
+            if (line != null && line.toLowerCase(Locale.ROOT).contains(number.toLowerCase(Locale.ROOT)))
+                return line;
+            if (street != null) {
+                if (line != null && line.toLowerCase(Locale.ROOT).contains(street.toLowerCase(Locale.ROOT)))
+                    return number + " " + line;
+                return line == null ? number + " " + street : number + " " + street + ", " + line;
+            }
+            if (line != null) return number + ", " + line;
+            return feature == null ? number : number + ", " + feature;
+        }
+        if (line != null) return line;
+        return feature;
+    }
+
+    private static boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
 }

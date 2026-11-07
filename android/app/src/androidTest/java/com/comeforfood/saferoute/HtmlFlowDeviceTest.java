@@ -81,8 +81,7 @@ public class HtmlFlowDeviceTest {
             click(R.id.btnGuest);SystemClock.sleep(3500);capture("flow-05-map");
             click(R.id.routes);capture("visual-route-search");
             onActivity(a -> a.openMap());onActivity(a -> a.getSupportFragmentManager().executePendingTransactions());
-            tab(R.id.nav_report);capture("flow-06-report-start");
-            click(R.id.btnStartReport);capture("flow-07-photo-choice");
+            tab(R.id.nav_report);capture("flow-06-photo-choice");
             onActivity(a -> {
                 com.comeforfood.saferoute.feature.report.ReportDraft draft=new androidx.lifecycle.ViewModelProvider(a).get(com.comeforfood.saferoute.feature.report.ReportDraft.class);
                 draft.image("android.resource://"+a.getPackageName()+"/"+R.drawable.ic_map);

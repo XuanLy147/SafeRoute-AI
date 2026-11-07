@@ -70,18 +70,52 @@ public class HtmlFlowTest {
         activity.openMap();settle();tab(R.id.nav_report);
         assertEquals(View.GONE,activity.findViewById(R.id.navigation).getVisibility());
         ReportDraft draft=new ViewModelProvider(activity).get(ReportDraft.class);
-        click(R.id.btnStartReport);assertEquals(1,draft.step());
+        assertEquals(1,draft.step());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.btnCamera).getVisibility());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.btnPickGallery).getVisibility());
+        assertEquals(View.GONE,activity.findViewById(R.id.stepStart).getVisibility());
         // Test-only drawable as the selected photo; no private image or live API.
         draft.image("android.resource://"+activity.getPackageName()+"/"+R.drawable.ic_map);draft.step(2);recreate();
         draft=new ViewModelProvider(activity).get(ReportDraft.class);
         click(R.id.btnUseImage);assertEquals(3,draft.step());
+        assertEquals(View.GONE,activity.findViewById(R.id.mapHint).getVisibility());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.tvCoordinates).getVisibility());
+        assertEquals(activity.getString(R.string.my_location),((com.google.android.material.button.MaterialButton)activity.findViewById(R.id.btnAdjustPin)).getText().toString());
+        assertEquals(activity.getString(R.string.report_location_or),((TextView)((android.widget.LinearLayout)activity.findViewById(R.id.stepGps)).getChildAt(4)).getText().toString());
         click(R.id.btnSimulateAi);assertEquals(3,draft.step());
-        draft.point(new Point(10.75,106.67));click(R.id.btnSimulateAi);assertEquals(4,draft.step());
+        EditText manualLocation=(EditText)activity.findViewById(R.id.manualLocation);
+        assertEquals(activity.getString(R.string.report_manual_location_hint),manualLocation.getHint().toString());
+        final String[] searchedAddress={null};
+        ((SafeRouteApp)activity.getApplication()).setAddressSearch((query,callback)->{
+            searchedAddress[0]=query;
+            callback.success(java.util.Collections.singletonList(
+                    new com.comeforfood.saferoute.feature.routing.AddressSearch.Place("123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",new Point(10.75,106.67))));
+            return ()->{};
+        });
+        manualLocation.setText("123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh");
+        click(R.id.btnSimulateAi);
+        assertEquals(4,draft.step());
+        assertEquals("123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",searchedAddress[0]);
+        assertTrue(draft.point().sameAs(new Point(10.75,106.67)));
+        assertEquals("Địa chỉ: 123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh",
+                ((TextView)activity.findViewById(R.id.tvCoordinates)).getText().toString());
         assertEquals(activity.getString(R.string.ai_unavailable_title),((TextView)activity.findViewById(R.id.tvAiTitle)).getText().toString());
+        assertEquals(View.GONE,activity.findViewById(R.id.tvAiDisclaimer).getVisibility());
+        assertEquals(activity.getString(R.string.report_manual),((com.google.android.material.button.MaterialButton)activity.findViewById(R.id.btnManual)).getText().toString());
         click(R.id.btnManual);click(R.id.btnReview);assertEquals(5,draft.step());
-        ((RadioButton)((RadioGroup)activity.findViewById(R.id.categoryOptions)).getChildAt(3)).performClick();
+        RadioGroup categoryOptions=(RadioGroup)activity.findViewById(R.id.categoryOptions);
+        assertEquals(4,categoryOptions.getChildCount());
+        assertEquals(java.util.Arrays.asList("Nứt đường","Ổ gà","Ngập nước","Vật cản"),java.util.Arrays.asList(
+                ((RadioButton)categoryOptions.getChildAt(0)).getText().toString(),
+                ((RadioButton)categoryOptions.getChildAt(1)).getText().toString(),
+                ((RadioButton)categoryOptions.getChildAt(2)).getText().toString(),
+                ((RadioButton)categoryOptions.getChildAt(3)).getText().toString()));
+        ((RadioButton)categoryOptions.getChildAt(3)).performClick();
         ((EditText)activity.findViewById(R.id.etDescription)).setText("Test-only report draft");
         click(R.id.btnReview);assertEquals(6,draft.step());
+        String reviewSummary=((TextView)activity.findViewById(R.id.reviewSummary)).getText().toString();
+        assertTrue(reviewSummary.contains("Vị trí: 123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh"));
+        assertFalse(reviewSummary.contains("10.750000, 106.670000"));
         click(R.id.btnSubmitReport);assertEquals(6,draft.step());
         ((CheckBox)activity.findViewById(R.id.confirmReport)).setChecked(true);
         recreate();draft=new ViewModelProvider(activity).get(ReportDraft.class);
@@ -89,6 +123,14 @@ public class HtmlFlowTest {
         click(R.id.btnSubmitReport);assertEquals(7,draft.step());
         click(R.id.btnRetryReport);assertEquals(7,draft.step());
         back();assertEquals(6,draft.step());back();assertEquals(5,draft.step());
+    }
+    @Test public void reportTabSkipsIntroductionAndBackReturnsToMap() {
+        activity.openMap();settle();tab(R.id.nav_report);
+        assertEquals(1,new ViewModelProvider(activity).get(ReportDraft.class).step());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.btnCamera).getVisibility());
+        assertEquals(View.VISIBLE,activity.findViewById(R.id.btnPickGallery).getVisibility());
+        click(R.id.btnBack);
+        assertTrue(screen() instanceof MapFragment);
     }
     @Test public void reviewerAndAdminMenusAreDistinctAndGuestIsDeniedEveryRestrictedPage() {
         for(FlowPageFragment.Page page:FlowPageFragment.Page.values())if(page.restricted()){
