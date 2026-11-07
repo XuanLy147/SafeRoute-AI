@@ -8,7 +8,7 @@ documentation and evidence commits follow this implementation snapshot.
 
 ## Sources
 
-- TV3 ac607a24c35b6b8739fdb1cc97186003b6aeef04
+- TV3 1349d2a4713e3dab2f979011d1b3309ea11667d8 (tracker-only successor of code ac607a24c35b6b8739fdb1cc97186003b6aeef04)
 - TV4 38df244da6a3b0cf8ce2e627b13d538bfde6e83f plus preserved local changes (702af0e)
 - TV5 b5c81b4ecf5298ec6dcd8923d4abb848260092ac
 
@@ -31,7 +31,7 @@ backed up separately. No main/frontend/Android edits or pushes.
 | Secrets | PASS Gitleaks 8.24.3 scan of tracked release content |
 | Contract | Runtime-generated OpenAPI and schema-validated examples |
 | Google Routes live | NOT_RUN; no authorized configured key/billing |
-| GitHub Actions | PASS [run 42364615627](https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42364615627) on 3847148; current branch triggers verification again |
+| GitHub Actions | PASS [run 42365060883](https://github.com/XuanLy147/SafeRoute-AI/actions/runs/42365060883) on a57b3e9, 179 tests + all runtime gates; final tracker-only merge triggers the same workflow |
 | Cloud Run | NOT_RUN; no credentials/project/cost approval |
 | Android device | NOT_RUN; read-only source audit and handoff only |
 
@@ -71,3 +71,7 @@ all runtime gates PASS. Later HTTPBearer/OpenAPI correction adds one local test
 (179 total) and has passed the same local suite/container gates. Each push runs
 GitHub Actions again; the final delivery message links the final HEAD run.
 The prior failed first run is retained as history; no failure was hidden.
+
+Final source reconciliation merged TV3 tracker-only HEAD 1349d2a. Backend source,
+tests, image build and generated contract are byte-identical to CI-passed a57b3e9.
+This documentation/history update does not weaken gates or change test counts.

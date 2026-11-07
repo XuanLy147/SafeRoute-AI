@@ -71,3 +71,12 @@ Android DTOs inspected read-only: AuthDto, DetectionDto, ReportDto, Route,
 RouteComparison and Tv1DataSource. TV1 boundary is a UI interface, not an existing
 HTTP contract. No shared Retrofit implementation was found in inspected branch
 paths; integration mapping remains TV1/TV2 work, documented in handoff.
+
+## Late source HEAD reconciliation
+
+Final fetch found TV03 1349d2a4713e3dab2f979011d1b3309ea11667d8, a single
+tracker-only commit after ac607a2. Diff: AI_TRACKER.md only, 12 insertions and
+10 deletions; no runtime/source/test changes. Merged with a real merge commit;
+retained both TV3 and TV4 journal entries in the sole conflict. Source freeze
+for final delivery uses 1349d2a / 38df244 / b5c81b4. Historical TV3 75-test claims
+are not added to current integration counts or treated as production approval.
