@@ -1,5 +1,15 @@
 # TV4 risk core — handoff 2026-11-07
 
+Latest gate: [TV3 c81aaeb / TV5 d5596b2](tv4-final-integration-gate.md):
+127 PASS / 12 FAIL with --runxfail (no hidden XFAIL), migration/schema PASS,
+5 real PostGIS tests PASS. Overall BLOCKED: routing HTTP endpoint absent,
+image linkage/AI error handling and remaining risk-status contract defects.
+
+Newest verification: [TV5 484721d cross-branch report](tv4-crossbranch-484721d.md).
+83 PASS (78 unit + 5 real DB), 4 strict XFAIL for unresolved TV5 behavior.
+Keyed TV4 facade added locally; no old import patch applied to TV5. Production
+25m/0.5/2–6 policy remains DRAFT; mixed namespaces still fail type validation.
+
 Latest follow-up: [real PostGIS verification / contract gate](../db/tv4-postgis-verification.md).
 PostgreSQL 16.4 / PostGIS 3.4.3: migration upgrade/rollback/re-upgrade PASS,
 metadata diff=[], 61 unit tests + 4 real DB tests PASS. Container cleaned up.

@@ -107,3 +107,17 @@ class PostgisRiskAdapter:
         if set(results) != {candidate.id for candidate in candidates}:
             raise RiskIntegrationError("Scorer returned missing or extra route IDs")
         return [results[candidate.id] for candidate in candidates]
+
+
+class KeyedPostgisRiskAdapter(PostgisRiskAdapter):
+    """Opt-in facade for TV5 484721d's dict-capable RiskScorerProtocol.
+
+    Keeps the original list facade compatible with existing callers. Policy
+    remains explicitly injected; no production defaults are introduced.
+    """
+
+    def evaluate_routes(self, candidates):
+        results = self.evaluate_by_id(candidates)
+        if set(results) != {candidate.id for candidate in candidates}:
+            raise RiskIntegrationError("Scorer returned missing or extra route IDs")
+        return results

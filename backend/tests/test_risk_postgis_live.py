@@ -13,7 +13,7 @@ from sqlalchemy.engine import make_url
 from app.db.session import SessionLocal
 from app.models.entities import Report, ReportStatus, User, UserRole
 from app.db.geo import make_point
-from app.modules.risk.postgis_adapter import PostgisRiskAdapter
+from app.modules.risk.postgis_adapter import PostgisRiskAdapter, KeyedPostgisRiskAdapter
 from app.modules.risk.scoring import RiskPolicy
 from app.modules.routing.schemas import RouteCandidate
 
@@ -95,3 +95,27 @@ def test_meter_distance_with_projected_point(db):
         FROM (SELECT ST_SetSRID(ST_MakePoint(106,10),4326)::geography p) s
     """)).one()
     assert tuple(result) == (True, False)
+
+
+def test_keyed_draft_policy_25m_with_boundary_reports(db):
+    insert_reports(db)
+    user_id = db.scalar(text("SELECT id FROM users WHERE email='tv4-spatial-fixture@example.invalid'"))
+    for meters in (24, 26):
+        lon, lat = db.execute(text("""
+            SELECT ST_X(p::geometry), ST_Y(p::geometry)
+            FROM (SELECT ST_Project(ST_SetSRID(ST_MakePoint(106,10.005),4326)::geography,
+                                   :meters, pi()/2) p) s
+        """), {"meters": meters}).one()
+        db.add(Report(user_id=user_id, category_user="D40", severity="HIGH",
+                      status=ReportStatus.VERIFIED, location=make_point(lon, lat)))
+    db.flush()
+    # These are test policy values, not an approved production configuration.
+    keyed = KeyedPostgisRiskAdapter(db, RiskPolicy("DRAFT-25m-0.5-2-6", {"HIGH":4}, 0.5),
+                                   radius_m=25, medium_min=2, high_min=6)
+    result = keyed.evaluate_routes([route("far",106.01), route("near",106)])
+    assert list(result) == ["far", "near"]
+    assert result["far"].score == 0
+    # Base verified 4 + pending 2 + report 24m away 4; 26m/rejected excluded.
+    assert (result["near"].score, result["near"].level) == (10, "HIGH")
+    assert result["near"].hazards_count == 3
+    assert result["near"].pending_hazards_count == 1

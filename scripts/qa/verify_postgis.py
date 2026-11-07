@@ -7,6 +7,7 @@ the newly created container by its returned ID. No production risk policy set.
 
 import argparse
 import os
+import re
 from pathlib import Path
 import secrets
 import subprocess
@@ -17,6 +18,7 @@ import time
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--backend", type=Path, required=True)
+    parser.add_argument("--runxfail", action="store_true", help="Run legacy xfail assertions normally for an integration gate")
     args = parser.parse_args()
     backend = args.backend.resolve(strict=True)
     if not (backend / "migrations/versions/0001_initial_schema.py").is_file():
@@ -30,6 +32,7 @@ def main():
     def run(command, **kwargs):
         result = subprocess.run(command, capture_output=True, text=True, **kwargs)
         output = (result.stdout + result.stderr).replace(password, "[REDACTED]")
+        output = re.sub(r"eyJ[A-Za-z0-9_-]+\.eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+", "[REDACTED_TEST_JWT]", output)
         if result.returncode:
             raise RuntimeError(output)
         return output
@@ -112,7 +115,8 @@ def main():
         print("ROLLBACK_PASS: model tables/enums removed, Alembic revision empty, PostGIS retained", flush=True)
         migrate("head")
         verify_schema()
-        print(run([sys.executable, "-m", "pytest", "tests", "-q", "-ra"], cwd=backend, env=env), flush=True)
+        pytest_args = ["--runxfail"] if args.runxfail else []
+        print(run([sys.executable, "-m", "pytest", "tests", "-q", "-ra", *pytest_args], cwd=backend, env=env), flush=True)
         engine.dispose()
         print("VERIFICATION_COMPLETE: real PostgreSQL/PostGIS; synthetic policy/coordinates only", flush=True)
     finally:

@@ -86,6 +86,19 @@ TV3 6/6 đã tái chạy PASS trong snapshot tích hợp sau fetch; không chứ
 
 ## 7. Nguyên tắc demo
 
+Final integration gate 2026-11-07: TV3 c81aaeb / TV4 38df244 + local TV4 changes /
+TV5 d5596b2: configured-checkpoint run 127 PASS / 12 FAIL, --runxfail giữ nguyên
+assertions cũ. Migration cycle/metadata PASS, 5 PostGIS PASS; HTTP business flow
+ghi DB được nhưng image URL sai; routes/compare chưa gắn. Overall BLOCKED.
+Xem [final integration gate](docs/integration/tv4-final-integration-gate.md).
+Không commit/push/merge/deploy; không sửa source TV3/TV5.
+
+Cross-branch verification 2026-11-07: snapshot TV3 9197a41 / TV4 38df244 + local
+keyed facade / TV5 484721d; 78 unit + 5 PostGIS PASS, 4 strict XFAIL thuộc TV5
+(unavailable/partial recommendations, sentinel 999, extra keys). Migration cycle
+PASS; metadata diff=[]. Policy 25m/0.5/2–6 vẫn DRAFT. Không commit/push/merge.
+Chi tiết: [cross-branch report](docs/integration/tv4-crossbranch-484721d.md).
+
 Pre-commit verification 2026-11-07: user cho phép commit/push riêng nhánh TV4.
 Đã rerun 65 tests PASS và migration thật trong snapshot pinned TV3 9197a41 /
 TV5 5d65a6c. Remote TV3 hiện bf29861 chưa được tích hợp/test ở đây.
