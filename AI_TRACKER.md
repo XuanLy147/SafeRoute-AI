@@ -41,6 +41,23 @@
 | TV5-03 | TV5 | CI/CD chạy build/lint/test; E2E + latency/cost evidence | backend | TODO | — | All modules |
 
 ## 4. API-LOCK / quyết định xuyên nhóm
+
+### TV4 Database / PostGIS — audit 2026-11-07 theo phân công mới
+
+Phân công hiện hành do user xác nhận: TV3 Backend/API/AI integration;
+TV4 Database/PostGIS/Alembic/Risk/Cloud; TV5 Google Routes/Routing.
+Các dòng task cũ phía trên giữ nguyên để truy vết, không còn là căn cứ phân công
+TV4-AI hoặc TV5-Cloud. TV3/integration lead cần rebaseline toàn bộ bảng chung.
+
+| ID | Owner | Hạng mục | Trạng thái | Bằng chứng / blocker |
+|---|---|---|---|---|
+| TV4-RISK-CORE | TV4 | Risk scorer độc lập và regression | IN_PROGRESS | 16/16 unittest PASS trên Python 3.11.9; MOCK_FOR_DEV; contract DRAFT; xem commit TV4 trong Git history |
+| TV4-DB-INTEGRATION | TV4 | Models alignment, Alembic, PostGIS, ST_DWithin -> risk | BLOCKED | Pre-commit rerun: upgrade/rollback/re-upgrade, metadata diff=[], 61 unit + 4 PostGIS PASS. Còn chờ duyệt policy/import/protocol và owner fixes. Xem docs/db/tv4-postgis-verification.md |
+
+Audit và handoff: [DB contract matrix](docs/db/tv4-postgis-contract-audit.md),
+[TV4 risk handoff](docs/integration/tv4-risk-handoff.md).
+TV3 6/6 đã tái chạy PASS trong snapshot tích hợp sau fetch; không chứng minh DB online.
+
 | Contract | Owners xác nhận | Trạng thái | Link/chứng cứ | Ghi chú |
 |---|---|---|---|---|
 | Auth/report/vote/review: endpoints, RBAC, status enum | TV2 + TV3 + TV1 | UNCONFIRMED | — | `PENDING_VERIFICATION`, `VERIFIED`, `REJECTED` |
@@ -65,8 +82,29 @@
 | Thời điểm (Asia/Ho_Chi_Minh) | TV / Agent | Branch | Đã làm / tệp thay đổi | Test (PASS/FAIL/NOT_RUN) | PR/Commit | Blocker & việc tiếp theo |
 |---|---|---|---|---|---|---|
 | 2026-11-07 | Team setup | main | Tạo bộ khung `AGENTS.md`, `AI_TRACKER.md` | NOT_RUN (docs only) | See git history | TV1–TV5 bắt đầu từ đúng branch |
+| 2026-11-07 | TV4 / Codex | feature/tv4-risk-core | Audit local, cập nhật DB contract matrix/handoff/tracker; giữ nguyên scorer/tests | PASS 16/16 risk unittest; PostGIS/Alembic/DB integration NOT_RUN | HEAD 7a78359; thay đổi chưa commit | Thiếu source TV3, contract TV3/TV5 và PostGIS test environment; xem docs/db/tv4-postgis-contract-audit.md |
 
 ## 7. Nguyên tắc demo
+
+Pre-commit verification 2026-11-07: user cho phép commit/push riêng nhánh TV4.
+Đã rerun 65 tests PASS và migration thật trong snapshot pinned TV3 9197a41 /
+TV5 5d65a6c. Remote TV3 hiện bf29861 chưa được tích hợp/test ở đây.
+Evidence: docs/db/evidence/tv4-precommit-verification.txt. Không commit snapshot,
+không merge main, không thay tiến độ task của TV khác.
+
+Latest verification 2026-11-07: đã khởi động Docker Desktop, dùng container test
+riêng PostgreSQL 16.4/PostGIS 3.4.3, xác minh migration và 4 DB tests thật PASS
+(65 tests tổng, không skip). Container đã dọn. Không sửa scorer/models/migration
+hoặc TV5 service. Contract production còn DRAFT; phát hiện thêm circular import
+TV3 khi import adapter trực tiếp; TV5 zip vẫn chưa sửa. Evidence và contract gate:
+[real PostGIS verification](docs/db/tv4-postgis-verification.md).
+
+Post-push follow-up 2026-11-07, TV4: đã bảo toàn local, fetch TV3/TV5, dựng
+snapshot `C:\dev\SafeRoute-AI-tv4-integration-20261107`; thêm draft PostGIS
+adapter và unit/live tests, chuẩn bị import patch cho TV5. 61 UNIT_PASS,
+4 DB tests skipped; offline Alembic SQL sinh được nhưng live upgrade/rollback
+NOT_RUN. Không commit/push/merge/deploy. Chi tiết và handoff:
+[post-push report](docs/integration/tv4-post-push-report.md).
 - **P0-A:** Ảnh/GPS → YOLO gợi ý hoặc [] → user sửa → submit PENDING → reviewer quyết định → map refresh.
 - **P0-B:** Điểm A/B → Google Routes trả tuyến → PostGIS risk scorer → hiển thị giải thích theo nguy cơ ghi nhận.
 - Chỉ tick DONE nếu thực sự demo/test được. Mock data phải có nhãn; không giới thiệu demo mock như backend thật.
