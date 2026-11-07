@@ -1,0 +1,8 @@
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="8dp" android:clickable="true" android:focusable="true" app:cardCornerRadius="12dp" app:cardElevation="0dp" app:strokeWidth="1dp" app:strokeColor="@color/outline">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+<TextView android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle1" android:textStyle="bold" android:textColor="@color/ink"/>
+<TextView android:id="@+id/type" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textAppearance="@style/Text.SafeRoute.Note"/>
+<TextView android:id="@+id/status" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="@style/Text.SafeRoute.Body" android:textStyle="bold"/>
+</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

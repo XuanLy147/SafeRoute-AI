@@ -1,0 +1,36 @@
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true">
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="20dp" android:paddingTop="20dp" android:text="@string/map_title" android:textAppearance="@style/Text.SafeRoute.Title"/>
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="20dp" android:paddingTop="6dp" android:paddingBottom="16dp" android:text="@string/map_subtitle" android:textAppearance="@style/Text.SafeRoute.Note"/>
+<FrameLayout android:layout_width="match_parent" android:layout_height="@dimen/map_height" android:background="@color/info">
+<androidx.fragment.app.FragmentContainerView android:id="@+id/map" android:layout_width="match_parent" android:layout_height="match_parent"/>
+<LinearLayout android:id="@+id/map_placeholder" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:padding="24dp">
+<ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/ic_map" android:importantForAccessibility="no"/>
+<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/map_unavailable" android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6" android:textColor="@color/on_info"/>
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/map_unavailable_detail" android:gravity="center" android:textColor="@color/on_info" android:textSize="14sp"/>
+</LinearLayout>
+</FrameLayout>
+<TextView android:id="@+id/map_status" android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="20dp" android:paddingTop="8dp" android:text="@string/map_connecting" android:textAppearance="@style/Text.SafeRoute.Note" android:visibility="gone"/>
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:paddingHorizontal="16dp" android:orientation="horizontal">
+<com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/location" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:minHeight="48dp" android:text="@string/my_location"/>
+<com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/routes" style="@style/Widget.MaterialComponents.Button.OutlinedButton" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginStart="8dp" android:minHeight="48dp" android:text="@string/nav_routes"/>
+</LinearLayout>
+<HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content" android:scrollbars="none" android:paddingHorizontal="16dp">
+<com.google.android.material.chip.ChipGroup android:id="@+id/categories" android:layout_width="wrap_content" android:layout_height="wrap_content" android:contentDescription="@string/filter_label" app:singleSelection="true" app:selectionRequired="true" app:singleLine="true">
+<com.google.android.material.chip.Chip android:id="@+id/all" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/filter_all" app:ensureMinTouchTargetSize="true"/>
+<com.google.android.material.chip.Chip android:id="@+id/pothole" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/filter_pothole" app:ensureMinTouchTargetSize="true"/>
+<com.google.android.material.chip.Chip android:id="@+id/cracks" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/filter_cracks" app:ensureMinTouchTargetSize="true"/>
+</com.google.android.material.chip.ChipGroup>
+</HorizontalScrollView>
+<com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/verified" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="48dp" android:paddingHorizontal="20dp" android:text="@string/filter_verified"/>
+<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:paddingHorizontal="20dp">
+<TextView android:id="@+id/status" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textAppearance="@style/Text.SafeRoute.Note" android:accessibilityLiveRegion="polite"/>
+<com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/refresh" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:minHeight="48dp" android:text="@string/refresh"/>
+</LinearLayout>
+<ProgressBar android:id="@+id/loading" style="?android:attr/progressBarStyleHorizontal" android:layout_width="match_parent" android:layout_height="4dp" android:indeterminate="true" android:visibility="gone"/>
+<LinearLayout android:id="@+id/report_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone" android:paddingHorizontal="20dp">
+<LinearLayout android:id="@+id/report_list" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical"/>
+</LinearLayout>
+</LinearLayout>
+</androidx.core.widget.NestedScrollView>

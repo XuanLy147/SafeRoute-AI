@@ -1,0 +1,36 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="72dp"
+    android:height="72dp"
+    android:viewportWidth="72"
+    android:viewportHeight="72">
+    <!-- Blue Rounded Background -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M16,4 L56,4 A12,12 0,0,1 68,16 L68,56 A12,12 0,0,1 56,68 L16,68 A12,12 0,0,1 4,56 L4,16 A12,12 0,0,1 16,4 Z" />
+
+    <!-- Smiley Face White Navigation Shape -->
+    <!-- Head circle -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M23,34 C23,26.8 28.8,21 36,21 C43.2,21 49,26.8 49,34 C49,41.2 43.2,47 36,47 C33,47 30,46 27.5,44.2 L20,47 L22.5,40.5 C22.8,38.5 23,36.2 23,34 Z" />
+
+    <!-- Eyes -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,32 A2.2,2.2 0,1,1 30,31.9 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,32 A2.2,2.2 0,1,1 42,31.9 Z" />
+
+    <!-- Smile -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M31,38 C33,41 39,41 41,38" />
+</vector>

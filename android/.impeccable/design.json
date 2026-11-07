@@ -1,0 +1,496 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T07:12:06.854734+00:00",
+  "title": "Design System: SafeRoute AI Android",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "tonalRamp": [
+          "oklch(15.00% 0.2152 262.88)",
+          "oklch(26.43% 0.2152 262.88)",
+          "oklch(37.86% 0.2152 262.88)",
+          "oklch(49.29% 0.2152 262.88)",
+          "oklch(60.71% 0.2152 262.88)",
+          "oklch(72.14% 0.2152 262.88)",
+          "oklch(83.57% 0.2152 262.88)",
+          "oklch(95.00% 0.2152 262.88)"
+        ]
+      },
+      "on-primary": {
+        "role": "neutral",
+        "displayName": "On Primary",
+        "tonalRamp": [
+          "oklch(15.00% 0.0000 89.88)",
+          "oklch(26.43% 0.0000 89.88)",
+          "oklch(37.86% 0.0000 89.88)",
+          "oklch(49.29% 0.0000 89.88)",
+          "oklch(60.71% 0.0000 89.88)",
+          "oklch(72.14% 0.0000 89.88)",
+          "oklch(83.57% 0.0000 89.88)",
+          "oklch(95.00% 0.0000 89.88)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "tonalRamp": [
+          "oklch(15.00% 0.0000 89.88)",
+          "oklch(26.43% 0.0000 89.88)",
+          "oklch(37.86% 0.0000 89.88)",
+          "oklch(49.29% 0.0000 89.88)",
+          "oklch(60.71% 0.0000 89.88)",
+          "oklch(72.14% 0.0000 89.88)",
+          "oklch(83.57% 0.0000 89.88)",
+          "oklch(95.00% 0.0000 89.88)"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "tonalRamp": [
+          "oklch(15.00% 0.0034 247.86)",
+          "oklch(26.43% 0.0034 247.86)",
+          "oklch(37.86% 0.0034 247.86)",
+          "oklch(49.29% 0.0034 247.86)",
+          "oklch(60.71% 0.0034 247.86)",
+          "oklch(72.14% 0.0034 247.86)",
+          "oklch(83.57% 0.0034 247.86)",
+          "oklch(95.00% 0.0034 247.86)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15.00% 0.0398 265.75)",
+          "oklch(26.43% 0.0398 265.75)",
+          "oklch(37.86% 0.0398 265.75)",
+          "oklch(49.29% 0.0398 265.75)",
+          "oklch(60.71% 0.0398 265.75)",
+          "oklch(72.14% 0.0398 265.75)",
+          "oklch(83.57% 0.0398 265.75)",
+          "oklch(95.00% 0.0398 265.75)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15.00% 0.0374 257.28)",
+          "oklch(26.43% 0.0374 257.28)",
+          "oklch(37.86% 0.0374 257.28)",
+          "oklch(49.29% 0.0374 257.28)",
+          "oklch(60.71% 0.0374 257.28)",
+          "oklch(72.14% 0.0374 257.28)",
+          "oklch(83.57% 0.0374 257.28)",
+          "oklch(95.00% 0.0374 257.28)"
+        ]
+      },
+      "outline": {
+        "role": "neutral",
+        "displayName": "Outline",
+        "tonalRamp": [
+          "oklch(15.00% 0.0198 252.89)",
+          "oklch(26.43% 0.0198 252.89)",
+          "oklch(37.86% 0.0198 252.89)",
+          "oklch(49.29% 0.0198 252.89)",
+          "oklch(60.71% 0.0198 252.89)",
+          "oklch(72.14% 0.0198 252.89)",
+          "oklch(83.57% 0.0198 252.89)",
+          "oklch(95.00% 0.0198 252.89)"
+        ]
+      },
+      "info": {
+        "role": "semantic",
+        "displayName": "Info",
+        "tonalRamp": [
+          "oklch(15.00% 0.0142 254.60)",
+          "oklch(26.43% 0.0142 254.60)",
+          "oklch(37.86% 0.0142 254.60)",
+          "oklch(49.29% 0.0142 254.60)",
+          "oklch(60.71% 0.0142 254.60)",
+          "oklch(72.14% 0.0142 254.60)",
+          "oklch(83.57% 0.0142 254.60)",
+          "oklch(95.00% 0.0142 254.60)"
+        ]
+      },
+      "on-info": {
+        "role": "semantic",
+        "displayName": "On Info",
+        "tonalRamp": [
+          "oklch(15.00% 0.2172 264.38)",
+          "oklch(26.43% 0.2172 264.38)",
+          "oklch(37.86% 0.2172 264.38)",
+          "oklch(49.29% 0.2172 264.38)",
+          "oklch(60.71% 0.2172 264.38)",
+          "oklch(72.14% 0.2172 264.38)",
+          "oklch(83.57% 0.2172 264.38)",
+          "oklch(95.00% 0.2172 264.38)"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning",
+        "tonalRamp": [
+          "oklch(15.00% 0.1247 46.20)",
+          "oklch(26.43% 0.1247 46.20)",
+          "oklch(37.86% 0.1247 46.20)",
+          "oklch(49.29% 0.1247 46.20)",
+          "oklch(60.71% 0.1247 46.20)",
+          "oklch(72.14% 0.1247 46.20)",
+          "oklch(83.57% 0.1247 46.20)",
+          "oklch(95.00% 0.1247 46.20)"
+        ]
+      },
+      "verified": {
+        "role": "semantic",
+        "displayName": "Verified",
+        "tonalRamp": [
+          "oklch(15.00% 0.1049 165.61)",
+          "oklch(26.43% 0.1049 165.61)",
+          "oklch(37.86% 0.1049 165.61)",
+          "oklch(49.29% 0.1049 165.61)",
+          "oklch(60.71% 0.1049 165.61)",
+          "oklch(72.14% 0.1049 165.61)",
+          "oklch(83.57% 0.1049 165.61)",
+          "oklch(95.00% 0.1049 165.61)"
+        ]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "Error",
+        "tonalRamp": [
+          "oklch(15.00% 0.1905 27.52)",
+          "oklch(26.43% 0.1905 27.52)",
+          "oklch(37.86% 0.1905 27.52)",
+          "oklch(49.29% 0.1905 27.52)",
+          "oklch(60.71% 0.1905 27.52)",
+          "oklch(72.14% 0.1905 27.52)",
+          "oklch(83.57% 0.1905 27.52)",
+          "oklch(95.00% 0.1905 27.52)"
+        ]
+      },
+      "route-alternative": {
+        "role": "neutral",
+        "displayName": "Route Alternative",
+        "tonalRamp": [
+          "oklch(15.00% 0.0407 257.42)",
+          "oklch(26.43% 0.0407 257.42)",
+          "oklch(37.86% 0.0407 257.42)",
+          "oklch(49.29% 0.0407 257.42)",
+          "oklch(60.71% 0.0407 257.42)",
+          "oklch(72.14% 0.0407 257.42)",
+          "oklch(83.57% 0.0407 257.42)",
+          "oklch(95.00% 0.0407 257.42)"
+        ]
+      },
+      "primary-night": {
+        "role": "primary",
+        "displayName": "Primary Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0857 262.68)",
+          "oklch(26.43% 0.0857 262.68)",
+          "oklch(37.86% 0.0857 262.68)",
+          "oklch(49.29% 0.0857 262.68)",
+          "oklch(60.71% 0.0857 262.68)",
+          "oklch(72.14% 0.0857 262.68)",
+          "oklch(83.57% 0.0857 262.68)",
+          "oklch(95.00% 0.0857 262.68)"
+        ]
+      },
+      "on-primary-night": {
+        "role": "neutral",
+        "displayName": "On Primary Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.1036 255.05)",
+          "oklch(26.43% 0.1036 255.05)",
+          "oklch(37.86% 0.1036 255.05)",
+          "oklch(49.29% 0.1036 255.05)",
+          "oklch(60.71% 0.1036 255.05)",
+          "oklch(72.14% 0.1036 255.05)",
+          "oklch(83.57% 0.1036 255.05)",
+          "oklch(95.00% 0.1036 255.05)"
+        ]
+      },
+      "surface-night": {
+        "role": "neutral",
+        "displayName": "Surface Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0375 261.69)",
+          "oklch(26.43% 0.0375 261.69)",
+          "oklch(37.86% 0.0375 261.69)",
+          "oklch(49.29% 0.0375 261.69)",
+          "oklch(60.71% 0.0375 261.69)",
+          "oklch(72.14% 0.0375 261.69)",
+          "oklch(83.57% 0.0375 261.69)",
+          "oklch(95.00% 0.0375 261.69)"
+        ]
+      },
+      "background-night": {
+        "role": "neutral",
+        "displayName": "Background Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0330 262.29)",
+          "oklch(26.43% 0.0330 262.29)",
+          "oklch(37.86% 0.0330 262.29)",
+          "oklch(49.29% 0.0330 262.29)",
+          "oklch(60.71% 0.0330 262.29)",
+          "oklch(72.14% 0.0330 262.29)",
+          "oklch(83.57% 0.0330 262.29)",
+          "oklch(95.00% 0.0330 262.29)"
+        ]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Ink Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0069 247.90)",
+          "oklch(26.43% 0.0069 247.90)",
+          "oklch(37.86% 0.0069 247.90)",
+          "oklch(49.29% 0.0069 247.90)",
+          "oklch(60.71% 0.0069 247.90)",
+          "oklch(72.14% 0.0069 247.90)",
+          "oklch(83.57% 0.0069 247.90)",
+          "oklch(95.00% 0.0069 247.90)"
+        ]
+      },
+      "muted-night": {
+        "role": "neutral",
+        "displayName": "Muted Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0198 252.89)",
+          "oklch(26.43% 0.0198 252.89)",
+          "oklch(37.86% 0.0198 252.89)",
+          "oklch(49.29% 0.0198 252.89)",
+          "oklch(60.71% 0.0198 252.89)",
+          "oklch(72.14% 0.0198 252.89)",
+          "oklch(83.57% 0.0198 252.89)",
+          "oklch(95.00% 0.0198 252.89)"
+        ]
+      },
+      "outline-night": {
+        "role": "neutral",
+        "displayName": "Outline Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0407 257.42)",
+          "oklch(26.43% 0.0407 257.42)",
+          "oklch(37.86% 0.0407 257.42)",
+          "oklch(49.29% 0.0407 257.42)",
+          "oklch(60.71% 0.0407 257.42)",
+          "oklch(72.14% 0.0407 257.42)",
+          "oklch(83.57% 0.0407 257.42)",
+          "oklch(95.00% 0.0407 257.42)"
+        ]
+      },
+      "info-night": {
+        "role": "semantic",
+        "displayName": "Info Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0775 257.14)",
+          "oklch(26.43% 0.0775 257.14)",
+          "oklch(37.86% 0.0775 257.14)",
+          "oklch(49.29% 0.0775 257.14)",
+          "oklch(60.71% 0.0775 257.14)",
+          "oklch(72.14% 0.0775 257.14)",
+          "oklch(83.57% 0.0775 257.14)",
+          "oklch(95.00% 0.0775 257.14)"
+        ]
+      },
+      "on-info-night": {
+        "role": "semantic",
+        "displayName": "On Info Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0618 259.76)",
+          "oklch(26.43% 0.0618 259.76)",
+          "oklch(37.86% 0.0618 259.76)",
+          "oklch(49.29% 0.0618 259.76)",
+          "oklch(60.71% 0.0618 259.76)",
+          "oklch(72.14% 0.0618 259.76)",
+          "oklch(83.57% 0.0618 259.76)",
+          "oklch(95.00% 0.0618 259.76)"
+        ]
+      },
+      "warning-night": {
+        "role": "semantic",
+        "displayName": "Warning Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.1534 91.61)",
+          "oklch(26.43% 0.1534 91.61)",
+          "oklch(37.86% 0.1534 91.61)",
+          "oklch(49.29% 0.1534 91.61)",
+          "oklch(60.71% 0.1534 91.61)",
+          "oklch(72.14% 0.1534 91.61)",
+          "oklch(83.57% 0.1534 91.61)",
+          "oklch(95.00% 0.1534 91.61)"
+        ]
+      },
+      "verified-night": {
+        "role": "semantic",
+        "displayName": "Verified Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.1299 164.98)",
+          "oklch(26.43% 0.1299 164.98)",
+          "oklch(37.86% 0.1299 164.98)",
+          "oklch(49.29% 0.1299 164.98)",
+          "oklch(60.71% 0.1299 164.98)",
+          "oklch(72.14% 0.1299 164.98)",
+          "oklch(83.57% 0.1299 164.98)",
+          "oklch(95.00% 0.1299 164.98)"
+        ]
+      },
+      "error-night": {
+        "role": "semantic",
+        "displayName": "Error Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.1035 19.57)",
+          "oklch(26.43% 0.1035 19.57)",
+          "oklch(37.86% 0.1035 19.57)",
+          "oklch(49.29% 0.1035 19.57)",
+          "oklch(60.71% 0.1035 19.57)",
+          "oklch(72.14% 0.1035 19.57)",
+          "oklch(83.57% 0.1035 19.57)",
+          "oklch(95.00% 0.1035 19.57)"
+        ]
+      },
+      "route-alternative-night": {
+        "role": "neutral",
+        "displayName": "Route Alternative Night",
+        "tonalRamp": [
+          "oklch(15.00% 0.0351 256.79)",
+          "oklch(26.43% 0.0351 256.79)",
+          "oklch(37.86% 0.0351 256.79)",
+          "oklch(49.29% 0.0351 256.79)",
+          "oklch(60.71% 0.0351 256.79)",
+          "oklch(72.14% 0.0351 256.79)",
+          "oklch(83.57% 0.0351 256.79)",
+          "oklch(95.00% 0.0351 256.79)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Screen title",
+        "purpose": "Native MaterialComponents Headline5, bold."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Native MaterialComponents Body1."
+      },
+      "note": {
+        "displayName": "Supporting note",
+        "purpose": "Native MaterialComponents Body2."
+      }
+    },
+    "shadows": [
+      {
+        "name": "flat-card",
+        "value": "none",
+        "purpose": "Native cardElevation is 0dp; browser preview equivalent."
+      }
+    ],
+    "motion": [],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Native MaterialButton primary variant. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<button class=\"ds-button-primary\">Compare routes</button>",
+      "css": ".ds-button-primary{background:#2563EB;color:#FFFFFF;border:1px solid transparent;border-radius:4px;min-height:48px;padding:8px 16px;font:500 14px sans-serif}.ds-button-primary:hover{filter:brightness(.95)}.ds-button-primary:focus-visible{outline:2px solid #2563EB;outline-offset:3px}.ds-button-primary:active{filter:brightness(.88)}.ds-button-primary:disabled{opacity:.45}"
+    },
+    {
+      "name": "Outlined button",
+      "kind": "button",
+      "refersTo": "button-outlined",
+      "description": "Native MaterialButton outlined variant. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<button class=\"ds-button-outlined\">Compare routes</button>",
+      "css": ".ds-button-outlined{background:transparent;color:#2563EB;border:1px solid #CBD5E1;border-radius:4px;min-height:48px;padding:8px 16px;font:500 14px sans-serif}.ds-button-outlined:hover{filter:brightness(.95)}.ds-button-outlined:focus-visible{outline:2px solid #2563EB;outline-offset:3px}.ds-button-outlined:active{filter:brightness(.88)}.ds-button-outlined:disabled{opacity:.45}"
+    },
+    {
+      "name": "Text button",
+      "kind": "button",
+      "refersTo": "button-text",
+      "description": "Native MaterialButton text variant. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<button class=\"ds-button-text\">Compare routes</button>",
+      "css": ".ds-button-text{background:transparent;color:#2563EB;border:1px solid transparent;border-radius:4px;min-height:48px;padding:8px 16px;font:500 14px sans-serif}.ds-button-text:hover{filter:brightness(.95)}.ds-button-text:focus-visible{outline:2px solid #2563EB;outline-offset:3px}.ds-button-text:active{filter:brightness(.88)}.ds-button-text:disabled{opacity:.45}"
+    },
+    {
+      "name": "Coordinate input",
+      "kind": "input",
+      "refersTo": "input-outlined",
+      "description": "Outlined coordinate field. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<label class=\"ds-field\">A - Origin<input placeholder=\"10.755400, 106.678200\"></label>",
+      "css": ".ds-field{display:grid;gap:8px;color:#475569;font:14px sans-serif}.ds-field input{border:1px solid #CBD5E1;border-radius:4px;padding:16px;font:16px sans-serif;color:#0F172A;background:#FFFFFF}.ds-field input:hover{border-color:#475569}.ds-field input:focus-visible{outline:2px solid #2563EB;outline-offset:1px}"
+    },
+    {
+      "name": "Filter chip",
+      "kind": "chip",
+      "refersTo": "filter-chip",
+      "description": "Single-selection hazard category. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\">All</button>",
+      "css": ".ds-chip{border:1px solid #CBD5E1;border-radius:24px;min-height:48px;padding:8px 16px;background:#EFF6FF;color:#0F172A;font:14px sans-serif}.ds-chip:hover{background:#DBEAFE}.ds-chip:focus-visible{outline:2px solid #2563EB;outline-offset:2px}.ds-chip:active{background:#BFDBFE}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Four labeled destinations; report/profile are integration placeholders. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><button aria-current=\"page\">Map</button><button>Routes</button><button>Reports</button><button>Profile</button></nav>",
+      "css": ".ds-nav{display:flex;background:#FFFFFF}.ds-nav button{flex:1;min-height:56px;padding:8px;border:0;background:transparent;color:#475569;font:12px sans-serif}.ds-nav button[aria-current]{color:#2563EB}.ds-nav button:hover{background:#EFF6FF}.ds-nav button:focus-visible{outline:2px solid #2563EB;outline-offset:-2px}.ds-nav button:active{background:#DBEAFE}"
+    },
+    {
+      "name": "Route card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Selected route card with outlined state and no shadow. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<article class=\"ds-card\"><strong>Route details</strong><p>Risk score supplied by service</p><p>Explanation supplied by service</p></article>",
+      "css": ".ds-card{padding:16px;border:2px solid #2563EB;border-radius:12px;background:#FFFFFF;color:#0F172A;font:16px sans-serif}.ds-card p{margin:12px 0 0}"
+    },
+    {
+      "name": "Status panel",
+      "kind": "custom",
+      "refersTo": "status-panel",
+      "description": "Informational fallback. Documentation preview only; Android Material defaults remain authoritative.",
+      "html": "<div class=\"ds-status\" role=\"status\">Map unavailable. Coordinate entry remains available.</div>",
+      "css": ".ds-status{padding:12px;background:#EFF6FF;color:#1D4ED8;font:14px sans-serif}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Smart Mobility Blue",
+    "overview": "Smart Mobility Blue is the supplied visual direction. The implementation uses native Material Components, clear Vietnamese labels, pale backgrounds and blue actions to make recorded road conditions and route choices legible. This document preserves that incumbent system; it does not introduce a new identity.\n\nThe screen hierarchy is practical and compact: a clear title, the relevant map or inputs, explicit status, then supporting details. Verification and selected-route state have both text and color cues. The documented system is extracted from source; device-level visual acceptance is still outstanding.",
+    "keyCharacteristics": [
+      "Native Java/XML Material controls.",
+      "Blue actions, neutral surfaces and explicit semantic status.",
+      "Scrollable phone layouts with persistent, labeled navigation.",
+      "Flat outlined cards with visible selection."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Label Rule",
+        "body": "Verification and route selection must remain understandable without color.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat Card Rule",
+        "body": "Keep list-card hierarchy in content, spacing and stroke rather than added decorative shadows.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Android resource roles so light and dark schemes resolve together.",
+      "Do keep status labels and route explanations alongside visual cues.",
+      "Do preserve native sp text, touch targets and keyboard/system insets.",
+      "Do keep all controls reachable when the screen is short or text is enlarged."
+    ],
+    "donts": [
+      "Don't use a risk color or score to imply guaranteed safety.",
+      "Don't fabricate route alternatives, geometry, scores or verification.",
+      "Don't replace native controls with browser-rendered UI.",
+      "Don't treat sidecar browser previews as Android screenshot evidence."
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="auth_unavailable">Chưa kết nối dịch vụ tài khoản. Thông tin chưa được gửi; bạn vẫn có thể sử dụng bản đồ.</string>
+    <string name="ai_unavailable_title">Chưa kết nối phân tích ảnh</string>
+    <string name="ai_unavailable_detail">Bạn có thể chọn loại nguy cơ thủ công. Chưa có kết quả AI cho ảnh này.</string>
+    <string name="report_location_missing">Chưa chọn vị trí báo cáo</string>
+    <string name="report_location_button">Lấy vị trí</string>
+    <string name="reports_unavailable">Chưa kết nối dữ liệu báo cáo. Danh sách sẽ xuất hiện khi dịch vụ sẵn sàng.</string>
+    <string name="profile_sign_in">Đăng nhập / Đăng ký</string>
+    <string name="account_guest">Chưa đăng nhập</string>
+    <string name="image_read_error">Không đọc được ảnh. Vui lòng chọn lại.</string>
+    <string name="auth_back">Quay lại</string>
+    <string name="analyze_image_action">Phân tích ảnh</string>
+</resources>

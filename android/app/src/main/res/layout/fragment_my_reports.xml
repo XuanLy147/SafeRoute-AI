@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='utf-8'?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/bg_screen" android:orientation="vertical" android:padding="20dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:minHeight="48dp">
+        <ImageButton android:id="@+id/btnBack" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/tv2_community_feedback_2_contentdescription" android:src="@drawable/ic_back" android:minHeight="48dp" android:textAllCaps="false" app:tint="@color/primary" />
+        <TextView android:id="@+id/tvTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="start" android:text="@string/tv2_my_reports_3_text" android:textColor="@color/text_title" android:textSize="24sp" android:textStyle="bold" android:textAppearance="@style/Text.SafeRoute.Title" />
+        <ImageButton android:id="@+id/btnOpenProfile" android:layout_width="48dp" android:layout_height="48dp" android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/tv2_my_reports_4_contentdescription" android:src="@drawable/ic_person" android:minHeight="48dp" android:textAllCaps="false" app:tint="@color/primary" />
+    </LinearLayout>
+    <ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="20dp">
+            <LinearLayout android:id="@+id/listContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                <TextView android:id="@+id/reportsUnavailable" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="16dp" android:layout_marginTop="16dp" android:text="@string/reports_unavailable" android:textAppearance="@style/Text.SafeRoute.Body" android:background="@color/info" android:textColor="@color/on_info" />
+                <com.google.android.material.chip.ChipGroup android:id="@+id/chipGroupFilter" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" app:singleSelection="true">
+                    <com.google.android.material.chip.Chip android:id="@+id/chipFilterAll" android:layout_width="wrap_content" android:layout_height="wrap_content" android:checked="true" android:text="@string/tv2_my_reports_11_text" android:checkable="true" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipFilterPending" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_12_text" android:checkable="true" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipFilterVerified" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_13_text" android:checkable="true" />
+                    <com.google.android.material.chip.Chip android:id="@+id/chipFilterRejected" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_14_text" android:checkable="true" />
+                </com.google.android.material.chip.ChipGroup>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/tv2_my_reports_15_text" android:textColor="@color/text_title" android:textSize="16sp" android:textStyle="bold" />
+                <com.google.android.material.card.MaterialCardView android:id="@+id/reportPending" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="12dp" app:strokeColor="@color/divider_color" app:strokeWidth="1dp" app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_18_text" android:textColor="@color/text_title" android:textSize="15sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:background="@drawable/bg_badge_pending" android:text="@string/tv2_my_reports_19_text" />
+                        <com.google.android.material.button.MaterialButton android:id="@+id/btnReportDetail" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end" android:text="@string/tv2_my_reports_20_text" android:textAllCaps="false" app:cornerRadius="12dp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:id="@+id/reportVerified" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="12dp" app:strokeColor="@color/divider_color" app:strokeWidth="1dp" app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_23_text" android:textColor="@color/text_title" android:textSize="15sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:background="@drawable/bg_badge_verified" android:text="@string/tv2_my_reports_24_text" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/tv2_my_reports_25_text" android:textColor="@color/text_hint" android:textSize="14sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+                <com.google.android.material.card.MaterialCardView android:id="@+id/reportRejected" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="12dp" app:strokeColor="@color/divider_color" app:strokeWidth="1dp" app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_28_text" android:textColor="@color/text_title" android:textSize="15sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:background="@drawable/bg_badge_rejected" android:text="@string/tv2_my_reports_29_text" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/tv2_my_reports_25_text" android:textColor="@color/text_hint" android:textSize="14sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+            <LinearLayout android:id="@+id/detailContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:visibility="gone">
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnDetailBack" style="@style/Widget.MaterialComponents.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="@string/tv2_my_reports_32_text" android:textAllCaps="false" app:cornerRadius="12dp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_badge_info" android:padding="10dp" android:text="@string/tv2_my_reports_33_text" android:textColor="@color/color_info" android:textSize="14sp" android:textStyle="bold" />
+                <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" app:cardBackgroundColor="@color/surface" app:cardCornerRadius="12dp" app:strokeColor="@color/divider_color" app:strokeWidth="1dp" app:cardElevation="0dp">
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/tv2_my_reports_36_text" android:textColor="@color/text_title" android:textSize="17sp" android:textStyle="bold" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:background="@drawable/bg_badge_pending" android:text="@string/tv2_my_reports_19_text" />
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/tv2_my_reports_38_text" android:textColor="@color/text_body" android:textSize="14sp" />
+                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="@string/tv2_my_reports_39_text" android:textColor="@color/text_label" android:textSize="14sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>
