@@ -9,6 +9,7 @@ dependencies = [
     "uvicorn[standard]>=0.28.0,<0.33.0",
     "pydantic>=2.6.0,<2.11.0",
     "pydantic-settings>=2.2.0,<2.8.0",
+    "email-validator>=2.0.0",
     "sqlalchemy>=2.0.28,<2.1.0",
     "geoalchemy2>=0.14.4,<0.18.0",
     "psycopg2-binary>=2.9.9,<2.10.0",
@@ -29,8 +30,13 @@ dev = [
 ]
 
 [tool.ruff]
-line-length = 100
+line-length = 120
 target-version = "py311"
+exclude = ["migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["B008", "BLE001", "E501", "UP042"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

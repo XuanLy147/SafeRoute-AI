@@ -1,14 +1,14 @@
 import os
-from datetime import datetime, timezone
-from fastapi import FastAPI, Depends
+from datetime import UTC, datetime
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import text
-from sqlalchemy.orm import Session
 
-from app.core.config import settings
-from app.db.session import get_db, engine
 from app.api.v1.api import api_router
+from app.core.config import settings
+from app.db.session import engine
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -55,7 +55,7 @@ def health_check():
         "service": settings.PROJECT_NAME,
         "version": settings.VERSION,
         "database": db_status,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 # 4. Gắn router chính v1

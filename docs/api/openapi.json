@@ -46,10 +46,773 @@
           }
         }
       }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Đăng nhập hệ thống",
+        "description": "Xác thực email và mật khẩu, cấp phát JWT Bearer Token chứa thông tin vai trò (USER, REVIEWER, ADMIN).",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Đăng ký tài khoản",
+        "description": "Tạo tài khoản mới với vai trò mặc định là USER.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Thông tin tài khoản hiện tại",
+        "description": "Lấy thông tin cá nhân của người dùng đã xác thực bằng JWT Bearer Token.",
+        "operationId": "get_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/images": {
+      "post": {
+        "tags": [
+          "Images"
+        ],
+        "summary": "Tải lên ảnh bằng chứng nguy cơ",
+        "description": "Kiểm tra định dạng (JPEG, PNG, WEBP), giới hạn 5MB và lưu trữ ảnh an toàn với UUID.",
+        "operationId": "upload_image_api_v1_images_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_image_api_v1_images_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImageUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/reports": {
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Tạo báo cáo nguy cơ mặt đường mới",
+        "description": "Gửi báo cáo kèm GPS và loại hư hỏng. Trạng thái ban đầu BẮT BUỘC là PENDING_VERIFICATION.",
+        "operationId": "create_report_api_v1_reports_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportItemResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Lấy danh sách báo cáo công khai trên bản đồ",
+        "description": "Mặc định LOẠI BỎ hoàn toàn các báo cáo bị REJECTED khỏi bản đồ chung. Có hỗ trợ lọc theo trạng thái và khu vực.",
+        "operationId": "get_reports_api_v1_reports_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ReportStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Lọc theo trạng thái",
+              "title": "Status"
+            },
+            "description": "Lọc theo trạng thái"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Lọc theo mã hư hỏng",
+              "title": "Category"
+            },
+            "description": "Lọc theo mã hư hỏng"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReportItemResponse"
+                  },
+                  "title": "Response Get Reports Api V1 Reports Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/mine": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Lấy danh sách báo cáo của tôi",
+        "description": "Xem lịch sử các báo cáo do chính người dùng hiện tại đã gửi lên.",
+        "operationId": "get_my_reports_api_v1_reports_mine_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportItemResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get My Reports Api V1 Reports Mine Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/reports/{report_id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Chi tiết một báo cáo nguy cơ",
+        "description": "Lấy chi tiết báo cáo, bao gồm ảnh, nhãn người dùng, số lượng vote và lịch sử kiểm duyệt.",
+        "operationId": "get_report_detail_api_v1_reports__report_id__get",
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDetailResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/{report_id}/votes": {
+      "post": {
+        "tags": [
+          "Community Votes"
+        ],
+        "summary": "Góp ý cộng đồng cho một báo cáo",
+        "description": "Người dùng gửi ý kiến SUPPORT, OPPOSE hoặc UNSURE. Mỗi người chỉ được vote 1 lần trên 1 report (tránh spam 409 Conflict).",
+        "operationId": "create_vote_api_v1_reports__report_id__votes_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoteCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/review/queue": {
+      "get": {
+        "tags": [
+          "Review & Audit"
+        ],
+        "summary": "Hàng đợi kiểm duyệt báo cáo",
+        "description": "Chỉ dành cho vai trò REVIEWER hoặc ADMIN (USER gọi sẽ nhận mã lỗi 403 Forbidden). Trả về danh sách báo cáo đang ở trạng thái PENDING_VERIFICATION.",
+        "operationId": "get_review_queue_api_v1_review_queue_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReportItemResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Review Queue Api V1 Review Queue Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/review/reports/{report_id}/status": {
+      "patch": {
+        "tags": [
+          "Review & Audit"
+        ],
+        "summary": "Xét duyệt báo cáo nguy cơ (Xác minh hoặc Từ chối)",
+        "description": "Chỉ dành cho REVIEWER/ADMIN (USER gọi sẽ bị 403). BẮT BUỘC cung cấp lý do và tự động ghi vết Audit Log (review_logs).",
+        "operationId": "review_report_status_api_v1_review_reports__report_id__status_patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewStatusPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/{report_id}/status": {
+      "patch": {
+        "tags": [
+          "Review & Audit"
+        ],
+        "summary": "Xét duyệt báo cáo (Alias endpoint: PATCH /api/v1/reports/{id}/status)",
+        "operationId": "review_report_status_api_v1_reports__report_id__status_patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "report_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Report Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewStatusPatchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/detect": {
+      "post": {
+        "tags": [
+          "AI Inference"
+        ],
+        "summary": "Phát hiện hư hỏng mặt đường bằng AI YOLOv12s",
+        "description": "Nhận ảnh mặt đường và trả về danh sách các vùng phát hiện (D00, D10, D20, D40, Repair). Cho phép trả về detections=[] khi mặt đường bình thường.",
+        "operationId": "detect_road_hazards_api_v1_ai_detect_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_detect_road_hazards_api_v1_ai_detect_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiDetectResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AiDetectResponse": {
+        "properties": {
+          "model_version": {
+            "type": "string",
+            "title": "Model Version",
+            "description": "Phiên bản mô hình AI đã nạp",
+            "default": "SafeRoute-YOLOv12s-v1.1"
+          },
+          "inference_time_ms": {
+            "type": "number",
+            "title": "Inference Time Ms",
+            "description": "Thời gian suy luận (milliseconds)"
+          },
+          "device": {
+            "type": "string",
+            "title": "Device",
+            "description": "Thiết bị chạy suy luận (cpu/cuda)",
+            "default": "cpu"
+          },
+          "detections": {
+            "items": {
+              "$ref": "#/components/schemas/DetectionItem"
+            },
+            "type": "array",
+            "title": "Detections",
+            "description": "Danh sách các vùng hư hỏng phát hiện được. Cho phép rỗng [] nếu đường bình thường."
+          }
+        },
+        "type": "object",
+        "required": [
+          "inference_time_ms"
+        ],
+        "title": "AiDetectResponse"
+      },
+      "Body_detect_road_hazards_api_v1_ai_detect_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "Ảnh mặt đường cần nhận diện"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_detect_road_hazards_api_v1_ai_detect_post"
+      },
+      "Body_upload_image_api_v1_images_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "description": "File ảnh bằng chứng"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_image_api_v1_images_post"
+      },
+      "DetectionItem": {
+        "properties": {
+          "class_code": {
+            "type": "string",
+            "title": "Class Code",
+            "description": "Mã lớp hư hỏng: D00, D10, D20, D40, Repair"
+          },
+          "class_name": {
+            "type": "string",
+            "title": "Class Name",
+            "description": "Tên loại hư hỏng tiếng Anh/Việt"
+          },
+          "confidence": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "description": "Độ tin cậy của mô hình YOLOv12s (0.0 - 1.0)"
+          },
+          "bbox": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Bbox",
+            "description": "Tọa độ Bounding Box [ymin, xmin, ymax, xmax] normalized hoặc pixel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "class_code",
+          "class_name",
+          "confidence",
+          "bbox"
+        ],
+        "title": "DetectionItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ImageUploadResponse": {
+        "properties": {
+          "image_id": {
+            "type": "string",
+            "title": "Image Id"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename"
+          },
+          "mime": {
+            "type": "string",
+            "title": "Mime"
+          },
+          "size_bytes": {
+            "type": "integer",
+            "title": "Size Bytes"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_id",
+          "filename",
+          "mime",
+          "size_bytes",
+          "url"
+        ],
+        "title": "ImageUploadResponse"
+      },
+      "LoginRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Password",
+            "description": "Mật khẩu tối thiểu 6 ký tự"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "LoginRequest"
+      },
       "PingResponse": {
         "properties": {
           "message": {
@@ -60,6 +823,621 @@
         },
         "type": "object",
         "title": "PingResponse"
+      },
+      "RegisterRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "title": "Password",
+            "description": "Mật khẩu tối thiểu 6 ký tự"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserRole"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "USER"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "RegisterRequest"
+      },
+      "ReportCreateRequest": {
+        "properties": {
+          "image_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Id",
+            "description": "UUID của ảnh đã tải lên qua POST /api/v1/images"
+          },
+          "latitude": {
+            "type": "number",
+            "maximum": 90.0,
+            "minimum": -90.0,
+            "title": "Latitude",
+            "description": "Vĩ độ (WGS84), ví dụ: 10.762622"
+          },
+          "longitude": {
+            "type": "number",
+            "maximum": 180.0,
+            "minimum": -180.0,
+            "title": "Longitude",
+            "description": "Kinh độ (WGS84), ví dụ: 106.660172"
+          },
+          "category_user": {
+            "type": "string",
+            "title": "Category User",
+            "description": "Loại hư hỏng do người dùng xác nhận (D00, D10, D20, D40, Repair, hoặc thủ công)"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity",
+            "description": "Mức độ nguy cơ: LOW, MEDIUM, HIGH",
+            "default": "MEDIUM"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Mô tả chi tiết tình trạng đường"
+          }
+        },
+        "type": "object",
+        "required": [
+          "latitude",
+          "longitude",
+          "category_user"
+        ],
+        "title": "ReportCreateRequest"
+      },
+      "ReportDetailResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "category_user": {
+            "type": "string",
+            "title": "Category User"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportStatus"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "votes": {
+            "$ref": "#/components/schemas/VotesSummary",
+            "default": {
+              "support": 0,
+              "oppose": 0,
+              "unsure": 0,
+              "total": 0
+            }
+          },
+          "support_votes": {
+            "type": "integer",
+            "title": "Support Votes",
+            "default": 0
+          },
+          "oppose_votes": {
+            "type": "integer",
+            "title": "Oppose Votes",
+            "default": 0
+          },
+          "unsure_votes": {
+            "type": "integer",
+            "title": "Unsure Votes",
+            "default": 0
+          },
+          "images": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Images",
+            "default": []
+          },
+          "ai_predictions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Ai Predictions",
+            "default": []
+          },
+          "review_logs": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Review Logs",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "category_user",
+          "status",
+          "severity",
+          "latitude",
+          "longitude",
+          "observed_at"
+        ],
+        "title": "ReportDetailResponse"
+      },
+      "ReportItemResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "category_user": {
+            "type": "string",
+            "title": "Category User"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportStatus"
+          },
+          "severity": {
+            "type": "string",
+            "title": "Severity"
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Observed At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "votes": {
+            "$ref": "#/components/schemas/VotesSummary",
+            "default": {
+              "support": 0,
+              "oppose": 0,
+              "unsure": 0,
+              "total": 0
+            }
+          },
+          "support_votes": {
+            "type": "integer",
+            "title": "Support Votes",
+            "default": 0
+          },
+          "oppose_votes": {
+            "type": "integer",
+            "title": "Oppose Votes",
+            "default": 0
+          },
+          "unsure_votes": {
+            "type": "integer",
+            "title": "Unsure Votes",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "category_user",
+          "status",
+          "severity",
+          "latitude",
+          "longitude",
+          "observed_at"
+        ],
+        "title": "ReportItemResponse"
+      },
+      "ReportStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING_VERIFICATION",
+          "VERIFIED",
+          "REJECTED"
+        ],
+        "title": "ReportStatus"
+      },
+      "ReviewResponse": {
+        "properties": {
+          "report_id": {
+            "type": "integer",
+            "title": "Report Id"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReportStatus"
+          },
+          "actor_id": {
+            "type": "integer",
+            "title": "Actor Id"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "report_id",
+          "status",
+          "actor_id",
+          "reason",
+          "created_at"
+        ],
+        "title": "ReviewResponse"
+      },
+      "ReviewStatusPatchRequest": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ReportStatus",
+            "description": "Trạng thái phê duyệt mới: VERIFIED hoặc REJECTED"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 5,
+            "title": "Reason",
+            "description": "Lý do xác minh hoặc từ chối (bắt buộc tối thiểu 5 ký tự)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "ReviewStatusPatchRequest"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "default": "bearer"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "role",
+          "user_id",
+          "email"
+        ],
+        "title": "TokenResponse"
+      },
+      "UserProfileResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "email",
+          "role",
+          "created_at"
+        ],
+        "title": "UserProfileResponse"
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "USER",
+          "REVIEWER",
+          "ADMIN"
+        ],
+        "title": "UserRole"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoteCreateRequest": {
+        "properties": {
+          "vote": {
+            "$ref": "#/components/schemas/VoteType",
+            "description": "Ý kiến cộng đồng: SUPPORT, OPPOSE, UNSURE (chuẩn hợp đồng TV2/TV3/TV4)",
+            "default": "SUPPORT"
+          },
+          "vote_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VoteType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Alias tương thích ngược với Android Retrofit DTO của TV2"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note",
+            "description": "Ghi chú đóng góp ý kiến"
+          }
+        },
+        "type": "object",
+        "title": "VoteCreateRequest"
+      },
+      "VoteResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "report_id": {
+            "type": "integer",
+            "title": "Report Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "vote": {
+            "$ref": "#/components/schemas/VoteType"
+          },
+          "vote_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VoteType"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "report_id",
+          "user_id",
+          "vote",
+          "created_at"
+        ],
+        "title": "VoteResponse"
+      },
+      "VoteType": {
+        "type": "string",
+        "enum": [
+          "SUPPORT",
+          "OPPOSE",
+          "UNSURE"
+        ],
+        "title": "VoteType"
+      },
+      "VotesSummary": {
+        "properties": {
+          "support": {
+            "type": "integer",
+            "title": "Support",
+            "default": 0
+          },
+          "oppose": {
+            "type": "integer",
+            "title": "Oppose",
+            "default": 0
+          },
+          "unsure": {
+            "type": "integer",
+            "title": "Unsure",
+            "default": 0
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "VotesSummary"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "/api/v1/auth/login"
+          }
+        }
       }
     }
   }

@@ -1,6 +1,6 @@
 from geoalchemy2.elements import WKTElement
 from geoalchemy2.shape import to_shape
-from shapely.geometry import Point
+
 
 def make_point(longitude: float, latitude: float) -> WKTElement:
     """

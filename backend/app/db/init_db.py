@@ -1,10 +1,12 @@
 import sys
-from sqlalchemy import text
-from passlib.context import CryptContext
-from app.db.session import engine, SessionLocal, Base
-from app.models.entities import User, UserRole, RiskWeight
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from sqlalchemy import text
+
+from app.core.config import settings
+from app.core.security import get_password_hash
+from app.db.session import Base, SessionLocal, engine
+from app.models.entities import RiskWeight, User, UserRole
+
 
 def init_db():
     try:
@@ -15,14 +17,16 @@ def init_db():
         # 2. Tạo tất cả 8 bảng
         Base.metadata.create_all(bind=engine)
 
-        # 3. Seed 3 tài khoản mẫu (USER, REVIEWER, ADMIN) nếu chưa có
+        # 3. Seed tài khoản mẫu (USER, REVIEWER, ADMIN) - Chỉ áp dụng trong môi trường dev/staging
         db = SessionLocal()
         try:
-            if db.query(User).count() == 0:
+            if settings.ENVIRONMENT.lower() == "production":
+                print("[SECURE] Bo qua seed tai khoan demo trong moi truong production.", file=sys.stderr)
+            elif db.query(User).count() == 0:
                 seed_users = [
-                    User(email="user@saferoute.ai", password_hash=pwd_context.hash("123456"), role=UserRole.USER),
-                    User(email="reviewer@saferoute.ai", password_hash=pwd_context.hash("123456"), role=UserRole.REVIEWER),
-                    User(email="admin@saferoute.ai", password_hash=pwd_context.hash("123456"), role=UserRole.ADMIN),
+                    User(email="user@saferoute.ai", password_hash=get_password_hash("123456"), role=UserRole.USER),
+                    User(email="reviewer@saferoute.ai", password_hash=get_password_hash("123456"), role=UserRole.REVIEWER),
+                    User(email="admin@saferoute.ai", password_hash=get_password_hash("123456"), role=UserRole.ADMIN),
                 ]
                 db.add_all(seed_users)
 

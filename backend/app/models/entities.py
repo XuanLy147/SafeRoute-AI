@@ -1,15 +1,25 @@
 import enum
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
+from geoalchemy2 import Geography
 from sqlalchemy import (
-    Column, Integer, String, Float, Text, DateTime,
-    ForeignKey, Enum, UniqueConstraint, Index
+    Column,
+    DateTime,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
-from geoalchemy2 import Geography
+
 from app.db.session import Base
 
+
 def utc_now():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 # --- ENUMS CHUẨN HỢP ĐỒNG ---
 class UserRole(str, enum.Enum):

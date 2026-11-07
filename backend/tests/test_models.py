@@ -1,18 +1,12 @@
-import pytest
-from app.models.entities import (
-    UserRole,
-    ReportStatus,
-    VoteType,
-    User,
-    Report,
-    ReportImage,
-    AiPrediction,
-    AiDetection,
-    CommunityVote,
-    ReviewLog,
-    RiskWeight,
-)
 from app.db.geo import make_point
+from app.models.entities import (
+    ReportStatus,
+    RiskWeight,
+    User,
+    UserRole,
+    VoteType,
+)
+
 
 def test_enums_defined_correctly():
     assert UserRole.USER.value == "USER"
