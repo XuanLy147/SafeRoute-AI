@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/welcomeFragment">
+
+    <!-- Screen 1: Welcome / Splash -->
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.comeforfood.saferoute.feature.auth.WelcomeFragment"
+        android:label="Welcome"
+        tools:layout="@layout/fragment_welcome">
+        <action
+            android:id="@+id/action_welcome_to_login"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out" />
+    </fragment>
+
+    <!-- Screen 2: Login -->
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.comeforfood.saferoute.feature.auth.LoginFragment"
+        android:label="Login"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_to_register"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right" />
+        <action
+            android:id="@+id/action_login_to_report"
+            app:destination="@id/reportWizardFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out" />
+    </fragment>
+
+    <!-- Screen 3: Register -->
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.comeforfood.saferoute.feature.auth.RegisterFragment"
+        android:label="Register"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_register_to_login"
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Report Wizard (TV2 Core Flow) -->
+    <fragment
+        android:id="@+id/reportWizardFragment"
+        android:name="com.comeforfood.saferoute.feature.report.ReportWizardFragment"
+        android:label="Report Wizard"
+        tools:layout="@layout/fragment_report_wizard">
+        <action
+            android:id="@+id/action_report_to_myReports"
+            app:destination="@id/myReportsFragment" />
+        <action
+            android:id="@+id/action_report_to_profile"
+            app:destination="@id/profileFragment" />
+        <action
+            android:id="@+id/action_report_to_reviewer"
+            app:destination="@id/reviewerFragment" />
+        <action
+            android:id="@+id/action_report_to_feedback"
+            app:destination="@id/communityFeedbackFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myReportsFragment"
+        android:name="com.comeforfood.saferoute.feature.reports.MyReportsFragment"
+        android:label="My Reports"
+        tools:layout="@layout/fragment_my_reports">
+        <action
+            android:id="@+id/action_myReports_to_profile"
+            app:destination="@id/profileFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.comeforfood.saferoute.feature.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profile_to_myReports"
+            app:destination="@id/myReportsFragment" />
+        <action
+            android:id="@+id/action_profile_to_feedback"
+            app:destination="@id/communityFeedbackFragment" />
+        <action
+            android:id="@+id/action_profile_to_reviewer"
+            app:destination="@id/reviewerFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/communityFeedbackFragment"
+        android:name="com.comeforfood.saferoute.feature.community.CommunityFeedbackFragment"
+        android:label="Community Feedback"
+        tools:layout="@layout/fragment_community_feedback" />
+
+    <fragment
+        android:id="@+id/reviewerFragment"
+        android:name="com.comeforfood.saferoute.feature.review.ReviewerFragment"
+        android:label="Reviewer"
+        tools:layout="@layout/fragment_reviewer" />
+
+</navigation>
