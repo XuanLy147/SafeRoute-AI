@@ -1,2 +1,1 @@
 """SafeRoute AI Modules."""
-

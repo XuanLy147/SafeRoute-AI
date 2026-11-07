@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
+from app.core.errors import error_responses
 from app.core.security import (
     create_access_token,
     get_current_user,
@@ -19,14 +19,8 @@ from app.modules.auth.schemas import (
     UserProfileResponse,
 )
 
-router = APIRouter()
+router = APIRouter(responses=error_responses(400, 401, 403, 409, 503))
 
-# Dữ liệu dự phòng cho môi trường dev/test khi DB chưa kết nối
-DEMO_TEST_USERS = {
-    "user@saferoute.ai": {"id": 1, "role": UserRole.USER, "hash": get_password_hash("123456")},
-    "reviewer@saferoute.ai": {"id": 2, "role": UserRole.REVIEWER, "hash": get_password_hash("123456")},
-    "admin@saferoute.ai": {"id": 3, "role": UserRole.ADMIN, "hash": get_password_hash("123456")},
-}
 
 @router.post(
     "/login",
@@ -42,11 +36,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = None
-    try:
-        user = db.query(User).filter(User.email == request.email).first()
-    except Exception:
-        user = None
+    user = db.query(User).filter(User.email == request.email).first()
 
     # 1. Kiểm tra qua database
     if user:
@@ -59,18 +49,6 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         user_id = user.id
         role = user.role
         email = user.email
-    # 2. Hỗ trợ test users nếu DB chưa kết nối (Chỉ trong môi trường Dev/Test)
-    elif settings.ENVIRONMENT.lower() != "production" and request.email in DEMO_TEST_USERS:
-        demo = DEMO_TEST_USERS[request.email]
-        if not verify_password(request.password, demo["hash"]):
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email hoặc mật khẩu không chính xác.",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
-        user_id = demo["id"]
-        role = demo["role"]
-        email = request.email
     else:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -93,7 +71,9 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
         role=role,
         user_id=user_id,
         email=email,
+        full_name=user.full_name,
     )
+
 
 @router.post(
     "/register",
@@ -115,13 +95,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
             detail="Mật khẩu quá dài (vượt quá 72 bytes theo giới hạn bảo mật chuẩn Bcrypt).",
         )
 
-    user = None
-    try:
-        user = db.query(User).filter(User.email == request.email).first()
-    except Exception:
-        user = None
-
-    if user or (settings.ENVIRONMENT.lower() != "production" and request.email in DEMO_TEST_USERS):
+    user = db.query(User).filter(User.email == request.email).first()
+    if user:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail="Email này đã được đăng ký trong hệ thống.",
@@ -129,19 +104,16 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 
     new_user = User(
         email=request.email,
+        full_name=request.full_name,
         password_hash=get_password_hash(request.password),
         role=UserRole.USER,
         created_at=datetime.now(UTC),
     )
 
-    try:
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-        user_id = new_user.id
-    except Exception:
-        # Fallback in-memory nếu DB chưa chạy
-        user_id = 999
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    user_id = new_user.id
 
     access_token = create_access_token(
         data={
@@ -157,7 +129,9 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         role=UserRole.USER,
         user_id=user_id,
         email=request.email,
+        full_name=new_user.full_name,
     )
+
 
 @router.get(
     "/me",
@@ -168,6 +142,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
 def get_me(current_user: User = Depends(get_current_user)):
     return UserProfileResponse(
         id=current_user.id,
+        full_name=current_user.full_name,
         email=current_user.email,
         role=current_user.role,
         created_at=current_user.created_at or datetime.now(UTC),

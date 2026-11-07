@@ -22,12 +22,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     except Exception:
         return False
 
+
 def get_password_hash(password: str) -> str:
     pw_bytes = password.encode("utf-8")
     if len(pw_bytes) > 72:
         raise ValueError("Mật khẩu không được dài quá 72 bytes theo tiêu chuẩn an toàn Bcrypt.")
     salt = bcrypt.gensalt()
     return bcrypt.hashpw(pw_bytes, salt).decode("utf-8")
+
 
 # 2. Tạo và giải mã JWT token
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
@@ -41,9 +43,15 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 
+
 def decode_access_token(token: str) -> dict:
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(
+            token,
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            options={"require_exp": True, "require_sub": True},
+        )
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -58,11 +66,10 @@ def decode_access_token(token: str) -> dict:
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+
 # 3. OAuth2 Bearer scheme
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/auth/login",
-    auto_error=False
-)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login", auto_error=False)
+
 
 # 4. Dependency lấy User hiện tại
 def get_current_user(
@@ -78,45 +85,14 @@ def get_current_user(
 
     payload = decode_access_token(token)
     user_id_str: str | None = payload.get("sub")
-    role_str: str | None = payload.get("role")
-    email: str | None = payload.get("email")
-
-    if not user_id_str:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không chứa thông tin định danh hợp lệ.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    try:
-        user_id = int(user_id_str)
-    except ValueError:
-        user_id = None
-
-    # Tìm user trong DB nếu kết nối sẵn sàng
-    user = None
-    if user_id is not None:
-        try:
-            user = db.query(User).filter(User.id == user_id).first()
-        except Exception:
-            user = None
-
-    # Nếu DB chưa seed hoặc trong môi trường test độc lập, tạo đối tượng User đại diện từ token
+    if not isinstance(user_id_str, str) or not user_id_str.isdecimal():
+        raise HTTPException(status_code=401, detail="Invalid token subject")
+    user = db.get(User, int(user_id_str))
     if user is None:
-        try:
-            role_enum = UserRole(role_str) if role_str else UserRole.USER
-        except ValueError:
-            role_enum = UserRole.USER
-
-        user = User(
-            id=user_id or 1,
-            email=email or f"user_{user_id}@saferoute.ai",
-            password_hash="[PROTECTED]",
-            role=role_enum,
-            created_at=datetime.now(UTC),
-        )
+        raise HTTPException(status_code=401, detail="User no longer exists")
 
     return user
+
 
 # 5. Dependency kiểm tra quyền RBAC (Server-side RBAC)
 def require_role(allowed_roles: list[UserRole | str]):
@@ -124,16 +100,10 @@ def require_role(allowed_roles: list[UserRole | str]):
     Factory dependency kiểm tra quyền nghiêm ngặt tại Backend.
     Nếu quyền của User không nằm trong danh sách cho phép, chặn đứng với HTTP 403 Forbidden.
     """
-    allowed_values = [
-        r.value if isinstance(r, UserRole) else str(r) for r in allowed_roles
-    ]
+    allowed_values = [r.value if isinstance(r, UserRole) else str(r) for r in allowed_roles]
 
     def role_checker(current_user: User = Depends(get_current_user)) -> User:
-        user_role_val = (
-            current_user.role.value
-            if isinstance(current_user.role, UserRole)
-            else str(current_user.role)
-        )
+        user_role_val = current_user.role.value if isinstance(current_user.role, UserRole) else str(current_user.role)
         if user_role_val not in allowed_values:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

@@ -1,11 +1,12 @@
 import hashlib
 import os
 import time
+from pathlib import Path
+from threading import Lock
 from typing import Optional
 
 from fastapi import HTTPException, status
 
-from app.core.config import settings
 from app.modules.ai.schemas import AiDetectResponse, DetectionItem
 
 CLASS_MAP = {
@@ -18,17 +19,20 @@ CLASS_MAP = {
 
 EXPECTED_SHA256 = "ab42e303396857560995dd0fd4d54262015ef77851709220c2f20ca5fc6a4f4c"
 
+
 class YoloInferenceService:
     """
     Singleton Service quản lý nạp và suy luận YOLOv12s SafeRoute v1.1.
     Chỉ nạp trọng số 1 lần duy nhất trong suốt vòng đời của ứng dụng.
     """
+
+    _instance_lock = Lock()
+    _predict_lock = Lock()
     _instance: Optional["YoloInferenceService"] = None
 
     def __init__(self, weights_path: str | None = None):
         self.weights_path = weights_path or os.getenv(
-            "YOLO_WEIGHTS_PATH",
-            os.path.join(os.path.dirname(__file__), "..", "..", "..", "..", "ai", "weights", "best.pt")
+            "YOLO_WEIGHTS_PATH", str(Path(__file__).resolve().parents[4] / "ai" / "weights" / "best.pt")
         )
         self.model_version = "SafeRoute-YOLOv12s-v1.1"
         self.device = "cpu"
@@ -38,8 +42,9 @@ class YoloInferenceService:
 
     @classmethod
     def get_instance(cls) -> "YoloInferenceService":
-        if cls._instance is None:
-            cls._instance = YoloInferenceService()
+        with cls._instance_lock:
+            if cls._instance is None:
+                cls._instance = YoloInferenceService()
         return cls._instance
 
     def is_model_ready(self) -> bool:
@@ -61,7 +66,7 @@ class YoloInferenceService:
 
     def _load_model(self):
         if not os.path.exists(self.weights_path):
-            print(f"[WARN] Checkpoint khong ton tai tai: {self.weights_path}. San sang fallback dev.")
+            print(f"[WARN] Checkpoint khong ton tai tai: {self.weights_path}. AI unavailable; manual reporting supported.")
             return
 
         self.checksum_valid = self._verify_checksum()
@@ -72,13 +77,17 @@ class YoloInferenceService:
         # Thu nap qua Ultralytics neu co cai dat
         try:
             from ultralytics import YOLO
-            self.model = YOLO(self.weights_path)
+
+            model = YOLO(self.weights_path)
+            if dict(model.names) != {i: v[0] for i, v in CLASS_MAP.items()}:
+                raise ValueError("Checkpoint class mapping mismatch")
+            self.model = model
             print(f"[OK] Da nap thanh cong YOLOv12s checkpoint ({self.model_version}) len {self.device}.")
         except ImportError:
             print("[INFO] Thu vien 'ultralytics' chua cai dat trong runtime nay. Model YOLO khong kha dung.")
             self.model = None
-        except Exception as e:
-            print(f"[WARN] Loi khi nap YOLO model: {e}")
+        except Exception:
+            print("[WARN] AI model load failed")
             self.model = None
 
     def predict(self, image_bytes: bytes, filename: str = "image.jpg") -> AiDetectResponse:
@@ -91,17 +100,19 @@ class YoloInferenceService:
                 import io
 
                 from PIL import Image
+
                 img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-                results = self.model.predict(img, conf=0.25, verbose=False)
+                with self._predict_lock:
+                    results = self.model.predict(img, conf=0.25, verbose=False, device=self.device)
 
                 for r in results:
                     boxes = r.boxes
                     for box in boxes:
                         cls_id = int(box.cls[0].item())
                         conf = float(box.conf[0].item())
-                        xyxy = [round(float(coord), 2) for coord in box.xyxy[0].tolist()]
+                        xyxy = [float(coord) for coord in box.xyxyn[0].tolist()]
 
-                        class_info = CLASS_MAP.get(cls_id, ("OTHER", "Road Hazard"))
+                        class_info = CLASS_MAP[cls_id]
                         detections.append(
                             DetectionItem(
                                 class_code=class_info[0],
@@ -111,44 +122,14 @@ class YoloInferenceService:
                             )
                         )
                 current_version = self.model_version
-            except Exception as e:
-                print(f"[ERROR] Loi khi thuc hien inference YOLO: {e}")
+            except Exception:
+                print("[ERROR] AI inference failed")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Đã xảy ra lỗi trong quá trình thực thi suy luận mô hình AI.",
                 )
         else:
-            # Rào chắn Production: Nghiêm cấm giả mạo kết quả hoặc chạy heuristic ngầm trong production
-            if settings.ENVIRONMENT.lower() == "production":
-                raise HTTPException(
-                    status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                    detail="AI Inference Engine tạm thời không khả dụng trong môi trường production (Model chưa sẵn sàng).",
-                )
-
-            # 2. MOCK_FOR_DEV: Chỉ cho phép trong môi trường test/dev, minh bạch tên version
-            current_version = "MOCK_FOR_DEV-v1.0"
-            lower_name = filename.lower()
-            if "pothole" in lower_name or "o_ga" in lower_name or "d40" in lower_name:
-                detections.append(
-                    DetectionItem(
-                        class_code="D40",
-                        class_name="Pothole",
-                        confidence=0.8845,
-                        bbox=[120.0, 80.0, 310.0, 290.0],
-                    )
-                )
-            elif "crack" in lower_name or "nut" in lower_name or "d00" in lower_name:
-                detections.append(
-                    DetectionItem(
-                        class_code="D00",
-                        class_name="Longitudinal Crack",
-                        confidence=0.7420,
-                        bbox=[50.0, 150.0, 420.0, 210.0],
-                    )
-                )
-            else:
-                # Ảnh đường bình thường hoặc không phát hiện hư hỏng: detections=[] hợp lệ
-                detections = []
+            raise HTTPException(status_code=503, detail="AI model unavailable; manual reporting remains available")
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
         return AiDetectResponse(
@@ -157,6 +138,7 @@ class YoloInferenceService:
             device=self.device,
             detections=detections,
         )
+
 
 # Khởi tạo singleton
 ai_service = YoloInferenceService.get_instance()

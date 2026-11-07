@@ -11,11 +11,12 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", os.getenv("ENV", "development"))
 
+    RISK_POLICY_JSON: str | None = None
+    ENABLE_DEMO_ACCOUNTS: bool = False
+    PERSISTENT_UPLOADS: bool = False
+
     # Database
-    DATABASE_URL: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql+psycopg2://postgres:postgres@localhost:5432/saferoute"
-    )
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:postgres@localhost:5432/saferoute")
 
     # Security & JWT
     SECRET_KEY: str = os.getenv("SECRET_KEY", "saferoute-hackathon-24h-super-secret-key-2026")
@@ -35,10 +36,13 @@ class Settings(BaseSettings):
     def validate_production_security(self):
         """Kiểm tra nghiêm ngặt các rào chắn bảo mật trong môi trường production."""
         if self.ENVIRONMENT.lower() == "production":
-            if not self.SECRET_KEY or self.SECRET_KEY == "saferoute-hackathon-24h-super-secret-key-2026":
+            if not self.PERSISTENT_UPLOADS:
+                raise ValueError("Production requires persistent private photo storage")
+            if len(self.SECRET_KEY) < 32 or self.SECRET_KEY == "saferoute-hackathon-24h-super-secret-key-2026":
                 raise ValueError(
                     "FATAL SECURITY: Không được dùng SECRET_KEY mặc định hoặc rỗng trong môi trường production!"
                 )
+
 
 settings = Settings()
 settings.validate_production_security()

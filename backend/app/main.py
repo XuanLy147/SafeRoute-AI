@@ -1,12 +1,8 @@
-import os
-import re
 from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
-from starlette.responses import PlainTextResponse, Response
-from starlette.staticfiles import StaticFiles
 
 from app.api.v1.api import api_router
 from app.core.config import settings
@@ -27,41 +23,25 @@ app = FastAPI(
 # 1. Cấu hình CORS (hỗ trợ Android Emulator 10.0.2.2 và thiết bị thật LAN/Cloud)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# 2. Thư mục uploads cho ảnh tĩnh kèm rào chắn an toàn (SecureStaticFiles)
-SAFE_IMAGE_FILENAME_REGEX = re.compile(r"^[a-fA-F0-9]{32}\.(jpg|jpeg|png|webp)$")
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 
-class SecureStaticFiles(StaticFiles):
-    """
-    Static files handler bảo mật cho thư mục uploads:
-    - Chặn Directory Traversal, hidden files, directory listing (html=False).
-    - Chỉ cho phép phục vụ tệp hình ảnh có định dạng UUID chuẩn do hệ thống cấp.
-    - Bổ sung Security Headers: nosniff, CSP default-src 'none', immutable cache.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, html=False, **kwargs)
-
-    async def get_response(self, path: str, scope) -> Response:
-        clean_path = path.strip().lstrip("/\\")
-        if not SAFE_IMAGE_FILENAME_REGEX.match(clean_path):
-            return PlainTextResponse("Not Found", status_code=404)
-
-        response = await super().get_response(clean_path, scope)
-        response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["Content-Security-Policy"] = "default-src 'none'"
-        response.headers["Cache-Control"] = "public, max-age=86400, immutable"
-        return response
+@app.exception_handler(IntegrityError)
+async def integrity_error(request, exc):
+    return JSONResponse(status_code=409, content={"detail": "Conflicting persisted state"})
 
 
-os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-app.mount("/uploads", SecureStaticFiles(directory=settings.UPLOAD_DIR), name="uploads")
+@app.exception_handler(SQLAlchemyError)
+async def database_error(request, exc):
+    return JSONResponse(status_code=503, content={"detail": "Database temporarily unavailable"})
+
 
 # 3. Endpoint GET /health (Task T03 - P0)
 @app.get("/health", tags=["System"])
@@ -75,8 +55,7 @@ def health_check():
         with engine.connect() as conn:
             conn.execute(text("SELECT 1;"))
             db_status = "connected"
-    except Exception as e:
-        print(f"[WARN] Database health check unready: {e}")
+    except Exception:
         db_status = "offline"
 
     return {
@@ -87,5 +66,28 @@ def health_check():
         "timestamp": datetime.now(UTC).isoformat(),
     }
 
+
 # 4. Gắn router chính v1
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.get("/ready", tags=["System"])
+def readiness():
+    from app.modules.ai.service import ai_service
+    from app.modules.risk.policy import load_policy
+
+    try:
+        with engine.connect() as conn:
+            revision = conn.scalar(text("SELECT version_num FROM alembic_version"))
+            conn.execute(text("SELECT PostGIS_Version()"))
+        if revision != "0002_image_owner_profile":
+            return JSONResponse(status_code=503, content={"detail": "Migration required"})
+        policy = load_policy()
+    except Exception:
+        return JSONResponse(status_code=503, content={"detail": "Dependencies unavailable"})
+    return {
+        "status": "ready",
+        "ai_ready": ai_service.is_model_ready(),
+        "risk_ready": policy is not None and policy.approved,
+        "risk_policy_revision": policy.revision if policy else None,
+    }

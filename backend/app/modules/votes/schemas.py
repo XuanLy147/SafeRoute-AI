@@ -7,7 +7,9 @@ from app.models.entities import VoteType
 
 
 class VoteCreateRequest(BaseModel):
-    vote: VoteType = Field(VoteType.SUPPORT, description="Ý kiến cộng đồng: SUPPORT, OPPOSE, UNSURE (chuẩn hợp đồng TV2/TV3/TV4)")
+    vote: VoteType = Field(
+        VoteType.SUPPORT, description="Ý kiến cộng đồng: SUPPORT, OPPOSE, UNSURE (chuẩn hợp đồng TV2/TV3/TV4)"
+    )
     vote_type: VoteType | None = Field(None, description="Alias tương thích ngược với Android Retrofit DTO của TV2")
     note: str | None = Field(None, max_length=500, description="Ghi chú đóng góp ý kiến")
 
@@ -33,6 +35,7 @@ class VoteCreateRequest(BaseModel):
                 data["vote"] = raw_val
                 data["vote_type"] = raw_val
         return data
+
 
 class VoteResponse(BaseModel):
     id: int

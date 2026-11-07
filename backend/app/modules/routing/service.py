@@ -9,6 +9,8 @@ import logging
 from enum import Enum
 from typing import Protocol
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from .adapter import GoogleRoutesAdapter
 from .exceptions import NoRouteFoundError
 from .schemas import (
@@ -30,14 +32,16 @@ SAFE_ROUTE_DISCLAIMER = (
 
 class RiskAssessmentStatus(str, Enum):
     """Semantic status of hazard assessment for a set of candidate routes."""
-    AVAILABLE = "AVAILABLE"          # All candidate routes have valid, complete risk scores
-    UNAVAILABLE = "UNAVAILABLE"      # Scorer not configured or call failed; no risk data
-    PARTIAL = "PARTIAL"              # Some candidates have risk, some are missing
-    INVALID = "INVALID"              # Scorer returned unexpected keys or schema violations
+
+    AVAILABLE = "AVAILABLE"  # All candidate routes have valid, complete risk scores
+    UNAVAILABLE = "UNAVAILABLE"  # Scorer not configured or call failed; no risk data
+    PARTIAL = "PARTIAL"  # Some candidates have risk, some are missing
+    INVALID = "INVALID"  # Scorer returned unexpected keys or schema violations
 
 
 class RecommendationBasis(str, Enum):
     """Basis for selecting the recommended route."""
+
     SAFETY_LOWEST_RISK = "SAFETY_LOWEST_RISK"
     DURATION_ETA_ONLY = "DURATION_ETA_ONLY"
     SINGLE_ROUTE = "SINGLE_ROUTE"
@@ -50,15 +54,9 @@ class RiskScorerProtocol(Protocol):
     against recorded and verified road hazard reports.
     """
 
-    def evaluate_by_id(
-        self, candidates: list[RouteCandidate]
-    ) -> dict[str, RouteRiskScore]:
-        ...
+    def evaluate_by_id(self, candidates: list[RouteCandidate]) -> dict[str, RouteRiskScore]: ...
 
-    def evaluate_routes(
-        self, candidates: list[RouteCandidate]
-    ) -> list[RouteRiskScore] | dict[str, RouteRiskScore]:
-        ...
+    def evaluate_routes(self, candidates: list[RouteCandidate]) -> list[RouteRiskScore] | dict[str, RouteRiskScore]: ...
 
 
 class RoutingService:
@@ -115,6 +113,7 @@ class RoutingService:
         # 2. Risk scoring via TV4 scorer
         risk_map: dict[str, RouteRiskScore | None] = {c.id: None for c in candidates}
         assessment_status = RiskAssessmentStatus.UNAVAILABLE
+        diagnostic = "POLICY_NOT_CONFIGURED" if self.risk_scorer is None else None
 
         if self.risk_scorer is not None:
             try:
@@ -126,7 +125,11 @@ class RoutingService:
                         raw_risk = res
 
                 # Fallback to evaluate_routes (e.g. positional protocol or mock where evaluate_routes is configured)
-                if raw_risk is None and hasattr(self.risk_scorer, "evaluate_routes") and callable(self.risk_scorer.evaluate_routes):
+                if (
+                    raw_risk is None
+                    and hasattr(self.risk_scorer, "evaluate_routes")
+                    and callable(self.risk_scorer.evaluate_routes)
+                ):
                     res = self.risk_scorer.evaluate_routes(candidates)
                     if isinstance(res, (dict, list, tuple)):
                         raw_risk = res
@@ -208,9 +211,19 @@ class RoutingService:
                     assessment_status = RiskAssessmentStatus.INVALID
 
             except Exception as exc:  # noqa: BLE001 (Intentional: shield routing response from arbitrary scorer failures)
-                logger.error("Risk scorer execution failed: %s. Preserving routes without synthetic risk.", exc)
+                logger.error("Risk scorer execution failed (%s); preserving routes without risk.", type(exc).__name__)
+                diagnostic = "DATABASE_UNAVAILABLE" if isinstance(exc, SQLAlchemyError) else "SCORER_FAILED"
                 assessment_status = RiskAssessmentStatus.UNAVAILABLE
                 risk_map = {c.id: None for c in candidates}
+
+        # Validate even instances constructed without Pydantic validation.
+        try:
+            for key, value in risk_map.items():
+                if value is not None:
+                    risk_map[key] = RouteRiskScore.model_validate(value.model_dump())
+        except ValueError:
+            assessment_status = RiskAssessmentStatus.INVALID
+            risk_map = {c.id: None for c in candidates}
 
         # 3. Build evaluated_routes strictly preserving candidate order, IDs, and count
         evaluated_routes: list[EvaluatedRoute] = []
@@ -358,5 +371,6 @@ class RoutingService:
             recommendation_reason=recommendation_reason,
             disclaimer=SAFE_ROUTE_DISCLAIMER,
             risk_assessment_status=assessment_status.value,
+            risk_diagnostic="CONTRACT_INVALID" if assessment_status == RiskAssessmentStatus.INVALID else diagnostic,
             recommendation_basis=recommendation_basis.value if recommendation_basis else None,
         )

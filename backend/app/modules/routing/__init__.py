@@ -81,4 +81,3 @@ __all__ = [
     "encode_polyline",
     "to_geojson_linestring",
 ]
-

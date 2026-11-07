@@ -10,6 +10,7 @@ def make_point(longitude: float, latitude: float) -> WKTElement:
     """
     return WKTElement(f"POINT({longitude} {latitude})", srid=4326)
 
+
 def point_to_coords(geography_point) -> tuple[float, float]:
     """
     Chuyển đổi PostGIS Geography Point thành (latitude, longitude).

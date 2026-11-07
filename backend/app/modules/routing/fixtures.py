@@ -21,21 +21,17 @@ FIXTURE_GOOGLE_ROUTES_TWO_CANDIDATES: dict[str, Any] = {
             "distanceMeters": 2950,
             "duration": "450s",
             "description": "Đ. Trần Hưng Đạo",
-            "polyline": {
-                "encodedPolyline": "c_w`AomfjSb[nd@f^nd@jRbV"
-            },
-            "warnings": []
+            "polyline": {"encodedPolyline": "c_w`AomfjSb[nd@f^nd@jRbV"},
+            "warnings": [],
         },
         {
             "distanceMeters": 3480,
             "duration": "510s",
             "description": "Đ. Võ Văn Kiệt và Đ. Nguyễn Văn Cừ",
-            "polyline": {
-                "encodedPolyline": "c_w`AomfjSzT_Xvj@vj@vj@~p@s]j\\"
-            },
-            "warnings": ["Đoạn đường có thể đông vào giờ cao điểm"]
-        }
-    ]
+            "polyline": {"encodedPolyline": "c_w`AomfjSzT_Xvj@vj@vj@~p@s]j\\"},
+            "warnings": ["Đoạn đường có thể đông vào giờ cao điểm"],
+        },
+    ],
 }
 
 # 2. Realistic Google Routes API response with SINGLE candidate (MOCK_FOR_DEV)
@@ -47,19 +43,14 @@ FIXTURE_GOOGLE_ROUTES_SINGLE_CANDIDATE: dict[str, Any] = {
             "distanceMeters": 2950,
             "duration": "450s",
             "description": "Đ. Trần Hưng Đạo",
-            "polyline": {
-                "encodedPolyline": "c_w`AomfjSb[nd@f^nd@jRbV"
-            },
-            "warnings": []
+            "polyline": {"encodedPolyline": "c_w`AomfjSb[nd@f^nd@jRbV"},
+            "warnings": [],
         }
-    ]
+    ],
 }
 
 # 3. Google Routes API response when NO route is found (MOCK_FOR_DEV)
-FIXTURE_GOOGLE_ROUTES_EMPTY: dict[str, Any] = {
-    "_fixture_label": "MOCK_FOR_DEV_EMPTY",
-    "routes": []
-}
+FIXTURE_GOOGLE_ROUTES_EMPTY: dict[str, Any] = {"_fixture_label": "MOCK_FOR_DEV_EMPTY", "routes": []}
 
 # 4. Google Routes API 401/403 Error response (MOCK_FOR_DEV)
 FIXTURE_GOOGLE_ROUTES_AUTH_ERROR: dict[str, Any] = {
@@ -67,8 +58,8 @@ FIXTURE_GOOGLE_ROUTES_AUTH_ERROR: dict[str, Any] = {
     "error": {
         "code": 403,
         "message": "The provided API key is invalid or Google Routes API is not enabled on this project.",
-        "status": "PERMISSION_DENIED"
-    }
+        "status": "PERMISSION_DENIED",
+    },
 }
 
 # 5. Google Routes API 429 Rate Limit Error response (MOCK_FOR_DEV)
@@ -77,7 +68,6 @@ FIXTURE_GOOGLE_ROUTES_QUOTA_ERROR: dict[str, Any] = {
     "error": {
         "code": 429,
         "message": "Resource has been exhausted (e.g. check quota).",
-        "status": "RESOURCE_EXHAUSTED"
-    }
+        "status": "RESOURCE_EXHAUSTED",
+    },
 }
-

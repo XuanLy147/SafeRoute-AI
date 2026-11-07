@@ -70,7 +70,7 @@ class GoogleRoutesAdapter:
         travel_mode: TravelMode = TravelMode.TWO_WHEELER,
     ) -> dict[str, Any]:
         """Build Google Routes API v2 request body."""
-        return {
+        payload = {
             "origin": origin.to_google_location(),
             "destination": destination.to_google_location(),
             "travelMode": travel_mode.value,
@@ -84,6 +84,11 @@ class GoogleRoutesAdapter:
             "languageCode": "vi-VN",
             "units": "METRIC",
         }
+
+        if travel_mode in (TravelMode.WALK, TravelMode.BICYCLE):
+            payload.pop("routingPreference")
+            payload.pop("routeModifiers")
+        return payload
 
     @staticmethod
     def _parse_duration(duration_raw: Any) -> int:
@@ -205,13 +210,9 @@ class GoogleRoutesAdapter:
                 f"Google Routes API authorization failed (HTTP {response.status_code}): {response.text}"
             )
         if response.status_code == 429:
-            raise RouteServiceQuotaError(
-                f"Google Routes API quota exceeded (HTTP 429): {response.text}"
-            )
+            raise RouteServiceQuotaError(f"Google Routes API quota exceeded (HTTP 429): {response.text}")
         if response.status_code == 400:
-            raise InvalidCoordinatesError(
-                f"Google Routes API rejected parameters (HTTP 400): {response.text}"
-            )
+            raise InvalidCoordinatesError(f"Google Routes API rejected parameters (HTTP 400): {response.text}")
         if response.status_code >= 500:
             raise RouteServiceError(
                 f"Google Routes API upstream server error (HTTP {response.status_code}): {response.text}",
@@ -232,4 +233,3 @@ class GoogleRoutesAdapter:
             )
 
         return candidates
-

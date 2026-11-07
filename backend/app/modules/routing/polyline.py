@@ -25,7 +25,7 @@ def decode_polyline(polyline_str: str, precision: int = 5) -> list[tuple[float, 
     index = 0
     lat = 0
     lng = 0
-    factor = 10 ** precision
+    factor = 10**precision
     length = len(polyline_str)
 
     while index < length:
@@ -84,7 +84,7 @@ def encode_polyline(coordinates: list[tuple[float, float]], precision: int = 5) 
     if not coordinates:
         return ""
 
-    factor = 10 ** precision
+    factor = 10**precision
     output: list[str] = []
     prev_lat = 0
     prev_lng = 0
@@ -127,8 +127,4 @@ def to_geojson_linestring(coordinates: list[tuple[float, float]]) -> dict[str, A
     Android LatLng and Google Maps standard is (latitude, longitude).
     This function outputs [longitude, latitude] for TV4 PostGIS consumption.
     """
-    return {
-        "type": "LineString",
-        "coordinates": [[lng, lat] for lat, lng in coordinates]
-    }
-
+    return {"type": "LineString", "coordinates": [[lng, lat] for lat, lng in coordinates]}

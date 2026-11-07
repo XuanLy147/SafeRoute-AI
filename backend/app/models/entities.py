@@ -21,30 +21,36 @@ from app.db.session import Base
 def utc_now():
     return datetime.now(UTC)
 
+
 # --- ENUMS CHUẨN HỢP ĐỒNG ---
 class UserRole(str, enum.Enum):
     USER = "USER"
     REVIEWER = "REVIEWER"
     ADMIN = "ADMIN"
 
+
 class ReportStatus(str, enum.Enum):
     PENDING_VERIFICATION = "PENDING_VERIFICATION"
     VERIFIED = "VERIFIED"
     REJECTED = "REJECTED"
+
 
 class VoteType(str, enum.Enum):
     SUPPORT = "SUPPORT"
     OPPOSE = "OPPOSE"
     UNSURE = "UNSURE"
 
+
 # 1. Bảng users
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
+    full_name = Column(String(200), nullable=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(Enum(UserRole, name="user_role_enum"), nullable=False, default=UserRole.USER)
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
+
 
 # 2. Bảng reports (Có PostGIS Geography Point 4326 + GiST Index)
 class Report(Base):
@@ -56,7 +62,7 @@ class Report(Base):
         Enum(ReportStatus, name="report_status_enum"),
         nullable=False,
         default=ReportStatus.PENDING_VERIFICATION,
-        index=True
+        index=True,
     )
     severity = Column(String(20), nullable=False, default="MEDIUM")  # Tách biệt với confidence AI
     # Chú ý: Khi insert dùng WKTElement('POINT(lon lat)', srid=4326)
@@ -69,17 +75,20 @@ class Report(Base):
     votes = relationship("CommunityVote", back_populates="report", cascade="all, delete-orphan")
     review_logs = relationship("ReviewLog", back_populates="report", cascade="all, delete-orphan")
 
+
 # 3. Bảng report_images (Lưu metadata + object_key, không lưu blob)
 class ReportImage(Base):
     __tablename__ = "report_images"
     id = Column(Integer, primary_key=True, index=True)
     report_id = Column(Integer, ForeignKey("reports.id", ondelete="CASCADE"), nullable=True)
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="RESTRICT"), nullable=True)
     object_key = Column(String(512), nullable=False, unique=True)
     mime = Column(String(100), nullable=False)
     width = Column(Integer, nullable=True)
     height = Column(Integer, nullable=True)
 
     report = relationship("Report", back_populates="images")
+
 
 # 4. Bảng ai_predictions (Lưu cả khi detections=[])
 class AiPrediction(Base):
@@ -92,6 +101,7 @@ class AiPrediction(Base):
     report = relationship("Report", back_populates="predictions")
     detections = relationship("AiDetection", back_populates="prediction", cascade="all, delete-orphan")
 
+
 # 5. Bảng ai_detections (Lưu từng bounding box gốc của YOLO)
 class AiDetection(Base):
     __tablename__ = "ai_detections"
@@ -103,6 +113,7 @@ class AiDetection(Base):
 
     prediction = relationship("AiPrediction", back_populates="detections")
 
+
 # 6. Bảng community_votes (Giới hạn 1 vote / report / user)
 class CommunityVote(Base):
     __tablename__ = "community_votes"
@@ -113,10 +124,9 @@ class CommunityVote(Base):
     note = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
-    __table_args__ = (
-        UniqueConstraint("report_id", "user_id", name="uq_vote_report_user"),
-    )
+    __table_args__ = (UniqueConstraint("report_id", "user_id", name="uq_vote_report_user"),)
     report = relationship("Report", back_populates="votes")
+
 
 # 7. Bảng review_logs (Append-only audit log cho REVIEWER / ADMIN)
 class ReviewLog(Base):
@@ -130,6 +140,7 @@ class ReviewLog(Base):
     created_at = Column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     report = relationship("Report", back_populates="review_logs")
+
 
 # 8. Bảng risk_weights (Cấu hình trọng số cho TV5 tính Risk Score)
 class RiskWeight(Base):

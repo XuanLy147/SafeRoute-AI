@@ -1,112 +1,69 @@
-import os
-import uuid
+"""Bounded image validation and private local-volume storage."""
 
-from fastapi import HTTPException, UploadFile, status
+import io
+import uuid
+import warnings
+from pathlib import Path
+
+from fastapi import HTTPException, UploadFile
+from PIL import Image
 
 from app.core.config import settings
 
+FORMATS = {"JPEG": ("image/jpeg", ".jpg"), "PNG": ("image/png", ".png"), "WEBP": ("image/webp", ".webp")}
+
+
+def validate_image(file: UploadFile):
+    limit = settings.MAX_IMAGE_SIZE_MB * 1024 * 1024
+    try:
+        contents = file.file.read(limit + 1)
+    except OSError:
+        raise HTTPException(400, "Cannot read image upload") from None
+    if len(contents) > limit:
+        raise HTTPException(413, "Image exceeds byte limit")
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(contents)) as img:
+                fmt, width, height = img.format, img.width, img.height
+                if width * height > 25_000_000:
+                    raise HTTPException(413, "Image exceeds pixel limit")
+                if fmt not in FORMATS or FORMATS[fmt][0] != file.content_type:
+                    raise HTTPException(400, "Image content and MIME do not match")
+                img.verify()
+            with Image.open(io.BytesIO(contents)) as img:
+                img.load()
+    except HTTPException:
+        raise
+    except (Image.DecompressionBombError, Image.DecompressionBombWarning):
+        raise HTTPException(413, "Image exceeds pixel limit") from None
+    except Exception:
+        raise HTTPException(400, "Invalid or truncated image") from None
+    return contents, fmt, width, height
+
+
+def image_url(object_key: str) -> str:
+    return f"/api/v1/images/{Path(object_key).stem}"
+
 
 def save_uploaded_image(file: UploadFile) -> dict:
-    """
-    Kiểm định MIME type, dung lượng và lưu trữ ảnh an toàn.
-    Chống tấn công Path Traversal bằng UUID v4.
-    """
-    # 1. Kiểm tra MIME type
-    content_type = file.content_type or ""
-    if content_type.lower() not in settings.ALLOWED_IMAGE_TYPES:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=(
-                f"Định dạng ảnh không được hỗ trợ: '{content_type}'. "
-                f"Hệ thống chỉ chấp nhận: {settings.ALLOWED_IMAGE_TYPES}."
-            ),
-        )
-
-    # 2. Đọc và kiểm tra kích thước file
-    try:
-        contents = file.file.read()
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Không thể đọc nội dung file tải lên: {e!s}",
-        )
-
-    size_bytes = len(contents)
-    max_bytes = settings.MAX_IMAGE_SIZE_MB * 1024 * 1024
-    if size_bytes > max_bytes:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"Kích thước file ({size_bytes / 1024 / 1024:.2f} MB) vượt quá giới hạn cho phép ({settings.MAX_IMAGE_SIZE_MB} MB).",
-        )
-
-    if size_bytes == 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="File tải lên không có dữ liệu (0 byte).",
-        )
-
-    # 2.5 Kiểm tra magic bytes thực tế để ngăn chặn file thực thi giả mạo đuôi ảnh
-    is_valid_magic = False
-    ct_lower = content_type.lower()
-    if "jpeg" in ct_lower or "jpg" in ct_lower:
-        is_valid_magic = contents.startswith(b"\xff\xd8\xff")
-    elif "png" in ct_lower:
-        is_valid_magic = contents.startswith(b"\x89PNG\r\n\x1a\n")
-    elif "webp" in ct_lower:
-        is_valid_magic = contents.startswith(b"RIFF") and (len(contents) >= 12 and contents[8:12] == b"WEBP")
-
-    if not is_valid_magic:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Nội dung file không khớp với cấu trúc tệp ảnh hợp lệ (Magic bytes mismatch).",
-        )
-
-    # 2.8 Kiểm định giải mã cấu trúc ảnh qua PIL (Chống corrupted data & decompression bomb)
-    try:
-        import io
-
-        from PIL import Image, UnidentifiedImageError
-        Image.MAX_IMAGE_PIXELS = 25_000_000
-        with Image.open(io.BytesIO(contents)) as img:
-            img.verify()
-    except UnidentifiedImageError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Không thể giải mã dữ liệu ảnh: Tệp ảnh bị hỏng hoặc định dạng không chuẩn.",
-        )
-    except getattr(Image, "DecompressionBombError", Exception):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Kích thước giải nén của ảnh vượt ngưỡng an toàn (DecompressionBomb protection).",
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Dữ liệu ảnh không hợp lệ: {e!s}",
-        )
-
-    # 3. Tạo tên file duy nhất bằng UUID4
-    ext = os.path.splitext(file.filename or "")[1].lower()
-    if not ext:
-        if "png" in content_type:
-            ext = ".png"
-        elif "webp" in content_type:
-            ext = ".webp"
-        else:
-            ext = ".jpg"
-
+    contents, fmt, width, height = validate_image(file)
+    mime, ext = FORMATS[fmt]
     image_id = uuid.uuid4().hex
-    safe_filename = f"{image_id}{ext}"
-    target_path = os.path.join(settings.UPLOAD_DIR, safe_filename)
-
-    os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
-    with open(target_path, "wb") as f:
-        f.write(contents)
-
-    return {
-        "image_id": image_id,
-        "filename": safe_filename,
-        "mime": content_type,
-        "size_bytes": size_bytes,
-        "url": f"/uploads/{safe_filename}",
-    }
+    filename = image_id + ext
+    try:
+        directory = Path(settings.UPLOAD_DIR)
+        directory.mkdir(parents=True, exist_ok=True)
+        with (directory / filename).open("xb") as target:
+            target.write(contents)
+    except OSError:
+        raise HTTPException(503, "Image storage unavailable") from None
+    return dict(
+        image_id=image_id,
+        filename=filename,
+        mime=mime,
+        width=width,
+        height=height,
+        size_bytes=len(contents),
+        url=image_url(filename),
+    )
