@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt" android:width="72dp" android:height="72dp" android:viewportWidth="72" android:viewportHeight="72">
+<!-- Native vector reconstruction of the supplied small blue, smiling wheeled mark. -->
+<path android:pathData="M19,2 L53,2 Q70,2 70,19 L70,53 Q70,70 53,70 L19,70 Q2,70 2,53 L2,19 Q2,2 19,2 Z">
+<aapt:attr name="android:fillColor"><gradient android:startX="8" android:startY="4" android:endX="65" android:endY="70" android:type="linear"><item android:offset="0" android:color="#0755E9"/><item android:offset="0.48" android:color="#063FD6"/><item android:offset="1" android:color="#092DB7"/></gradient></aapt:attr>
+</path>
+<path android:fillColor="#00000000" android:strokeColor="#FFFFFF" android:strokeWidth="1.85" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M23.8,39.1 C20.8,35.4 20.4,30.6 22.7,26.0 C25.6,20.0 31.2,17.3 37.6,18.0 C46.7,18.9 52.2,26.0 51.5,34.6 C51.0,41.8 46.1,47.4 39.4,49.7 C31.9,52.2 23.2,50.2 18.0,44.8 C17.6,44.3 17.9,43.6 18.5,43.4 C21.4,42.8 22.9,41.3 23.8,39.1 Z"/>
+<path android:fillColor="#FFFFFF" android:pathData="M30,30.6 a1.65,1.65 0,1 0,3.3,0 a1.65,1.65 0,1 0,-3.3,0 M41,30.6 a1.65,1.65 0,1 0,3.3,0 a1.65,1.65 0,1 0,-3.3,0"/>
+<path android:fillColor="#00000000" android:strokeColor="#FFFFFF" android:strokeWidth="1.8" android:strokeLineCap="round" android:pathData="M30.7,36.4 C33.3,41.3 40.9,41.5 43.8,36.6"/>
+<path android:fillColor="#FFFFFF" android:pathData="M23.8,50.5 a3.4,3.4 0,1 0,6.8,0 a3.4,3.4 0,1 0,-6.8,0 M39.6,51 a3.4,3.4 0,1 0,6.8,0 a3.4,3.4 0,1 0,-6.8,0"/>
+</vector>

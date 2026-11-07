@@ -1,0 +1,14 @@
+<resources>
+<string name="brand_wordmark">SafeRoute</string>
+<string name="polish_report_intro">Chia sẻ ảnh hiện trường để cộng đồng có thêm thông tin về nguy cơ trên đường.</string>
+<string name="polish_report_photo">Ảnh rõ mặt đường</string>
+<string name="polish_report_photo_note">Chụp hoặc chọn ảnh, rồi kiểm tra lại.</string>
+<string name="polish_report_location">Vị trí chính xác</string>
+<string name="polish_report_location_note">Xác nhận ghim tại nơi ghi nhận nguy cơ.</string>
+<string name="polish_report_confirm">Kiểm tra trước khi gửi</string>
+<string name="polish_report_confirm_note">Bạn xác nhận nội dung; báo cáo chờ xét duyệt.</string>
+<string name="polish_report_safety">Dừng xe ở nơi phù hợp trước khi chụp ảnh.</string>
+<string name="polish_your_activity">Hoạt động của bạn</string>
+<string name="polish_account_options">Tài khoản</string>
+<string name="polish_map_nearby">Cảnh báo quanh bạn</string>
+</resources>

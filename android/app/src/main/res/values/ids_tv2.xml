@@ -1,0 +1,14 @@
+<resources>
+<item name="action_welcome_to_login" type="id"/>
+<item name="action_login_to_register" type="id"/>
+<item name="action_login_to_report" type="id"/>
+<item name="action_register_to_login" type="id"/>
+<item name="action_report_to_myReports" type="id"/>
+<item name="action_report_to_profile" type="id"/>
+<item name="action_report_to_reviewer" type="id"/>
+<item name="action_report_to_feedback" type="id"/>
+<item name="action_myReports_to_profile" type="id"/>
+<item name="action_profile_to_myReports" type="id"/>
+<item name="action_profile_to_feedback" type="id"/>
+<item name="action_profile_to_reviewer" type="id"/>
+</resources>
