@@ -1,0 +1,1 @@
+model_version,dataset_split,n_images,n_instances,precision,recall,map50,map50_95,latency_ms,device,notes

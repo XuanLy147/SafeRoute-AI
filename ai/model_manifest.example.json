@@ -1,0 +1,8 @@
+{
+  "model_name": "SafeRoute AI YOLOv12s",
+  "model_version": "v1.1",
+  "classes": ["D00", "D10", "D20", "D40", "Repair"],
+  "weights_sha256": "FILL_AFTER_HASHING_REAL_WEIGHTS",
+  "runtime": "FILL_FROM_ACTUAL_ENVIRONMENT",
+  "status": "example-only; not an evaluation report"
+}
