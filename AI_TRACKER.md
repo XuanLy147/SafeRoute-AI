@@ -122,3 +122,25 @@ NOT_RUN. Không commit/push/merge/deploy. Chi tiết và handoff:
 - **P0-B:** Điểm A/B → Google Routes trả tuyến → PostGIS risk scorer → hiển thị giải thích theo nguy cơ ghi nhận.
 - Chỉ tick DONE nếu thực sự demo/test được. Mock data phải có nhãn; không giới thiệu demo mock như backend thật.
 - Mọi thông tin còn chưa biết phải được ghi rõ `UNKNOWN` hoặc `UNVERIFIED`, không điền ước lượng như số đo thật.
+
+
+## TV345 master integration rebaseline — 2026-11-07
+
+Current ownership supersedes historical assignments: TV3 API/Auth/Reports/Images/
+Votes/Review/AI HTTP; TV4 DB/PostGIS/Alembic/Risk/Docker/Cloud/CI; TV5 Google Routes/
+Routing/Geometry/Recommendation. Android remains TV1/TV2.
+
+| Task | Owner | Status | Evidence |
+|---|---|---|---|
+| Durable API/private images/security/DTO | TV3 | DONE_VERIFIED | b7c0b87; 172 combined tests PASS; container HTTP/restart PASS |
+| PostGIS/migrations/keyed risk | TV4 | DONE_VERIFIED | cycle/data preservation/diff=[]; 5 live spatial + HTTP risk PASS |
+| Routing/Google adapter regression | TV5 | DONE_VERIFIED | b5c81b4 retained; unavailable/partial/invalid/zero tested |
+| Production risk approval | TV4 + owners | BLOCKED | numeric approval absent; explicit demo profile |
+| Docker/real AI CPU | TV3/TV4 | DONE_VERIFIED | build/start/restart/checksum/class mapping/inference PASS |
+| Cloud/live Google | TV4/TV5 | BLOCKED | credentials/cost approval absent |
+| GitHub CI | TV4 | IN_PROGRESS | workflow authored; remote evidence pending |
+| Android device integration | TV1/TV2 | TODO | handoff ready; no Android modifications |
+
+Evidence: docs/integration/evidence/; handoff: docs/handoff/RELEASE_READINESS.md.
+Older failure counts/assignments above are historical. Original TV4 workspace is
+unchanged; all work uses the separate integration worktree and actual merge history.

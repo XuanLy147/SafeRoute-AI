@@ -37,3 +37,13 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 7. Chỉ ghi DONE/PASS nếu đã build/test có bằng chứng.
 
 Tham khảo code thử nghiệm tại repository riêng `SafeRoute-AI_Demo`; **không mặc định code demo đã có trong repo chính**.
+
+## TV345 integration handoff — 2026-11-07
+
+Nhánh `integration/tv345-backend-handoff` tích hợp source TV3/TV4/TV5, giữ Android
+read-only. Phân công hiện hành: TV3 API/Auth/Reports/AI HTTP; TV4 DB/PostGIS/Alembic/
+Risk/Docker/Cloud/CI; TV5 Google Routes/Routing/Geometry/Recommendation. Các mô tả
+scaffold ở trên là lịch sử khởi tạo, không phải trạng thái kiểm chứng mới.
+
+Xem [handoff](docs/handoff/RELEASE_READINESS.md), [local development](docs/handoff/LOCAL_DEVELOPMENT.md),
+[source audit](docs/integration/TV345_SOURCE_AUDIT.md) và [risk decision](docs/integration/TV345_RISK_DECISION.md).

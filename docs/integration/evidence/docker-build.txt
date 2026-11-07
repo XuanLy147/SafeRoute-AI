@@ -1,0 +1,54 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.16kB 0.0s done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.11-slim
+#2 DONE 1.2s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 160B done
+#3 DONE 0.0s
+
+#4 [1/8] FROM docker.io/library/python:3.11-slim@sha256:65bd3d9f1d7fa268dd1909973ba7eb4bdf41f6dcf2cfbe76ba9528b170f3fd79
+#4 resolve docker.io/library/python:3.11-slim@sha256:65bd3d9f1d7fa268dd1909973ba7eb4bdf41f6dcf2cfbe76ba9528b170f3fd79 0.0s done
+#4 DONE 0.0s
+
+#5 [internal] load build context
+#5 transferring context: 49.71kB 0.0s done
+#5 DONE 0.0s
+
+#6 [4/8] COPY backend/requirements.txt backend/requirements-ai.txt ./
+#6 CACHED
+
+#7 [2/8] WORKDIR /srv/backend
+#7 CACHED
+
+#8 [3/8] RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2.0-0 && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [5/8] RUN pip install --no-cache-dir torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu && pip install --no-cache-dir -r requirements.txt -r requirements-ai.txt
+#9 CACHED
+
+#10 [6/8] COPY backend/ ./
+#10 DONE 0.0s
+
+#11 [7/8] COPY ai/weights/best.pt ai/weights/best.pt.sha256 /srv/ai/weights/
+#11 DONE 0.1s
+
+#12 [8/8] RUN cd /srv/ai/weights && sha256sum -c best.pt.sha256 && useradd --uid 10001 --create-home saferoute && mkdir -p /srv/uploads && chown -R saferoute:saferoute /srv/uploads
+#12 0.252 best.pt: OK
+#12 DONE 0.3s
+
+#13 exporting to image
+#13 exporting layers
+#13 exporting layers 0.6s done
+#13 exporting manifest sha256:4c89602d7c842e625584f3babedf00bf58f3f3ba1ee68ba0c21a1a55662184a5 0.0s done
+#13 exporting config sha256:1dae02d845b4c6b447bd4afc5f5937b2df1fb19e479ca07e25ad370ceab16950 0.0s done
+#13 exporting attestation manifest sha256:c2fd362dd619a0f75052906eba219df2ba97cdc66a6e4ecad2bf1814fdece3ac 0.0s done
+#13 exporting manifest list sha256:02261033c32b06b1dfab3ee6f04084da47812bb58483ee091f1ce2230b16226c 0.0s done
+#13 naming to docker.io/library/saferoute-tv345:integration done
+#13 unpacking to docker.io/library/saferoute-tv345:integration
+#13 unpacking to docker.io/library/saferoute-tv345:integration 0.2s done
+#13 DONE 0.9s

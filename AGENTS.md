@@ -27,11 +27,11 @@ SafeRoute AI — Hackathon SGU 2026–2027, nhóm COME FOR FOOD (5 thành viên)
 |---|---|---|
 | TV1 | App shell, MainActivity/navigation, Map/GPS/markers, routing UI | `android/` → `feature/map/`, `feature/routing/` |
 | TV2 | Auth, báo cáo ảnh/AI preview/manual correction, report detail, vote, review UI, shared Retrofit/DTO | `android/` → `feature/{auth,report,reports,review,profile}/`, `core/network/`, `core/model/` |
-| TV3 | FastAPI, PostgreSQL/PostGIS, RBAC, reports, migrations, OpenAPI | `backend/` (API + DB) |
-| TV4 | Inference YOLO, class mapping, model manifest, evaluation, AI service | `ai/`, `backend/app/modules/ai/` |
-| TV5 | Google Routes adapter, risk scoring, Cloud Run, Docker/CI/CD, integration | `backend/app/modules/routing/`, `infra/`, `.github/workflows/` |
+| TV3 | FastAPI, Auth/Reports/Images/Votes/Review, AI HTTP, OpenAPI | `backend/app/` API modules |
+| TV4 | PostgreSQL/PostGIS, Alembic, Risk Scoring, Docker, Cloud, CI/CD | DB/models/migrations/risk, `infra/`, `.github/workflows/` |
+| TV5 | Google Routes adapter, routing service, geometry, recommendation | `backend/app/modules/routing/` |
 
-**Shared contract:** TV3 giữ chuẩn OpenAPI và DB migrations; TV1 giữ Android app shell/navigation; TV2 giữ Android network/DTO; TV4/TV5 thống nhất AI/route schemas với TV3 và Android. Không tạo bản trùng của MainActivity, Retrofit client, API DTO hay database schema.
+**Shared contract:** TV3 giữ chuẩn OpenAPI; TV4 giữ DB migrations; TV1 giữ Android app shell/navigation; TV2 giữ Android network/DTO; TV4/TV5 thống nhất AI/route schemas với TV3 và Android. Không tạo bản trùng của MainActivity, Retrofit client, API DTO hay database schema.
 
 ## 5. Git workflow
 - `main`: tích hợp sau review.
@@ -68,3 +68,5 @@ Trạng thái task trong `AI_TRACKER.md`: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DON
 - Chủ động thực thi task được giao trong phạm vi được phép, không chỉ viết pseudocode.
 - Nếu thiếu SDK, secrets, backend hoặc quyền truy cập: báo giới hạn rõ ràng, không tuyên bố đã chạy.
 - Ưu tiên luồng P0 chạy thật: (A) ảnh→AI→user sửa→report PENDING→review→map; (B) A/B→Google Routes→risk scoring→UI, trước tính năng trình diễn phụ.
+
+Phân công cập nhật theo master integration request ngày 2026-11-07. AI runtime/evaluation có sẵn: kiểm chứng và tích hợp, không train mới. Lịch sử phân công cũ giữ trong Git/tracker.

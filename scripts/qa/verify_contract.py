@@ -13,3 +13,13 @@ for name in ("TV1_MAP_ROUTING_HANDOFF", "TV2_REPORT_COMMUNITY_HANDOFF", "API_CON
 assert "/api/v1/routes/compare" in actual["paths"]
 assert "normalized" in actual["components"]["schemas"]["DetectionItem"]["properties"]["bbox"]["description"].lower()
 print("PASS: runtime OpenAPI matches committed artifact; five handoff documents present")
+
+from app.modules.routing.schemas import RouteCompareRequest, RouteCompareResponse
+from app.modules.ai.schemas import AiDetectResponse
+from app.modules.reports.schemas import ReportCreateRequest
+examples=json.loads((root / "docs/handoff/examples.json").read_text(encoding="utf-8"))
+RouteCompareRequest.model_validate(examples["route_request"])
+RouteCompareResponse.model_validate(examples["route_response"])
+AiDetectResponse.model_validate(examples["ai_response"])
+ReportCreateRequest.model_validate(examples["report_request"])
+print("PASS: supplied JSON examples match implementation schemas")
