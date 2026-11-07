@@ -122,7 +122,7 @@ public class MapFragment extends LocationAwareFragment {
                         + "\n\n" + hazard.description + "\n\n" + hazard.point.format()
                         + "\n\n" + getString(verified ? R.string.verified_note : R.string.pending_note))
                 .setPositiveButton(R.string.go_here, (dialog, which) -> ((MainActivity) requireActivity()).openRoutes(hazard.point))
-                .setNeutralButton(R.string.flow_alert_detail, (dialog, which) -> ((MainActivity)requireActivity()).openTv2Fragment(MapFlowFragment.at("detail",hazard.id)))
+                .setNeutralButton(R.string.flow_alert_detail, (dialog, which) -> ((MainActivity)requireActivity()).openTv2Fragment(com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(hazard.id)))
                 .setNegativeButton(R.string.close, null).show();
     }
     @Override protected void onLocating(boolean loading) {

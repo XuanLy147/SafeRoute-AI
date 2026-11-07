@@ -1,7 +1,7 @@
 """initial schema with postgis and 8 core tables
 
 Revision ID: 0001_initial_schema
-Revises: 
+Revises:
 Create Date: 2026-11-07 14:00:00.000000
 
 """

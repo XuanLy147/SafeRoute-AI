@@ -68,3 +68,12 @@ Trạng thái task trong `AI_TRACKER.md`: `TODO`, `IN_PROGRESS`, `BLOCKED`, `DON
 - Chủ động thực thi task được giao trong phạm vi được phép, không chỉ viết pseudocode.
 - Nếu thiếu SDK, secrets, backend hoặc quyền truy cập: báo giới hạn rõ ràng, không tuyên bố đã chạy.
 - Ưu tiên luồng P0 chạy thật: (A) ảnh→AI→user sửa→report PENDING→review→map; (B) A/B→Google Routes→risk scoring→UI, trước tính năng trình diễn phụ.
+
+## 10. Full-release integration — 2026-11-07
+
+Task hiện hành cho phép sửa xuyên TV1–TV5 trong worktree
+`integration/saferoute-full-release`, commit/push integration và tạo PR. Merge/push
+main chỉ khi toàn bộ mandatory gates, CI và review requirements PASS. Không
+bypass branch protection. Xem docs/release thay vì coi evidence backend lịch sử
+là bằng chứng Android E2E. Contract tv345-contract-2026-11-07 vẫn là nguồn thật.
+Giữ mọi thay đổi chưa commit trong worktree TV4 gốc. Không deploy cloud tính phí.

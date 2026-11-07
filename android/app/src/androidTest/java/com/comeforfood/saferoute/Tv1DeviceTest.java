@@ -41,6 +41,11 @@ public class Tv1DeviceTest {
     @Before public void setUp() {
         app = ApplicationProvider.getApplicationContext();
         originalSource = app.getDataSource();
+        // The runtime now uses HTTP. Keep the disconnected fixture explicit in this regression suite.
+        app.setDataSource(new Tv1DataSource() {
+            public Request loadReports(Callback<List<Hazard>> c){c.failure(Failure.NOT_CONNECTED);return ()->{};}
+            public Request compare(Point a,Point b,Callback<RouteComparison> c){c.failure(Failure.NOT_CONNECTED);return ()->{};}
+        });
     }
     @After public void tearDown() {
         if (scenario != null) scenario.close();

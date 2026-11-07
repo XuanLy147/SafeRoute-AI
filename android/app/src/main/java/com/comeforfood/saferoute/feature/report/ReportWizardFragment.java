@@ -23,6 +23,8 @@ import java.io.File;
 public class ReportWizardFragment extends LocationAwareFragment {
     private FragmentReportWizardBinding binding;
     private ReportDraft draft;
+    private boolean busy;
+    private retrofit2.Call<com.comeforfood.saferoute.core.model.DetectionDto.DetectionResponse> detectionCall;
     private GoogleMap map;
     private Marker pin;
     private String[] categories, severities;
@@ -70,15 +72,17 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnPickGallery.setOnClickListener(v->gallery.launch(new String[]{"image/jpeg","image/png"}));
         binding.btnCamera.setOnClickListener(v->takePhoto());
         binding.btnUseImage.setOnClickListener(v->{ if(draft.image()==null) message(R.string.report_missing_image); else go(3); });
+        android.widget.EditText manualPoint=new android.widget.EditText(requireContext());manualPoint.setHint("Nhập vĩ độ, kinh độ nếu không lấy được GPS");manualPoint.setInputType(android.text.InputType.TYPE_CLASS_TEXT);manualPoint.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);binding.stepGps.addView(manualPoint);
+        com.google.android.material.button.MaterialButton usePoint=new com.google.android.material.button.MaterialButton(requireContext());usePoint.setText("Dùng tọa độ đã nhập");binding.stepGps.addView(usePoint);usePoint.setOnClickListener(v->{try{draft.point(Point.parse(manualPoint.getText().toString()));renderPoint();}catch(IllegalArgumentException e){manualPoint.setError("Tọa độ không hợp lệ: vĩ độ, kinh độ");}});
         binding.btnAdjustPin.setOnClickListener(v->useLocation(location->{
             draft.point(new Point(location.getLatitude(),location.getLongitude())); renderPoint();
             if(map!=null) map.animateCamera(CameraUpdateFactory.newLatLngZoom(MapsSupport.latLng(draft.point()),17));
         }));
         binding.btnSimulateAi.setOnClickListener(v->{
             if(draft.point()==null) message(R.string.report_location_missing);
-            else go(4); // Disconnected AI: show honest fallback immediately, never fake loading/detection.
+            else analyze();
         });
-        binding.btnManual.setOnClickListener(v->go(5));
+        binding.btnManual.setOnClickListener(v->{if(detectionCall!=null)detectionCall.cancel();busy=false;go(5);});
         binding.btnReview.setOnClickListener(v->{
             if(draft.category()<0) message(R.string.report_missing_category); else go(6);
         });
@@ -119,6 +123,7 @@ public class ReportWizardFragment extends LocationAwareFragment {
     private void message(int string) { if(binding!=null) Snackbar.make(binding.getRoot(),string,Snackbar.LENGTH_LONG).show(); }
     private void go(int step) { draft.step(step); if(binding!=null) { render();binding.wizardScroll.smoothScrollTo(0,0); } }
     private void back() {
+        if(busy){notice("Đang xử lý. Vui lòng đợi hoặc quay lại sau khi hoàn tất.");return;}
         int step=draft.step();
         if(step==0) ((MainActivity)requireActivity()).openMap();
         else go(step==7?6:step-1);
@@ -147,20 +152,89 @@ public class ReportWizardFragment extends LocationAwareFragment {
         binding.btnCamera.setVisibility(step==1?View.VISIBLE:View.GONE);
         binding.btnPickGallery.setText(step==2?R.string.report_change_image:R.string.report_gallery);
         if(draft.image()!=null) {
-            try { binding.imgPreview.setImageURI(Uri.parse(draft.image())); binding.reviewImage.setImageDrawable(binding.imgPreview.getDrawable()); }
+            try { binding.imgPreview.setImageURI(Uri.parse(draft.image())); binding.reviewImage.setImageDrawable(binding.imgPreview.getDrawable());
+                binding.aiImage.setImageDrawable(binding.imgPreview.getDrawable());
+                if(binding.imgPreview.getDrawable()!=null)binding.aiBoxes.setImageSize(binding.imgPreview.getDrawable().getIntrinsicWidth(),binding.imgPreview.getDrawable().getIntrinsicHeight());
+                binding.aiBoxes.setDetections(draft.detections()); }
             catch(RuntimeException error) { draft.image(null);message(R.string.image_read_error); }
         } else binding.imgPreview.setImageResource(R.drawable.ic_camera);
         binding.confirmReport.setChecked(draft.confirmed());
         if(draft.category()>=0&&draft.point()!=null) binding.reviewSummary.setText(getString(R.string.report_summary,categories[draft.category()],severities[draft.severity()],draft.point().format(),draft.description()));
-        renderPoint();
+        renderPoint();renderDetections();
     }
     private void submit() {
         if(draft.image()==null) {message(R.string.report_missing_image);go(1);return;}
         if(draft.point()==null) {message(R.string.report_location_missing);go(3);return;}
         if(draft.category()<0) {message(R.string.report_missing_category);go(5);return;}
         if(!draft.confirmed()) {message(R.string.report_missing_consent);return;}
-        go(7); // No service connected. Keep draft; do not emit REPORTS_CHANGED or show success.
+        if(busy)return;
+        if(draft.uncertain()) {go(7);notice("Kết quả gửi chưa rõ. Mở Báo cáo của tôi để kiểm tra trước khi gửi bản mới.");return;}
+        if(!new com.comeforfood.saferoute.core.session.SessionManager(requireContext()).isLoggedIn()) {go(7);notice("Đăng nhập trước khi gửi báo cáo. Bản nháp được giữ lại.");return;}
+        busy=true;enable(binding.getRoot(),false);
+        if(draft.uploadedId()!=null){createReport();return;}
+        try {
+            com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(),api().upload(com.comeforfood.saferoute.core.network.ImageUpload.part(requireContext().getContentResolver(),Uri.parse(draft.image()))),response->{
+                if(!response.has("image_id")){failed("Server thiếu mã ảnh");return;}
+                draft.uploadedId(response.get("image_id").getAsString());createReport();
+            },this::failed);
+        }catch(RuntimeException error){failed("Không đọc được ảnh JPEG/PNG/WEBP. Hãy chọn lại ảnh.");}
     }
+    private com.comeforfood.saferoute.core.network.ApiService api(){return ((com.comeforfood.saferoute.SafeRouteApp)requireActivity().getApplication()).api().service;}
+    private void notice(String message){if(binding!=null)Snackbar.make(binding.getRoot(),message,Snackbar.LENGTH_LONG).show();}
+    private void enable(View v,boolean enabled){v.setEnabled(enabled);if(v instanceof ViewGroup)for(int i=0;i<((ViewGroup)v).getChildCount();i++)enable(((ViewGroup)v).getChildAt(i),enabled);}
+    private void failed(String message){busy=false;if(binding!=null){enable(binding.getRoot(),true);go(7);notice(message);}}
+    private void createReport(){
+        String[] codes={"D00","D10","D20","D40","Repair","Ngập nước","Vật cản"};String[] levels={"LOW","MEDIUM","HIGH"};
+        com.comeforfood.saferoute.core.model.ReportDto.CreateRequest request=new com.comeforfood.saferoute.core.model.ReportDto.CreateRequest(draft.uploadedId(),draft.point().latitude,draft.point().longitude,codes[draft.category()],levels[draft.severity()],draft.description(),draft.detections());
+        request.setModelVersion(draft.modelVersion());
+        draft.uncertain(true); // Persist before sending: rotation/process death must not blindly repeat a write.
+        com.comeforfood.saferoute.core.network.ApiCalls.enqueueDetailed(getViewLifecycleOwner(),api().create(request),response->{
+            if(response.getId()==null){failed("Chưa xác nhận mã báo cáo. Kiểm tra Báo cáo của tôi.");return;}
+            busy=false;draft.clear();getParentFragmentManager().setFragmentResult(MainActivity.REPORTS_CHANGED,new Bundle());
+            ((MainActivity)requireActivity()).openTv2Fragment(com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(response.getId()));
+        },(code,error)->{if(code>=400&&code<500)draft.uncertain(false);failed(error);});
+    }
+    private void analyze(){
+        if(busy)return;go(4);draft.detections(java.util.Collections.emptyList());
+        try {
+            okhttp3.MultipartBody.Part file=com.comeforfood.saferoute.core.network.ImageUpload.part(requireContext().getContentResolver(),Uri.parse(draft.image()));
+            busy=true;binding.tvAiTitle.setText("Đang phân tích ảnh…");binding.tvAiDetectionSummary.setText("Bạn có thể tiếp tục nhập nhãn thủ công.");
+            detectionCall=api().detect(file);
+            com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(),detectionCall,response->{
+                busy=false;
+                java.util.List<com.comeforfood.saferoute.core.model.DetectionDto> detections=response.getDetections();
+                if(detections==null||detections.stream().anyMatch(d->!d.valid())){aiFailed("Dữ liệu AI không hợp lệ. Hãy nhập nhãn thủ công.");return;}
+                draft.modelVersion(response.getModelVersion());draft.detections(detections);renderDetections();binding.aiBoxes.setDetections(detections);binding.tvAiTitle.setText(detections.isEmpty()?"Không phát hiện hư hỏng":"Đề xuất AI — cần bạn xác nhận");
+                StringBuilder text=new StringBuilder();for(com.comeforfood.saferoute.core.model.DetectionDto d:detections)text.append(d.getDisplayName()).append(" · ").append(Math.round(d.getConfidence()*100)).append("%\n");
+                binding.tvAiDetectionSummary.setText(text.length()==0?"Bạn vẫn có thể nhập nhãn thủ công.":text+"Độ tin cậy AI không phải mức độ nguy hiểm.");
+            },this::aiFailed);
+        }catch(RuntimeException e){aiFailed("Không đọc được ảnh. Hãy chọn lại ảnh hoặc nhập nhãn thủ công.");}
+    }
+    private android.widget.LinearLayout detectionEditors;
+    private void renderDetections(){
+        if(binding==null)return;
+        if(detectionEditors==null){detectionEditors=new android.widget.LinearLayout(requireContext());detectionEditors.setOrientation(android.widget.LinearLayout.VERTICAL);binding.cardAiResult.addView(detectionEditors,2);}
+        detectionEditors.removeAllViews();
+        java.util.ArrayList<com.comeforfood.saferoute.core.model.DetectionDto> detections=draft.detections();
+        for(int i=0;i<detections.size();i++){
+            final int index=i;com.comeforfood.saferoute.core.model.DetectionDto detection=detections.get(i);
+            android.widget.Spinner label=new android.widget.Spinner(requireContext());String[] codes={"D00","D10","D20","D40","Repair"};
+            label.setContentDescription("Sửa nhãn phát hiện AI "+(i+1));label.setAdapter(new android.widget.ArrayAdapter<>(requireContext(),android.R.layout.simple_spinner_dropdown_item,codes));
+            label.setSelection(java.util.Arrays.asList(codes).indexOf(detection.getClassCode()));detectionEditors.addView(label);
+            label.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener(){
+                public void onNothingSelected(android.widget.AdapterView<?> p){}
+                public void onItemSelected(android.widget.AdapterView<?> p,View v,int position,long id){
+                    java.util.ArrayList<com.comeforfood.saferoute.core.model.DetectionDto> current=draft.detections();if(index>=current.size())return;
+                    com.comeforfood.saferoute.core.model.DetectionDto old=current.get(index);
+                    if(!codes[position].equals(old.getClassCode())){current.set(index,new com.comeforfood.saferoute.core.model.DetectionDto(codes[position],old.getConfidence(),old.getBbox()));draft.detections(current);draft.confirmed(false);binding.aiBoxes.setDetections(current);}
+                }
+            });
+        }
+        if(!detections.isEmpty()){
+            com.google.android.material.button.MaterialButton clear=new com.google.android.material.button.MaterialButton(requireContext());clear.setText("Bỏ đề xuất AI, nhập nhãn thủ công");detectionEditors.addView(clear);clear.setOnClickListener(v->{draft.detections(java.util.Collections.emptyList());binding.aiBoxes.clear();draft.confirmed(false);go(5);});
+        }
+    }
+    private void aiFailed(String error){busy=false;if(binding!=null){binding.tvAiTitle.setText(R.string.ai_unavailable_title);binding.tvAiDetectionSummary.setText(error);}}
     @Override protected void onLocating(boolean locating) { if(binding!=null)binding.btnAdjustPin.setEnabled(!locating); }
-    @Override public void onDestroyView() { pin=null;map=null;binding=null;super.onDestroyView(); }
+    @Override public void onDestroyView() { busy=false;detectionEditors=null;pin=null;map=null;binding=null;super.onDestroyView(); }
 }

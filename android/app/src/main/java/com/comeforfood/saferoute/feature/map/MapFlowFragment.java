@@ -47,7 +47,7 @@ public class MapFlowFragment extends Fragment {
                 }
                 List<Hazard> reports=HazardFilter.apply(state.data==null?java.util.Collections.emptyList():state.data,model.category(),model.verifiedOnly());
                 binding.flowBody.setText(reports.isEmpty()?getString(R.string.reports_empty):getString(R.string.reports_count,reports.size()));
-                for(Hazard h:reports) action(h.title.isEmpty()?h.type.label:h.title,h.id,()->host().openTv2Fragment(at("detail",h.id)));
+                for(Hazard h:reports) action(h.title.isEmpty()?h.type.label:h.title,h.id,()->host().openTv2Fragment(com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(h.id)));
             });
             model.refreshReports();
         }

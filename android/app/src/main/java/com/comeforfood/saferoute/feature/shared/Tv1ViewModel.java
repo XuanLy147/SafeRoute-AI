@@ -156,6 +156,12 @@ public class Tv1ViewModel extends AndroidViewModel {
         refreshReports();
     }
 
+    public void cancelRouteRequest() {
+        if(routeRequest!=null&&routes.getValue()!=null&&routes.getValue().loading) {
+            routeGeneration++;routeRequest.cancel();main.removeCallbacks(routeTimeout);
+            routes.setValue(new State<>(false,null,null));
+        }
+    }
     @Override protected void onCleared() {
         reportsGeneration++; routeGeneration++;
         if (reportsRequest != null) reportsRequest.cancel();

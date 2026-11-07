@@ -41,6 +41,11 @@ public class Tv1UiTest {
     private SafeRouteApp app;
     @Before public void start() {
         app = (SafeRouteApp) RuntimeEnvironment.getApplication();
+        // The runtime now uses HTTP. Keep the disconnected fixture explicit in this regression suite.
+        app.setDataSource(new Tv1DataSource() {
+            public Request loadReports(Callback<List<Hazard>> c){c.failure(Failure.NOT_CONNECTED);return ()->{};}
+            public Request compare(Point a,Point b,Callback<RouteComparison> c){c.failure(Failure.NOT_CONNECTED);return ()->{};}
+        });
     }
     private void launch() {
         controller = Robolectric.buildActivity(MainActivity.class).setup();

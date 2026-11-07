@@ -1,9 +1,9 @@
 name: TV345 backend integration
 on:
   push:
-    branches: [integration/tv345-backend-handoff]
+    branches: [main, integration/tv345-backend-handoff, integration/saferoute-full-release]
   pull_request:
-    paths: ['backend/**', 'ai/**', 'scripts/qa/**', 'docs/handoff/**', '.github/workflows/backend-integration.yml']
+    branches: [main, integration/saferoute-full-release]
 permissions:
   contents: read
 jobs:

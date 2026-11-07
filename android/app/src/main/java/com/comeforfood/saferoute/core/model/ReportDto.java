@@ -20,6 +20,8 @@ public class ReportDto implements Serializable {
     public static final String VOTE_UNSURE = "UNSURE";
 
     public static class CreateRequest implements Serializable {
+        @SerializedName("model_version") private String modelVersion;
+        public void setModelVersion(String version){modelVersion=version;}
         @SerializedName("image_id")
         private String imageId;
 
@@ -85,7 +87,7 @@ public class ReportDto implements Serializable {
         private String reason; // Mandatory when REJECTED
 
         @SerializedName("reviewer_note")
-        private String reviewerNote;
+        private transient String reviewerNote;
 
         public ReviewDecisionRequest(String status, String reason, String reviewerNote) {
             this.status = status;
@@ -199,24 +201,24 @@ public class ReportDto implements Serializable {
             this.description = description;
             this.supportVotes = supportVotes;
             this.opposeVotes = opposeVotes;
-            this.modelVersion = "weights-v0* (YOLOv8s)";
+            this.modelVersion = null;
             this.aiDetections = new ArrayList<>();
             this.auditLogs = new ArrayList<>();
         }
 
-        public String getId() { return id != null ? id : "SR-0001"; }
-        public String getUserId() { return userId != null ? userId : "user_unknown"; }
+        public String getId() { return id; }
+        public String getUserId() { return userId; }
         public String getReporterName() { return reporterName != null ? reporterName : "Người dùng cộng đồng"; }
-        public String getCategoryUser() { return categoryUser != null ? categoryUser : "D40"; }
-        public String getStatus() { return status != null ? status : STATUS_PENDING; }
+        public String getCategoryUser() { return categoryUser; }
+        public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
-        public String getSeverity() { return severity != null ? severity : "MEDIUM"; }
+        public String getSeverity() { return severity; }
         public double getLatitude() { return latitude; }
         public double getLongitude() { return longitude; }
-        public String getAddress() { return address != null ? address : "Quận 5, TP. Hồ Chí Minh"; }
+        public String getAddress() { return address != null ? address : "Chưa có địa chỉ"; }
         public String getDescription() { return description != null ? description : ""; }
         public String getImageUrl() { return imageUrl; }
-        public String getCreatedAt() { return createdAt != null ? createdAt : "10:15 Hôm nay"; }
+        public String getCreatedAt() { return createdAt != null ? createdAt : "Chưa có thời gian"; }
         public List<DetectionDto> getAiDetections() { return aiDetections; }
         public void setAiDetections(List<DetectionDto> aiDetections) { this.aiDetections = aiDetections; }
         public int getSupportVotes() { return supportVotes; }
@@ -225,7 +227,7 @@ public class ReportDto implements Serializable {
         public void setOpposeVotes(int votes) { this.opposeVotes = votes; }
         public int getUnsureVotes() { return unsureVotes; }
         public void setUnsureVotes(int votes) { this.unsureVotes = votes; }
-        public String getModelVersion() { return modelVersion != null ? modelVersion : "weights-v0*"; }
+        public String getModelVersion() { return modelVersion; }
         public List<AuditLogEntry> getAuditLogs() { return auditLogs != null ? auditLogs : new ArrayList<>(); }
 
         public String getStatusDisplay() {

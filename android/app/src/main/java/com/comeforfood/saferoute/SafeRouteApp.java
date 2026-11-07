@@ -26,15 +26,16 @@ public class SafeRouteApp extends Application {
         tv2Screens = Objects.requireNonNull(screens);
     }
 
-    private Tv1DataSource dataSource = new Tv1DataSource() {
-        @Override public Request loadReports(Callback<List<Hazard>> callback) {
-            callback.failure(Failure.NOT_CONNECTED); return () -> {};
-        }
-        @Override public Request compare(Point a, Point b, Callback<RouteComparison> callback) {
-            callback.failure(Failure.NOT_CONNECTED); return () -> {};
-        }
-    };
-    public Tv1DataSource getDataSource() { return dataSource; }
+    private com.comeforfood.saferoute.core.network.ApiClient api;
+    public com.comeforfood.saferoute.core.network.ApiClient api() {
+        if(api==null)api=new com.comeforfood.saferoute.core.network.ApiClient(this);
+        return api;
+    }
+    private Tv1DataSource dataSource;
+    public Tv1DataSource getDataSource() {
+        if(dataSource==null)dataSource=new com.comeforfood.saferoute.core.network.NetworkDataSource(api().service);
+        return dataSource;
+    }
     /** Install once during app startup. UI tests install fixtures only in the test process. */
     public void setDataSource(Tv1DataSource source) { dataSource = Objects.requireNonNull(source); }
 }

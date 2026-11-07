@@ -30,8 +30,13 @@ public class DetectionDto implements Serializable {
         this.bbox = bbox;
     }
 
+    public boolean valid() {
+        if(!java.util.Arrays.asList("D00","D10","D20","D40","Repair").contains(classCode)||!Float.isFinite(confidence)||confidence<0||confidence>1||bbox==null||bbox.size()!=4)return false;
+        for(Float v:bbox)if(v==null||!Float.isFinite(v)||v<0||v>1)return false;
+        return bbox.get(0)<bbox.get(2)&&bbox.get(1)<bbox.get(3);
+    }
     public String getClassCode() {
-        return classCode != null ? classCode : "D40";
+        return classCode;
     }
 
     public float getConfidence() {
@@ -65,7 +70,7 @@ public class DetectionDto implements Serializable {
         private List<DetectionDto> detections;
 
         public String getModelVersion() {
-            return modelVersion != null ? modelVersion : "v1.1";
+            return modelVersion;
         }
 
         public List<DetectionDto> getDetections() {

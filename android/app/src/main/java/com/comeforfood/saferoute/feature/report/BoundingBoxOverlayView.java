@@ -18,6 +18,8 @@ import java.util.List;
 public class BoundingBoxOverlayView extends View {
 
     private final List<DetectionDto> detections = new ArrayList<>();
+    private float imageWidth=1,imageHeight=1;
+    public void setImageSize(int width,int height){imageWidth=Math.max(1,width);imageHeight=Math.max(1,height);invalidate();}
     private Paint boxPaint;
     private Paint textBgPaint;
     private Paint textPaint;
@@ -79,13 +81,16 @@ public class BoundingBoxOverlayView extends View {
 
         for (DetectionDto det : detections) {
             List<Float> bbox = det.getBbox();
-            if (bbox == null || bbox.size() < 4) continue;
+            if (!det.valid()) continue;
+            float scale=Math.min(viewWidth/imageWidth,viewHeight/imageHeight);
+            float width=imageWidth*scale,height=imageHeight*scale;
+            float x=(viewWidth-width)/2f,y=(viewHeight-height)/2f;
 
             // Map normalized coordinates [0.0 - 1.0] to pixel coordinates
-            float left = bbox.get(0) * viewWidth;
-            float top = bbox.get(1) * viewHeight;
-            float right = bbox.get(2) * viewWidth;
-            float bottom = bbox.get(3) * viewHeight;
+            float left = x + bbox.get(0) * width;
+            float top = y + bbox.get(1) * height;
+            float right = x + bbox.get(2) * width;
+            float bottom = y + bbox.get(3) * height;
 
             RectF rect = new RectF(left, top, right, bottom);
             canvas.drawRoundRect(rect, 8f, 8f, boxPaint);

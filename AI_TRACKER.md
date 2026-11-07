@@ -71,3 +71,17 @@
 - **P0-B:** Điểm A/B → Google Routes trả tuyến → PostGIS risk scorer → hiển thị giải thích theo nguy cơ ghi nhận.
 - Chỉ tick DONE nếu thực sự demo/test được. Mock data phải có nhãn; không giới thiệu demo mock như backend thật.
 - Mọi thông tin còn chưa biết phải được ghi rõ `UNKNOWN` hoặc `UNVERIFIED`, không điền ước lượng như số đo thật.
+
+
+## Full-release integration — 2026-11-07 (supersedes scaffold status above)
+
+| Task | Owners | Status | Evidence / next gate |
+|---|---|---|---|
+| Release reconciliation | TV1–TV5 | DONE_VERIFIED | 3b70333; backend source tree restored; frontend preserved; docs/release/MERGE_PROVENANCE.md |
+| Android HTTP integration | TV1/TV2 | IN_PROGRESS | Shared client, auth/session, images/AI/report, detail/vote/review, map/routes; final tests ongoing |
+| Real backend re-verification | TV3–TV5 | DONE_VERIFIED | 179 tests + 12 subtests PASS; migration/PostGIS; Docker restart; AI CPU; contract; docs/release evidence |
+| Android device E2E | TV1–TV5 | IN_PROGRESS | Dedicated real backend emulator harness; results must be recorded after execution |
+| Main release | Team | BLOCKED | Mandatory live gates, final CI/review not yet complete; main unchanged |
+
+Original dirty TV4 worktree and historical tracker entries are preserved. New
+integration evidence is recorded in docs/release, distinct from old owner runs.

@@ -90,13 +90,23 @@ public class LoginFragment extends Fragment {
             return;
         }
 
-        if (password.length() < 6) {
+        if (password.length() < 6 || password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
             binding.etPassword.setError(getString(R.string.err_password_short));
             binding.etPassword.requestFocus();
             return;
         }
 
-        Toast.makeText(requireContext(), R.string.auth_unavailable, Toast.LENGTH_LONG).show();
+        setLoading(true);
+        com.comeforfood.saferoute.core.network.ApiService api=((com.comeforfood.saferoute.SafeRouteApp)requireActivity().getApplication()).api().service;
+        com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(), api.login(new com.comeforfood.saferoute.core.model.AuthDto.LoginRequest(email,password)), response -> {
+            if(response.getAccessToken()==null || response.getAccessToken().isEmpty()) { setLoading(false);return; }
+            sessionManager.saveSession(response.getAccessToken(),response.getEmail(),"USER",response.getFullName());
+            com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(), api.me(), profile -> {
+                sessionManager.saveSession(response.getAccessToken(),profile.getEmail(),profile.getRole(),profile.getFullName());
+                setLoading(false);
+                ((com.comeforfood.saferoute.MainActivity)requireActivity()).openSessionHome();
+            }, error -> { sessionManager.clearSession();setLoading(false);Toast.makeText(requireContext(),error,Toast.LENGTH_LONG).show(); });
+        }, error -> { setLoading(false);Toast.makeText(requireContext(),error,Toast.LENGTH_LONG).show(); });
     }
 
     private void setLoading(boolean isLoading) {

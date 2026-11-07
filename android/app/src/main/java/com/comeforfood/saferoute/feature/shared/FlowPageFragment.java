@@ -60,7 +60,8 @@ public class FlowPageFragment extends Fragment {
         switch(page) {
             case REVIEW_HOME: link(Page.REVIEW_QUEUE);link(Page.REVIEW_HISTORY);link(Page.DUPLICATES);account();break;
             case ADMIN_HOME: link(Page.ADMIN_REPORTS);link(Page.ADMIN_AUDIT);link(Page.ADMIN_USERS);link(Page.ADMIN_METRICS);link(Page.ADMIN_SETTINGS);account();break;
-            case REVIEW_QUEUE: case ADMIN_REPORTS: case DUPLICATES:
+            case REVIEW_QUEUE: case ADMIN_REPORTS: loadQueue();break;
+            case DUPLICATES:
                 EditText search=new EditText(requireContext());search.setHint(R.string.role_search);search.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
                 search.setImportantForAutofill(View.IMPORTANT_FOR_AUTOFILL_NO);binding.flowActions.addView(search);
                 RadioGroup filters=new RadioGroup(requireContext());
@@ -98,6 +99,17 @@ public class FlowPageFragment extends Fragment {
                 link(Page.PRIVACY);break;
             case PRIVACY: binding.flowBody.setText(R.string.flow_privacy_body);break;
         }
+    }
+    private void loadQueue() {
+        binding.flowBody.setText("Đang tải hàng đợi…");binding.flowActions.removeAllViews();
+        com.comeforfood.saferoute.core.network.ApiCalls.enqueue(getViewLifecycleOwner(),((SafeRouteApp)requireActivity().getApplication()).api().service.queue(),reports->{
+            binding.flowBody.setText(reports.isEmpty()?"Không có báo cáo chờ duyệt":"Báo cáo chờ duyệt: "+reports.size());
+            for(com.comeforfood.saferoute.core.model.ReportDto.ReportResponse r:reports) {
+                MaterialButton row=action(R.string.role_detail,r.getId(),()->((MainActivity)requireActivity()).openTv2Fragment(com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(r.getId())));
+                row.setText("#"+r.getId()+" · "+r.getCategoryUser()+" · "+r.getCreatedAt());
+            }
+            action(R.string.role_retry,"retry",this::loadQueue);
+        },error->{binding.flowBody.setText(error);action(R.string.role_retry,"retry",this::loadQueue);});
     }
     private void account() {action(R.string.flow_account_home,"account",()->((MainActivity)requireActivity()).openTv2Fragment(new com.comeforfood.saferoute.feature.profile.ProfileFragment()));}
     private void retry() {action(R.string.role_retry,"retry",()->Snackbar.make(binding.getRoot(),R.string.role_unavailable,Snackbar.LENGTH_LONG).show());}

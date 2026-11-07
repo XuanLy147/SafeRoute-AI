@@ -15,14 +15,20 @@ public class SessionManager {
     private static final String KEY_NAME = "user_fullname";
 
     private final SharedPreferences prefs;
+    private static volatile String memoryToken;
+    private static volatile String validatedRole="USER";
 
     public SessionManager(Context context) {
         this.prefs = context.getApplicationContext().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        if(prefs.contains(KEY_TOKEN)) prefs.edit().remove(KEY_TOKEN).remove(KEY_ROLE).apply();
     }
 
     public void saveSession(String token, String email, String role, String fullName) {
+        memoryToken=token;validatedRole=role;
+        String encrypted=null;
+        try { encrypted=TokenVault.encrypt(token); } catch(Exception ignored) { /* No plaintext persistence. */ }
         prefs.edit()
-                .putString(KEY_TOKEN, token)
+                .putString("encrypted_token", encrypted)
                 .putString(KEY_EMAIL, email)
                 .putString(KEY_ROLE, role)
                 .putString(KEY_NAME, fullName)
@@ -34,7 +40,11 @@ public class SessionManager {
     }
 
     public String getToken() {
-        return prefs.getString(KEY_TOKEN, null);
+        if(memoryToken!=null)return memoryToken;
+        String encrypted=prefs.getString("encrypted_token",null);
+        if(encrypted==null)return null;
+        try { memoryToken=TokenVault.decrypt(encrypted);return memoryToken; }
+        catch(Exception ignored) { clearSession();return null; }
     }
 
     public String getEmail() {
@@ -42,7 +52,7 @@ public class SessionManager {
     }
 
     public String getRole() {
-        return prefs.getString(KEY_ROLE, "USER");
+        return validatedRole;
     }
 
     public String getFullName() {
@@ -55,6 +65,7 @@ public class SessionManager {
     }
 
     public void clearSession() {
+        memoryToken=null;validatedRole="USER";
         prefs.edit().clear().apply();
     }
 }

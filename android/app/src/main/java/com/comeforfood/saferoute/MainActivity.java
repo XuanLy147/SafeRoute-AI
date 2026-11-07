@@ -63,7 +63,16 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onFragmentResumed(FragmentManager manager, Fragment fragment) { syncNavigation(); }
         }, false);
         if (saved == null) {
-            if (new SessionManager(this).isLoggedIn()) openSessionHome();
+            if (new SessionManager(this).isLoggedIn()) {
+                openMap();
+                SessionManager session=new SessionManager(this);
+                String token=session.getToken();
+                com.comeforfood.saferoute.core.network.ApiCalls.enqueue(this,((SafeRouteApp)getApplication()).api().service.me(),profile->{
+                    if(!token.equals(session.getToken()))return;
+                    session.saveSession(token,profile.getEmail(),profile.getRole(),profile.getFullName());
+                    if(!getSupportFragmentManager().isStateSaved())openSessionHome();
+                },error->{session.clearSession();if(!getSupportFragmentManager().isStateSaved())openRoot(new LoginFragment(),R.id.nav_profile);});
+            }
             else if (getPreferences(MODE_PRIVATE).getBoolean("intro.complete", false)) openRoot(new LoginFragment(), R.id.nav_profile);
             else openRoot(new WelcomeFragment(), R.id.nav_profile);
         }

@@ -27,7 +27,13 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures { viewBinding = true; buildConfig = true }
-    buildTypes { release { isMinifyEnabled = false } }
+    buildTypes {
+        debug { buildConfigField("String", "API_BASE_URL", "\"" + providers.gradleProperty("API_BASE_URL").orElse("http://10.0.2.2:8000/").get() + "\"") }
+        release {
+            isMinifyEnabled = false
+            buildConfigField("String", "API_BASE_URL", "\"" + providers.gradleProperty("API_BASE_URL").orElse("https://localhost/").get() + "\"")
+        }
+    }
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
@@ -50,6 +56,10 @@ android {
     }
 }
 dependencies {
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.appcompat:appcompat:1.7.0")

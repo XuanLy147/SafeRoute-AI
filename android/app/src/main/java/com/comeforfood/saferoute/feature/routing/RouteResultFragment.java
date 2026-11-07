@@ -93,7 +93,7 @@ public class RouteResultFragment extends Fragment {
             item.recommended.setVisibility(route.id.equals(comparison.recommendedId) ? View.VISIBLE : View.GONE);
             item.metrics.setText(getString(R.string.route_metrics, (int) Math.ceil(route.durationSeconds / 60.0), route.distanceMeters / 1000.0));
             item.risk.setText(route.riskScore == null ? getString(R.string.risk_missing) : getString(R.string.risk_value, route.riskScore));
-            item.hazards.setText(route.verifiedCount + route.pendingCount == 0 ? getString(R.string.no_hazards)
+            item.hazards.setText(route.riskScore == null ? getString(R.string.risk_missing) : route.verifiedCount + route.pendingCount == 0 ? getString(R.string.no_hazards)
                     : getString(R.string.hazard_counts, route.verifiedCount, route.pendingCount));
             item.reason.setText(route.reason.isEmpty() ? getString(R.string.no_reason) : route.reason);
             boolean active = route.id.equals(selected.id);
@@ -133,6 +133,7 @@ public class RouteResultFragment extends Fragment {
         }
     }
     @Override public void onDestroyView() {
+        if(model!=null&&!requireActivity().isChangingConfigurations())model.cancelRouteRequest();
         renderer.clear(); map = null; selected = null; comparison = null; mapAttached = false;
         binding = null; super.onDestroyView();
     }

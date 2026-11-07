@@ -40,7 +40,7 @@ n = 0
 >       result=RoutingService(google,scorer).compare_routes(LatLng(latitude=10,longitude=106),LatLng(latitude=10.01,longitude=106))
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-tests\test_tv4_crossbranch_contract.py:42: 
+tests\test_tv4_crossbranch_contract.py:42:
 _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 
 self = <app.modules.routing.service.RoutingService object at 0x000001E41C098A90>
@@ -55,7 +55,7 @@ travel_mode = <TravelMode.TWO_WHEELER: 'TWO_WHEELER'>
         travel_mode: TravelMode = TravelMode.TWO_WHEELER,
     ) -> RouteCompareResponse:
         """Fetch candidate routes and evaluate risks against recorded hazards.
-    
+
         Business rules strictly applied:
         - Exactly the number of routes returned by Google is passed through (0 -> 404, 1 -> 1, N -> N).
         - No invented routes or fake hazards.
@@ -70,7 +70,7 @@ travel_mode = <TravelMode.TWO_WHEELER: 'TWO_WHEELER'>
             destination=destination,
             travel_mode=travel_mode,
         )
-    
+
         if not candidates:
 >           raise NoRouteFoundError(
                 f"No route found between ({origin.latitude}, {origin.longitude}) "
@@ -144,7 +144,7 @@ db = <sqlalchemy.orm.session.Session object at 0x000001E41AABD350>
         # Uploaded PNG must not turn into an invented .jpg URL in the report DTO.
 >       assert created.json()["image_url"] == uploaded.json()["url"]
 E       AssertionError: assert '/uploads/ad8...25e831be2.jpg' == '/uploads/ad8...25e831be2.png'
-E         
+E
 E         - /uploads/ad8e4996ea09455480b616e25e831be2.png
 E         ?                                            -
 E         + /uploads/ad8e4996ea09455480b616e25e831be2.jpg
@@ -180,7 +180,7 @@ expected = 'INVALID'
         assert [r.id for r in result.routes]==["a","b"]
 >       assert result.risk_assessment_status == expected
 E       AssertionError: assert 'UNAVAILABLE' == 'INVALID'
-E         
+E
 E         - INVALID
 E         + UNAVAILABLE
 
@@ -206,7 +206,7 @@ expected = 'INVALID'
         assert [r.id for r in result.routes]==["a","b"]
 >       assert result.risk_assessment_status == expected
 E       AssertionError: assert 'AVAILABLE' == 'INVALID'
-E         
+E
 E         - INVALID
 E         + AVAILABLE
 
@@ -219,7 +219,7 @@ ____________ test_zero_weighted_score_does_not_claim_zero_hazards _____________
         result=compare({"a":score(0,2),"b":score(1,1)})
 >       assert "ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o" not in result.recommendation_reason.lower()
 E       assert 'ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o' not in "tuy\u1ebfn '' \u0111\u01b0...\u1ec3n: 1 ph\xfat)."
-E         
+E
 E         'ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o' is contained here:
 E           tuy\u1ebfn '' \u0111\u01b0\u1ee3c \u0111\u1ec1 xu\u1ea5t v\xec ch\u01b0a ghi nh\u1eadn nguy c\u01a1 n\xe0o tr\xean h\u1ec7 th\u1ed1ng (th\u1eddi gian di chuy\u1ec3n: 1 ph\xfat).
 E         ?                          +++++++++++++++++++++++++
@@ -256,7 +256,7 @@ created_report_id = 102
         3. Vote KH\xd4NG l\xe0m thay \u0111\u1ed5i status c\u1ee7a report sang VERIFIED.
         """
         report_id = created_report_id
-    
+
         # Vote l\u1ea7n 1 -> Th\xe0nh c\xf4ng 201 Created
         vote_res = client.post(
             f"/api/v1/reports/{report_id}/votes",
@@ -328,4 +328,3 @@ FAILED tests/test_votes_review.py::test_community_vote_and_duplicate_prevention
 FAILED tests/test_votes_review.py::test_vote_with_tv2_vote_type_contract - as...
 FAILED tests/test_votes_review.py::test_reviewer_verifies_report_with_audit_log
 12 failed, 127 passed, 1 warning, 12 subtests passed in 6.75s
-
