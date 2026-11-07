@@ -97,7 +97,3 @@ Luồng hiện tại thay thế mô tả tab/điểm vào cũ: Welcome → giớ
 Backend auth chưa kết nối nên có nút **Xem bản đồ với tư cách khách**. App không có nút tự chọn vai trò; reviewer/admin chỉ xuất hiện khi có phiên hợp lệ. Tests dùng fixture riêng, không lưu quyền thử nghiệm vào app sau khi chạy.
 
 Xem [đối chiếu đầy đủ với HTML](../docs/integration/html-frontend-flow.md), gồm cả các màn mở rộng chưa có API. Không đổi Google Routes sang OSRM của bản mẫu HTML.
-
-## Backend đã ghép vào frontend
-
-Source TV345 và OpenAPI hiện nằm cùng repository. Xem [handoff TV1](../docs/handoff/TV1_MAP_ROUTING_HANDOFF.md), [handoff TV2](../docs/handoff/TV2_REPORT_COMMUNITY_HANDOFF.md) và [bản ghép](../docs/integration/frontend-tv345-merge.md). App vẫn cần triển khai shared HTTP/image client theo contract; chưa có Android–backend E2E. Các mô tả thiếu OpenAPI ở mốc QA cũ là lịch sử.

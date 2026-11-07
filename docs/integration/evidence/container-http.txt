@@ -1,4 +1,0 @@
-PASS: non-root container startup, Alembic, readiness, real HTTP auth/image/AI/report/vote/review, process restart and volume persistence
-IMAGE: sha256:144ae9d93322e2432f90454af706550d9c7c1b77f49fc2eb270baad25a7e3f39
-RISK_POLICY: absent, RISK_READY=false. GOOGLE/CLOUD: NOT_RUN
-CLEANUP: only resources created by this run removed

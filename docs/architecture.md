@@ -6,8 +6,8 @@ Android Java + XML (TV1/TV2)
    v
 FastAPI (TV3)
    |-- Auth/Reports/Votes/Review --> PostgreSQL/PostGIS
-   |-- AI HTTP/runtime integration (TV3) -------> YOLOv12s v1.1
-   |-- Routing (TV5) --------> Google Routes API + Risk scorer/PostGIS (TV4)
+   |-- AI detect (TV4) -------> YOLOv12s v1.1
+   |-- Routing (TV5) --------> Google Routes API + Risk scorer/PostGIS
 ```
 
 ## Chức năng P0

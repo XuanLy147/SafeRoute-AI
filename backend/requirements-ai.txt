@@ -1,4 +1,0 @@
-# Checkpoint metadata: Ultralytics 8.4.21. CPU smoke verified separately.
-ultralytics==8.4.21
-torch==2.6.0
-torchvision==0.21.0

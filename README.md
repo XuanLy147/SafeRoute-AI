@@ -10,9 +10,9 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 |---|---|---|
 | TV1 | Android bản đồ, GPS, marker, tuyến đường, navigation | Java + XML, AndroidX, Google Maps SDK |
 | TV2 | Android báo cáo ảnh/AI, tài khoản, bình chọn, kiểm duyệt | Java + XML, Retrofit |
-| TV3 | API, Auth/Reports/Images/Votes/Review, AI HTTP | FastAPI |
-| TV4 | Database/PostGIS, Alembic, Risk, Docker, Cloud, CI/CD | PostgreSQL/PostGIS, Docker, Cloud Run |
-| TV5 | Google Routes, Routing Service, Geometry, Recommendation | Google Routes API |
+| TV3 | API, xác thực, database, reports/review | FastAPI, PostgreSQL/PostGIS |
+| TV4 | AI inference, kiểm thử và model card | YOLOv12s v1.1, Python |
+| TV5 | Google Routes, risk scoring, Cloud, CI/CD | Routes API, Docker, Cloud Run |
 
 ## Cấu trúc thư mục
 
@@ -24,7 +24,7 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 - `scripts/` — Lệnh dùng chung và smoke test.
 - `.github/workflows/` — CI/CD sau khi có mã chạy và credentials cấu hình an toàn.
 
-> **Trạng thái frontend sau ghép TV345:** Android Java/XML đã có giao diện, Maps và tìm địa điểm chạy trên máy thật; 53 JVM tests PASS. Source backend, migrations, OpenAPI và handoff TV345 đã được ghép cùng repository. Android HTTP/image adapter chưa nối nên hai luồng P0 chưa đạt E2E trên điện thoại. Xem [bản ghép frontend–TV345](docs/integration/frontend-tv345-merge.md).
+> **Trạng thái:** Repo vừa được khởi tạo cấu trúc. File đánh dấu thư mục và tài liệu không chứng minh chức năng đã triển khai. Code chạy thật được phát triển và kiểm thử sau.
 
 ## Nguyên tắc phối hợp
 
@@ -37,13 +37,3 @@ SafeRoute AI là ứng dụng Android giúp cộng đồng báo cáo hư hỏng 
 7. Chỉ ghi DONE/PASS nếu đã build/test có bằng chứng.
 
 Tham khảo code thử nghiệm tại repository riêng `SafeRoute-AI_Demo`; **không mặc định code demo đã có trong repo chính**.
-
-## TV345 integration handoff — 2026-11-07
-
-Nhánh `integration/tv345-backend-handoff` tích hợp source TV3/TV4/TV5, giữ Android
-read-only. Phân công hiện hành: TV3 API/Auth/Reports/AI HTTP; TV4 DB/PostGIS/Alembic/
-Risk/Docker/Cloud/CI; TV5 Google Routes/Routing/Geometry/Recommendation. Các mô tả
-scaffold ở trên là lịch sử khởi tạo, không phải trạng thái kiểm chứng mới.
-
-Xem [handoff](docs/handoff/RELEASE_READINESS.md), [local development](docs/handoff/LOCAL_DEVELOPMENT.md),
-[source audit](docs/integration/TV345_SOURCE_AUDIT.md) và [risk decision](docs/integration/TV345_RISK_DECISION.md).
