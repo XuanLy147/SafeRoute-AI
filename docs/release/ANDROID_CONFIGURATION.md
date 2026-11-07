@@ -52,3 +52,9 @@ Official setup: https://developers.google.com/maps/documentation/android-sdk/get
 Other developers/CI may use different debug signing certificates. No key values
 are recorded in tracked evidence. Re-run the live gate after owner fixes Cloud
 configuration; a successful build does not establish provider authorization.
+
+Routes retest: a supplied key is configured in ignored backend/.env, but Google
+returns API_KEY_ANDROID_APP_BLOCKED. Configure a separate server key restricted
+to Routes API and the authorized server egress IP; do not remove the Android
+restrictions from the Maps key as a workaround.
+Official guidance: https://developers.google.com/maps/api-security-best-practices

@@ -34,3 +34,18 @@ to make a job green. Draft PR: https://github.com/XuanLy147/SafeRoute-AI/pull/3.
 
 Final local rebuild also corrected Windows SDK drive-colon escaping in ignored
 local.properties after lint PropertyEscape identified it. No lint gate disabled.
+
+## Provider retest and local cleanup — 2026-11-07
+
+User supplied a Routes key, now stored only in ignored backend/.env. Direct
+Google Routes request returned HTTP 403 / API_KEY_ANDROID_APP_BLOCKED; the real
+backend adapter raised RouteServiceAuthError (HTTP 502 mapping). No live Routes
+success is claimed. This supersedes earlier missing-key status. See
+evidence/routes-provider-auth.txt. Use a separate server-authorized Routes key.
+
+At user choice, C:/dev retains SafeRoute-AI (original dirty repository) and
+SafeRoute-AI-full-release (most complete integration). Other SafeRoute backups
+and the backend runtime worktree were relocated under .local-archive, ignored
+locally; frontend duplicate worktrees were unregistered. A baseline directory
+remnant was archived after Windows long-path deletion failed. Other projects
+were untouched. Main is still not merged.

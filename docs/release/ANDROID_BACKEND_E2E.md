@@ -40,3 +40,18 @@ User confirms no Routes server key. No server .env/key was fabricated and the
 Android key was not reused. Real Google candidate/risk/UI verification remains
 BLOCKED. CI regression excludes opt-in provider/backend tests explicitly and
 must not be used as a substitute for these gates.
+
+## Provider retest and local cleanup — 2026-11-07
+
+User supplied a Routes key, now stored only in ignored backend/.env. Direct
+Google Routes request returned HTTP 403 / API_KEY_ANDROID_APP_BLOCKED; the real
+backend adapter raised RouteServiceAuthError (HTTP 502 mapping). No live Routes
+success is claimed. This supersedes earlier missing-key status. See
+evidence/routes-provider-auth.txt. Use a separate server-authorized Routes key.
+
+At user choice, C:/dev retains SafeRoute-AI (original dirty repository) and
+SafeRoute-AI-full-release (most complete integration). Other SafeRoute backups
+and the backend runtime worktree were relocated under .local-archive, ignored
+locally; frontend duplicate worktrees were unregistered. A baseline directory
+remnant was archived after Windows long-path deletion failed. Other projects
+were untouched. Main is still not merged.
