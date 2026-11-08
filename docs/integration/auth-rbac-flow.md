@@ -54,7 +54,7 @@ Lệnh yêu cầu gõ lại email xác nhận, ghi audit; không tự chạy lú
 - Migration: upgrade head → downgrade 0002 → upgrade head PASS trên DB test. Backend local đã được cập nhật và migration applied.
 - OpenAPI: verify_contract.py PASS.
 - Regression: JWT cũ mất quyền ngay sau thu hồi trong DB; USER/REVIEWER bị chặn admin endpoints; self-demotion/stale role bị chặn; candidate-token/late-response/logout/mất mạng/401 đều được kiểm thử.
-- Log local: android/build/reports/tv1/auth-rbac-build.log, auth-backend-tests.log, auth-backend-deploy.log. Không commit secrets hoặc ảnh tài khoản thật.
+- Log local: frontend/build/reports/tv1/auth-rbac-build.log, auth-backend-tests.log, auth-backend-deploy.log. Không commit secrets hoặc ảnh tài khoản thật.
 
 ## Giới hạn còn lại
 

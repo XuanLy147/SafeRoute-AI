@@ -10,7 +10,7 @@ Thực hiện trong repository `SafeRoute-AI`, nhánh `feature/tv1-map-routing-u
 - Report: hướng dẫn ba bước có icon, thanh tiến trình, ảnh chờ gọn hơn, lựa chọn loại/mức độ thành hàng đều nhau.
 - Account/reviewer/admin: danh sách điều hướng có mũi tên, nhóm nội dung rõ ràng, màu sáng/tối đồng bộ. Thanh điều hướng có nền chọn nhẹ.
 
-Logo nằm trong `android/app/src/main/res/drawable/ic_saferoute_logo.xml`, được dựng lại bằng vector từ ảnh nhỏ người dùng gửi. Đây không phải file logo gốc; không khẳng định trùng từng pixel. Manifest dùng cùng logo cho icon ứng dụng.
+Logo nằm trong `frontend/app/src/main/res/drawable/ic_saferoute_logo.xml`, được dựng lại bằng vector từ ảnh nhỏ người dùng gửi. Đây không phải file logo gốc; không khẳng định trùng từng pixel. Manifest dùng cùng logo cho icon ứng dụng.
 
 ## File dùng chung
 
@@ -26,7 +26,7 @@ Styles: `values/styles_polish.xml`; màu: `values/colors_polish.xml` và `values
 - Lượt cuối thấy Google Maps tải tiles thật trong khung mới. Đây không phải bằng chứng routing/report backend hoạt động.
 - APK cuối đã cài và app thường đã mở lại. Session fixture được khôi phục, draft thử nghiệm được xóa; orientation test trả về mặc định Activity.
 
-Log local trong `android/build/reports/tv1/`: `visual-refresh-unit.log`, `visual-refresh-final-build.log`, `visual-refresh-device.log`, `visual-refresh-confirm.log`. Ảnh cuối trong `visual-refresh-confirm/` gồm `flow-01` đến `flow-19`, `visual-register.png`, `visual-route-search.png`, `visual-login-dark.png`, `visual-register-landscape.png`. Thư mục kéo về có cả ảnh từ các bài kiểm thử trước, chỉ các tên này thuộc lượt hiện tại. Build artifacts và ảnh giữ local, không commit.
+Log local trong `frontend/build/reports/tv1/`: `visual-refresh-unit.log`, `visual-refresh-final-build.log`, `visual-refresh-device.log`, `visual-refresh-confirm.log`. Ảnh cuối trong `visual-refresh-confirm/` gồm `flow-01` đến `flow-19`, `visual-register.png`, `visual-route-search.png`, `visual-login-dark.png`, `visual-register-landscape.png`. Thư mục kéo về có cả ảnh từ các bài kiểm thử trước, chỉ các tên này thuộc lượt hiện tại. Build artifacts và ảnh giữ local, không commit.
 
 ## Giới hạn và bàn giao
 

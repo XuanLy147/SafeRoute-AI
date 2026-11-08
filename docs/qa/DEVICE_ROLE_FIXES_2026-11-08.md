@@ -44,7 +44,7 @@ Các danh sách hỗ trợ offset/limit; reports hỗ trợ status và q, duplic
 
 ## Bằng chứng local
 
-Trong android/build/reports/qa-roles/ (Git bỏ qua):
+Trong frontend/build/reports/qa-roles/ (Git bỏ qua):
 - fix-android.log, fix-backend.log, fix-contract.log, fix-deploy.log.
 - fix-multi-read-idle.json, fix-final-detail.json/png, fix-vote.json.
 - fix-history.json, fix-duplicates.json/png, fix-admin-all.json, fix-admin-filter.json/png.

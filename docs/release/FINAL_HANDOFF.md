@@ -31,9 +31,9 @@ no synthetic routes or numeric risk are substituted. Owners remain TV1–TV5.
 
 ## Delivery and remaining gates
 
-Normal local debug APK: android/app/build/outputs/apk/debug/app-debug.apk,
+Normal local debug APK: frontend/app/build/outputs/apk/debug/app-debug.apk,
 backend origin http://10.0.2.2:8000/. It is not a signed production release.
-User's Maps configuration is in ignored android/local.properties. Key values
+User's Maps configuration is in ignored frontend/local.properties. Key values
 are not tracked. See ANDROID_CONFIGURATION.md for the observed package/SHA-1
 and Google authorization diagnostic history. New separate restricted keys are
 configured; see GOOGLE_PROVIDER_SETUP.md.

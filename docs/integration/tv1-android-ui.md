@@ -6,7 +6,7 @@ Làm việc trong `SafeRoute-AI`, nhánh `feature/tv1-map-routing-ui`, xuất ph
 Người dùng xác nhận TV3/TV5 chưa có backend/OpenAPI và yêu cầu tiếp tục phần giao diện.
 Đã đối chiếu AGENTS, README, tracker, prompt chung, phân công trong tài liệu đính kèm. UI spec cũ chỉ dùng màu sắc/phong cách; Java/XML và routing P0 theo tài liệu mới hơn.
 
-Project nằm duy nhất ở `android/`. Không sửa backend, AI, hạ tầng, workflow hoặc phần tính năng TV2.
+Project nằm duy nhất ở `frontend/`. Không sửa backend, AI, hạ tầng, workflow hoặc phần tính năng TV2.
 Không chép skeleton Java/XML rỗng từ repo demo. Gradle Wrapper được tạo bằng Gradle 9.1.0 trên máy.
 
 ## API-LOCK còn thiếu
@@ -15,7 +15,7 @@ Không chép skeleton Java/XML rỗng từ repo demo. Gradle Wrapper được t�
 |---|---|
 | TV3 + TV2 | Reports DTO thật: tọa độ, loại, trạng thái, ID, mô tả, lỗi; phạm vi vùng/pagination |
 | TV5 + TV4 + TV3 | Routes DTO: request A/B/mode; polyline hay points và độ chính xác; distance/duration units; risk score/scale; recommended_id; reason/explanation |
-| TV2 | Một adapter từ shared Retrofit/repository vào `Tv1DataSource`; session, token và ánh xạ lỗi |
+| TV2 | Một adapter từ shared Retrofit/repository vào `MapRoutingDataSource`; session, token và ánh xạ lỗi |
 | TV1 + TV2 | Review package, MainActivity, Gradle và cách ghép tab Báo cáo/Cá nhân trước merge |
 | TV1 | Android Maps key giới hạn package/SHA-1; test trên thiết bị |
 
@@ -27,7 +27,7 @@ Không xuất OpenAPI giả; không tự nhận JSON đã khóa. Không có HTTP
 - `Hazard`: presentation model, loại và trạng thái độc lập. `REPAIR` tương ứng nhãn Repair; không là RESOLVED.
 - `Route`: durationSeconds, distanceMeters, riskScore nullable, verifiedCount, pendingCount, points và reason. Không tính risk trong Android.
 - `RouteComparison`: chỉ chứa tuyến nguồn thực trả; recommendedId nullable, scoreDescription mô tả thang điểm. Không tự chọn tuyến có điểm thấp nhất làm khuyến nghị.
-- `Tv1DataSource.loadReports(callback)` và `compare(origin, destination, callback)` trả `Request.cancel()`.
+- `MapRoutingDataSource.loadReports(callback)` và `compare(origin, destination, callback)` trả `Request.cancel()`.
 - Callback chạy trên thread bất kỳ; ViewModel chuyển về main thread, hủy request cũ, bỏ callback lỗi thời và timeout 30 giây.
 - Nguồn mặc định trả NOT_CONNECTED. Danh sách rỗng thành công mang ý nghĩa khác với mất kết nối.
 - Callback success(null), ID tuyến trùng, khuyến nghị không thuộc danh sách, tọa độ/geometry/risk không hợp lệ đều bị từ chối.
@@ -41,9 +41,9 @@ Không xuất OpenAPI giả; không tự nhận JSON đã khóa. Không có HTTP
 
 Build APK và APK instrumentation PASS; 33/33 tests JVM PASS; lintDebug PASS (0 lỗi, 15 cảnh báo). Xem [kiểm chứng local](../qa/tv1-validation.md) để biết lệnh, môi trường và giới hạn.
 Báo cáo máy sinh ở:
-- `android/app/build/reports/tests/testDebugUnitTest/index.html`
-- `android/app/build/reports/lint-results-debug.html`
-- `android/app/build/outputs/apk/debug/app-debug.apk`
+- `frontend/app/build/reports/tests/testDebugUnitTest/index.html`
+- `frontend/app/build/reports/lint-results-debug.html`
+- `frontend/app/build/outputs/apk/debug/app-debug.apk`
 
 Chưa có commit/PR. Trạng thái cài/test USB và ảnh chụp được ghi trong báo cáo kiểm chứng; chưa xác minh Maps nền, GPS thật, tile/key errors hoặc API/cloud/E2E.
 Code review riêng đã xác nhận sửa hai lỗi: nội dung map cuộn được khi thiếu chiều cao, và GPS giữ lại điểm A khi chưa có Maps.
@@ -74,7 +74,7 @@ Phân công áp dụng: TV1 app shell/map/routing UI; TV2 shared Retrofit/DTO v�
 
 ### Ghép màn hình TV2
 
-Trong khởi động Application, TV2 gọi `setTv2Screens(...)` với implementation `Tv2Screens.report()` và `profile()` trả Fragment mới. Mặc định trả null, shell hiển thị chưa kết nối. Fragment TV2 phải phục hồi được bằng FragmentManager (constructor rỗng hoặc FragmentFactory đã đăng ký). Tab được giữ đúng khi recreate/back; không thêm Activity/project thứ hai.
+Trong khởi động Application, TV2 gọi `setFeatureScreens(...)` với implementation `FeatureScreens.report()` và `profile()` trả Fragment mới. Mặc định trả null, shell hiển thị chưa kết nối. Fragment TV2 phải phục hồi được bằng FragmentManager (constructor rỗng hoặc FragmentFactory đã đăng ký). Tab được giữ đúng khi recreate/back; không thêm Activity/project thứ hai.
 
 Sau khi server xác nhận tạo/sửa/verify/reject báo cáo thành công, TV2 gửi sự kiện trên **activity FragmentManager**:
 
@@ -88,8 +88,8 @@ requireActivity().getSupportFragmentManager()
 ### Kiểm thử bổ sung
 
 - JVM: ghép Fragment TV2 và phục hồi tab; coarse-only; từ chối vị trí và fallback nhập tay; kết quả permission sau recreate; landscape/dark/font 2.0; pending/rejected sau refresh; thay đổi báo cáo vô hiệu hóa risk và callback cũ.
-- Device suite `Tv1DeviceTest`: 6 ca, fixture ghi rõ MOCK_FOR_DEV. Lệnh sau khi cài app và APK test:
-  `adb shell am instrument -w -r -e class com.comeforfood.saferoute.Tv1DeviceTest com.comeforfood.saferoute.test/androidx.test.runner.AndroidJUnitRunner`.
+- Device suite `MapRoutingDeviceTest`: 6 ca, fixture ghi rõ MOCK_FOR_DEV. Lệnh sau khi cài app và APK test:
+  `adb shell am instrument -w -r -e class com.comeforfood.saferoute.MapRoutingDeviceTest com.comeforfood.saferoute.test/androidx.test.runner.AndroidJUnitRunner`.
 - Ảnh app do suite tạo tại external files `tv1-device-tests/`; không chụp sau khi Activity đã đóng. Kết quả thực tế ở báo cáo kiểm chứng.
 
 ### Trạng thái đề xuất để TV3/Lead cập nhật tracker

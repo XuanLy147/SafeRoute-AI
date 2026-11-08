@@ -164,7 +164,7 @@ in source. These improvements do not make all fallback paths safe.
 - init_db still calls create_all; Compose invokes init_db rather than Alembic.
   Fixed development credentials/source mount/reload remain in Compose.
 - AI default weights path resolves under backend/ai/weights, while supplied
-  checkpoint is repository-root ai/weights. Backend Docker build context lacks
+  checkpoint is repository-root model ai/weights. Backend Docker build context lacks
   checkpoint; requirements lack Ultralytics/PyTorch. Explicit host path only fixed
   checksum testing. Do not infer runtime container has a ready model.
 - Dockerfile build/runtime NOT_RUN in this task; static context/runtime blockers

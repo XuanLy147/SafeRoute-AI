@@ -17,7 +17,7 @@
 
 ## Giới hạn bảo vệ
 
-- Chỉ một file production thay đổi: android/app/src/main/java/com/comeforfood/saferoute/feature/report/ReportWizardFragment.java.
+- Chỉ một file production thay đổi: frontend/app/src/main/java/com/comeforfood/saferoute/feature/report/ReportWizardFragment.java.
 - Đồng bộ form chỉ khi giá trị hiển thị khác draft, tránh làm mất xác nhận khi chỉ vẽ lại cùng dữ liệu.
 - Giữ cơ chế uncertain: lần gửi chưa rõ kết quả không tự được phép gửi lại. Không thay đổi quy tắc retry, phân quyền, API, database hoặc dependency.
 - Không gọi API ghi từ các regression JVM. E2E dùng tài khoản, ảnh và database thử nghiệm riêng; không đổi tài khoản thật.
@@ -25,7 +25,7 @@
 
 ## Bằng chứng
 
-Bốn regression trong Tv2IntegrationTest:
+Bốn regression trong AccountReportIntegrationTest:
 - discardingDraftResetsVisibleInputsAndDefaultSeverity
 - selectingSamePhotoAfterDiscardLoadsPreviewAgain
 - failedReanalysisClearsOldAiEditorsModelAndConsent
@@ -33,14 +33,14 @@ Bốn regression trong Tv2IntegrationTest:
 
 Cả bốn đều FAIL trước sửa và PASS sau sửa. Các bài cũ về khôi phục draft/xác nhận, auth, quyền, network, routing và lifecycle vẫn đạt: tổng cộng 84 tests, 0 failures, 0 errors.
 
-Log trong android/build/reports/qa-roles/ (Git bỏ qua):
+Log trong frontend/build/reports/qa-roles/ (Git bỏ qua):
 - audit3-before.log: ba lỗi đầu.
 - audit3-image-before.log: ảnh thay thế không đọc được.
 - audit3-android.log: toàn bộ JVM/build/lint.
 - audit3-summary.json: kết quả từng regression và SHA-256 source đã kiểm thử.
 - audit3-device.log: E2E trên điện thoại, Google Maps/Routes và persistence sau restart.
 
-Lệnh Android: android/gradlew.bat -p android :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug, với SDK/JDK và thư viện Robolectric local như runbook.
+Lệnh Android: frontend/gradlew.bat -p frontend :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug, với SDK/JDK và thư viện Robolectric local như runbook.
 
 E2E dùng lại audit2_device_runner.py đã xác minh ở đợt trước. Kịch bản qua đăng ký USER → ảnh tổng hợp/AI/manual → upload/report/vote → đăng nhập REVIEWER/duyệt/map → tuyến Google thật → đăng nhập ADMIN/các màn đọc/tạo lại Activity/logout. Sau restart, report verified và audit/vote còn đúng. OK (1 test) là một kịch bản tổng hợp, không phải một thao tác đơn lẻ.
 

@@ -18,13 +18,13 @@
       "errors": 0,
       "skipped": 0
     },
-    "TEST-com.comeforfood.saferoute.Tv1UiTest": {
+    "TEST-com.comeforfood.saferoute.MapRoutingUiTest": {
       "tests": 22,
       "failures": 0,
       "errors": 0,
       "skipped": 0
     },
-    "TEST-com.comeforfood.saferoute.Tv2IntegrationTest": {
+    "TEST-com.comeforfood.saferoute.AccountReportIntegrationTest": {
       "tests": 7,
       "failures": 0,
       "errors": 0,
@@ -56,13 +56,13 @@
       "errors": 0,
       "skipped": 0
     },
-    "TEST-com.comeforfood.saferoute.Tv1UiTest": {
+    "TEST-com.comeforfood.saferoute.MapRoutingUiTest": {
       "tests": 22,
       "failures": 0,
       "errors": 0,
       "skipped": 0
     },
-    "TEST-com.comeforfood.saferoute.Tv2IntegrationTest": {
+    "TEST-com.comeforfood.saferoute.AccountReportIntegrationTest": {
       "tests": 8,
       "failures": 0,
       "errors": 0,

@@ -22,7 +22,7 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - uses: gradle/actions/setup-gradle@v4
       - name: JVM, Robolectric, APK, instrumentation APK and lint
-        working-directory: android
+        working-directory: frontend
         run: ./gradlew :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --console=plain
       - name: Enable KVM
         run: |
@@ -35,13 +35,13 @@ jobs:
           api-level: 35
           arch: x86_64
           target: google_apis
-          working-directory: android
-          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.comeforfood.saferoute.Tv1DeviceTest,com.comeforfood.saferoute.Tv2DeviceTest,com.comeforfood.saferoute.HtmlFlowDeviceTest --console=plain
+          working-directory: frontend
+          script: ./gradlew :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.comeforfood.saferoute.MapRoutingDeviceTest,com.comeforfood.saferoute.AccountReportDeviceTest,com.comeforfood.saferoute.HtmlFlowDeviceTest --console=plain
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: android-verification
           path: |
-            android/app/build/outputs/apk/
-            android/app/build/reports/
-            android/app/build/outputs/androidTest-results/
+            frontend/app/build/outputs/apk/
+            frontend/app/build/reports/
+            frontend/app/build/outputs/androidTest-results/

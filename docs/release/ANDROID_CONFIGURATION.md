@@ -1,12 +1,12 @@
 # Android configuration and verification
 
 Clone https://github.com/XuanLy147/SafeRoute-AI and checkout
-`integration/saferoute-full-release`. Android Studio uses `android/`.
+`integration/saferoute-full-release`. Android Studio uses `frontend/`.
 Keep existing AGP 9.0.1 / Gradle 9.1.0. Java source/target remains 17; the Gradle
 runtime needs a compatible modern JDK (CI uses 21; local Studio JBR is 25).
 Install SDK 35, build tools and platform-tools. Do not commit local.properties.
 
-Put `sdk.dir` and `MAPS_API_KEY` in android/local.properties or use MAPS_API_KEY
+Put `sdk.dir` and `MAPS_API_KEY` in frontend/local.properties or use MAPS_API_KEY
 environment variable. Restrict the Android Maps key by package/signing certificate
 and Maps SDK. Configure the separate server Routes key in backend/.env; never
 embed it in the APK. Owner must enable authorized APIs/billing.
@@ -17,15 +17,15 @@ backend. Base origin must have no /api/v1 suffix. Debug-only manifest permits lo
 HTTP. Release rejects non-HTTPS and requires a verified deployment origin via
 `-PAPI_BASE_URL=https://YOUR_VERIFIED_HOST/`; localhost default is not a deployment.
 
-From android/:
+From frontend/:
 
 ```powershell
 .\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug --console=plain
-.\gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.comeforfood.saferoute.Tv1DeviceTest,com.comeforfood.saferoute.Tv2DeviceTest,com.comeforfood.saferoute.HtmlFlowDeviceTest --console=plain
+.\gradlew.bat :app:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.comeforfood.saferoute.MapRoutingDeviceTest,com.comeforfood.saferoute.AccountReportDeviceTest,com.comeforfood.saferoute.HtmlFlowDeviceTest --console=plain
 ```
 
-APK: android/app/build/outputs/apk/debug/app-debug.apk. XML reports live under
-android/app/build/test-results and outputs/androidTest-results. Device regression
+APK: frontend/app/build/outputs/apk/debug/app-debug.apk. XML reports live under
+frontend/app/build/test-results and outputs/androidTest-results. Device regression
 uses explicit fixtures and is never evidence of Google live traffic.
 
 For actual Android/backend E2E, boot a Google APIs emulator, set ANDROID_HOME and
@@ -40,7 +40,7 @@ No cloud resources are created. Normal registered accounts always start USER.
 ## Local provider diagnostic — 2026-11-07
 
 The supplied Downloads/local.properties was applied to this release worktree's
-android/local.properties, with SDK path corrected to the installed Android SDK.
+frontend/local.properties, with SDK path corrected to the installed Android SDK.
 The file is Git-ignored. It contains only the Maps key, not a Routes server key.
 Google rejected authorization on the actual debug device. Check Maps SDK for
 Android enablement and the Android key restriction against:

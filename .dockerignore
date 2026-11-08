@@ -6,6 +6,6 @@
 **/.env
 **/.env.*
 **/uploads
-android
+frontend
 docs
 *.log

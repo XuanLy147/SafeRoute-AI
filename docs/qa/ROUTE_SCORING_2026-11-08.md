@@ -53,7 +53,7 @@ Bỏ “Chưa tính điểm rủi ro tổng hợp.”. Có điểm thì hiện �
 - Contract: runtime OpenAPI và JSON examples PASS; log scoring-contract.log.
 - Kiểm thử bổ sung sau điều chỉnh production: 48 bài PASS, gồm cập nhật trạng thái báo cáo và giữ cổng production; scoring-final-targeted.log.
 - Máy thật Xiaomi Android 13: E2E cuối PASS, Maps/Routes thật PASS, lưu dữ liệu sau khởi động lại PASS; scoring-device-final.log. Đã cài APK và cập nhật backend development local. /ready và compare tuyến mẫu đều HTTP 200; compare trả chính sách mới EXPERIMENTAL/AVAILABLE.
-- Tất cả log nằm trong android/build/reports/qa-roles/ (Git bỏ qua). Backend dùng database kiểm thử tạm, không sửa quyền/báo cáo thật.
+- Tất cả log nằm trong frontend/build/reports/qa-roles/ (Git bỏ qua). Backend dùng database kiểm thử tạm, không sửa quyền/báo cáo thật.
 
 ## Phê duyệt tự động
 

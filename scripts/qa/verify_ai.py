@@ -10,7 +10,7 @@ from PIL import Image
 import torch
 import ultralytics
 from app.modules.ai.service import ai_service, EXPECTED_SHA256
-assert hashlib.sha256((root / "ai/weights/best.pt").read_bytes()).hexdigest() == EXPECTED_SHA256
+assert hashlib.sha256((root / "model ai/weights/best.pt").read_bytes()).hexdigest() == EXPECTED_SHA256
 assert ai_service.is_model_ready(), "Real checkpoint/runtime unavailable"
 assert ai_service.model.names == {0:"D00",1:"D10",2:"D20",3:"D40",4:"Repair"}
 image = io.BytesIO()

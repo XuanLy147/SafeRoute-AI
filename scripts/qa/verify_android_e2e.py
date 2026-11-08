@@ -29,7 +29,7 @@ def main():
     if key:
         env["GOOGLE_ROUTES_API_KEY"] = key
     maps_key = ""
-    properties = root / "android/local.properties"
+    properties = root / "frontend/local.properties"
     if properties.exists():
         for line in properties.read_text(encoding="utf-8-sig").splitlines():
             if line.startswith("MAPS_API_KEY="):
@@ -78,10 +78,10 @@ def main():
             assert client.get("/ready").status_code == 200
             assert client.post("/api/v1/auth/register", json={"email": "android-review@example.com", "password": "local-device-test-password"}).status_code == 200
             run(["docker", "exec", db, "psql", "-U", "postgres", "-d", "saferoute_android_test", "-c", "UPDATE users SET role='REVIEWER' WHERE email='android-review@example.com'"])
-            gradle = str(root / "android" / ("gradlew.bat" if os.name == "nt" else "gradlew"))
-            run([gradle, "-p", str(root / "android"), "-PAPI_BASE_URL=http://10.0.2.2:" + port + "/", ":app:assembleDebug", ":app:assembleDebugAndroidTest", "--console=plain", "--no-daemon", "--max-workers=2", "-Dorg.gradle.jvmargs=-Xmx1024m"])
-            run([adb, "install", "-r", str(root / "android/app/build/outputs/apk/debug/app-debug.apk")])
-            run([adb, "install", "-r", str(root / "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")])
+            gradle = str(root / "frontend" / ("gradlew.bat" if os.name == "nt" else "gradlew"))
+            run([gradle, "-p", str(root / "frontend"), "-PAPI_BASE_URL=http://10.0.2.2:" + port + "/", ":app:assembleDebug", ":app:assembleDebugAndroidTest", "--console=plain", "--no-daemon", "--max-workers=2", "-Dorg.gradle.jvmargs=-Xmx1024m"])
+            run([adb, "install", "-r", str(root / "frontend/app/build/outputs/apk/debug/app-debug.apk")])
+            run([adb, "install", "-r", str(root / "frontend/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk")])
             output = run([adb, "shell", "am", "instrument", "-w", "-r", "-e", "class", "com.comeforfood.saferoute.LiveBackendDeviceTest", "-e", "backendE2E", "true", "-e", "liveRoutes", "true" if key else "false", "-e", "liveMaps", "true" if maps_key else "false", "com.comeforfood.saferoute.test/androidx.test.runner.AndroidJUnitRunner"])
             print(output, flush=True)
             assert "OK (1 test)" in output and "FAILURES" not in output, "Android UI gate failed"

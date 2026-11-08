@@ -46,7 +46,7 @@ Cause: java.io.EOFException: newline not found, limit=0.
 **Phân tích:** phù hợp với tái sử dụng kết nối keep-alive đã bị đóng trên đường adb reverse/backend; client đang tắt retryOnConnectionFailure cho mọi request. Chưa chứng minh lỗi tương tự trên mạng production HTTPS.
 **Hướng sửa:** phục hồi giới hạn cho request đọc an toàn hoặc điều chỉnh quản lý pool; không bật retry POST/PATCH mù quáng.
 **Owner:** TV2/TV5.
-**Code:** android/.../core/network/ApiClient.java:25, ApiCalls.java.
+**Code:** frontend/.../core/network/ApiClient.java:25, ApiCalls.java.
 **Evidence:** network-probe.json, admin-users-first.json, reviewer-initial.json, user-other-report.json.
 
 ### F02 — P1 — Xem ảnh không được phép làm người dùng bị đưa khỏi chi tiết báo cáo
@@ -204,8 +204,8 @@ Không coi đây là kiểm thử nút UI. Chi tiết HTTP codes lưu trong http
 
 ## Bằng chứng, thay đổi và dọn dữ liệu
 
-- Evidence local (Git ignored): android/build/reports/qa-roles/. JSON UI che trường mật khẩu; không đưa token/key vào tài liệu này.
-- Test harness mới: android/app/src/androidTest/java/com/comeforfood/saferoute/DeviceAuditBridgeTest.java.
+- Evidence local (Git ignored): frontend/build/reports/qa-roles/. JSON UI che trường mật khẩu; không đưa token/key vào tài liệu này.
+- Test harness mới: frontend/app/src/androidTest/java/com/comeforfood/saferoute/DeviceAuditBridgeTest.java.
   Chỉ bật bằng deviceAudit=true và secret mỗi phiên trong app-private config; bind loopback, giới hạn 45 phút.
   Có session/input tổng hợp chỉ dành cho QA; không được tính là đăng nhập UI hoặc camera UI.
 - assembleDebugAndroidTest PASS. Lượt bridge cuối kết thúc OK (1 test).

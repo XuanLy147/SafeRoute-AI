@@ -6,7 +6,7 @@ Bản main đã có FastAPI endpoints và Android HTTP client. Key riêng không
 
 | Dịch vụ | Biến | File | Trạng thái máy này |
 |---|---|---|---|
-| Maps SDK for Android | MAPS_API_KEY | android/local.properties | Đã có, giữ nguyên |
+| Maps SDK for Android | MAPS_API_KEY | frontend/local.properties | Đã có, giữ nguyên |
 | Routes API | GOOGLE_ROUTES_API_KEY | backend/.env | Để trống cho người dùng điền |
 
 Tạo hai key riêng trong Google Cloud Console → APIs & Services → Credentials. Bật Maps SDK for Android và Routes API trong project có billing hoạt động.
@@ -17,12 +17,12 @@ Hướng dẫn chính thức: [Maps SDK](https://developers.google.com/maps/docu
 ## Điền và chạy local
 
 1. Trong backend/.env, điền GOOGLE_ROUTES_API_KEY= rồi dán key sau dấu bằng. SECRET_KEY và POSTGRES_PASSWORD đã sinh ngẫu nhiên cho môi trường local mới; không cần lấy từ Google. DATABASE_URL dùng cùng mật khẩu cho PostGIS local. Nếu dùng database có sẵn, chỉnh mật khẩu/URL cho khớp; không xóa volume cũ.
-2. Trong android/local.properties, giữ nguyên sdk.dir và MAPS_API_KEY. API_BASE_URL đã đặt http://127.0.0.1:8000/ cho điện thoại qua USB. Đây là địa chỉ server, không phải API key. Chỉ dùng origin, không thêm /api/v1.
+2. Trong frontend/local.properties, giữ nguyên sdk.dir và MAPS_API_KEY. API_BASE_URL đã đặt http://127.0.0.1:8000/ cho điện thoại qua USB. Đây là địa chỉ server, không phải API key. Chỉ dùng origin, không thêm /api/v1.
 3. Tại thư mục gốc SafeRoute-AI, sau khi mở Docker Desktop:
    ```powershell
    docker compose --env-file backend/.env -p saferoute-local -f backend/docker-compose.yml up --build -d
    & D:\Android\Sdk\platform-tools\adb.exe reverse tcp:8000 tcp:8000
-   .\android\gradlew.bat -p android :app:assembleDebug
+   .\android\gradlew.bat -p frontend :app:assembleDebug
    ```
    Đây là lệnh hướng dẫn, chưa chạy khởi tạo database/server trong lượt tạo file.
 4. Cài APK vừa build lên điện thoại. Mỗi lần kết nối lại USB có thể cần chạy lại adb reverse. Backend chạy ở http://127.0.0.1:8000; xem /health, /ready và /docs.
@@ -30,7 +30,7 @@ Hướng dẫn chính thức: [Maps SDK](https://developers.google.com/maps/docu
 
 Nếu chạy Python trực tiếp: vào backend, dùng môi trường Python 3.11 đã cài requirements/runtime, chạy migrations rồi `python -m uvicorn app.main:app --env-file .env --host 127.0.0.1 --port 8000`. Cần --env-file vì Routes adapter đọc environment variable; Pydantic Settings riêng không tự đưa Routes key vào os.environ.
 
-Debug build đọc URL theo thứ tự: -PAPI_BASE_URL → biến môi trường API_BASE_URL → android/local.properties → mặc định emulator. Release vẫn yêu cầu -PAPI_BASE_URL=https://server-thật/; không tự lấy địa chỉ USB local.
+Debug build đọc URL theo thứ tự: -PAPI_BASE_URL → biến môi trường API_BASE_URL → frontend/local.properties → mặc định emulator. Release vẫn yêu cầu -PAPI_BASE_URL=https://server-thật/; không tự lấy địa chỉ USB local.
 
 ## Những thứ không cần mua thêm API key
 

@@ -14,7 +14,7 @@ Two new keys were created after explicit action-time user confirmation:
   local public IPv4. Exact IP is kept in local configuration/Cloud Console, not
   required for teammates. This is not a production Cloud Run key.
 
-Key values are only in ignored android/local.properties, backend/.env and the
+Key values are only in ignored frontend/local.properties, backend/.env and the
 ignored local key transfer file. No secret is stored in tracked evidence.
 
 ## Observed validation

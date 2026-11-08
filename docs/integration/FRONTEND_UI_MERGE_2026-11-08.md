@@ -11,7 +11,7 @@
 
 Incoming map overlays, navigation, route controls, onboarding images, icons, colors, themes and report layouts are retained. Compared with incoming resources, only login/register layouts, the local session-gate layout and `strings_flow.xml` differ to retain existing authentication behavior/messages; incoming login/register typography changes are included. The new map was visually checked using the physical-device screenshot.
 
-Three merge conflicts were resolved: NetworkDataSource keeps the localized overall risk availability/recommendation/disclaimer while accepting incoming per-route summaries and generic crack mapping; ReportWizardFragment keeps prior draft-reset guards with the incoming summary/location flow; Tv2IntegrationTest retains the authenticated fixture and follows the incoming navigation.
+Three merge conflicts were resolved: NetworkDataSource keeps the localized overall risk availability/recommendation/disclaimer while accepting incoming per-route summaries and generic crack mapping; ReportWizardFragment keeps prior draft-reset guards with the incoming summary/location flow; AccountReportIntegrationTest retains the authenticated fixture and follows the incoming navigation.
 
 Login/session/token handling and backend authentication, authorization, review-lock and role-audit fixes are preserved. MainActivity still gates report creation behind login, then opens the incoming direct report flow. No account passwords or real user roles were changed.
 
@@ -41,7 +41,7 @@ The first Android run identified a navigation-test fixture that attempted the ne
 
 Physical E2E used disposable backend/database/accounts: USER registration, synthetic photo with real AI/manual/upload/create/vote, REVIEWER password login and verification/map, ADMIN password login/read screens/activity recreation/logout, then backend restart persistence. Disposable resources were removed and the normal USB mapping restored. The merged APK is installed on the phone.
 
-Local ignored evidence: `android/build/reports/qa-roles/frontend-merge-{android,backend,contract,device,image}.log` and `frontend-merge-live-map.png`.
+Local ignored evidence: `frontend/build/reports/qa-roles/frontend-merge-{android,backend,contract,device,image}.log` and `frontend-merge-live-map.png`.
 
 ## Limits
 

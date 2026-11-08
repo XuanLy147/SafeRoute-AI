@@ -15,7 +15,7 @@ SafeRoute AI — Hackathon SGU 2026–2027, nhóm COME FOR FOOD (5 thành viên)
 6. Trước khi bàn giao, build/test thật nếu môi trường cho phép, ghi bằng chứng vào báo cáo. Cập nhật tracker nếu đã xác minh trạng thái.
 
 ## 3. Stack đã khóa
-- Android: **Java 17 + Android XML Views**, một project trong `android/`. Không dùng Kotlin, Compose, Flutter, React Native, WebView thay UI native.
+- Android: **Java 17 + Android XML Views**, một project trong `frontend/`. Không dùng Kotlin, Compose, Flutter, React Native, WebView thay UI native.
 - Maps: Google Maps SDK for Android; routing backend dùng Google Routes API.
 - Backend: Python FastAPI; database PostgreSQL + PostGIS.
 - AI: YOLOv12s SafeRoute AI v1.1, các class `D00`, `D10`, `D20`, `D40`, `Repair`.
@@ -25,10 +25,10 @@ SafeRoute AI — Hackathon SGU 2026–2027, nhóm COME FOR FOOD (5 thành viên)
 ## 4. Module owners
 | Owner | Trách nhiệm | Vùng code chính |
 |---|---|---|
-| TV1 | App shell, MainActivity/navigation, Map/GPS/markers, routing UI | `android/` → `feature/map/`, `feature/routing/` |
-| TV2 | Auth, báo cáo ảnh/AI preview/manual correction, report detail, vote, review UI, shared Retrofit/DTO | `android/` → `feature/{auth,report,reports,review,profile}/`, `core/network/`, `core/model/` |
+| TV1 | App shell, MainActivity/navigation, Map/GPS/markers, routing UI | `frontend/` → `feature/map/`, `feature/routing/` |
+| TV2 | Auth, báo cáo ảnh/AI preview/manual correction, report detail, vote, review UI, shared Retrofit/DTO | `frontend/` → `feature/{auth,report,reports,review,profile}/`, `core/network/`, `core/model/` |
 | TV3 | FastAPI, PostgreSQL/PostGIS, RBAC, reports, migrations, OpenAPI | `backend/` (API + DB) |
-| TV4 | Inference YOLO, class mapping, model manifest, evaluation, AI service | `ai/`, `backend/app/modules/ai/` |
+| TV4 | Inference YOLO, class mapping, model manifest, evaluation, AI service | `model ai/`, `backend/app/modules/ai/` |
 | TV5 | Google Routes adapter, risk scoring, Cloud Run, Docker/CI/CD, integration | `backend/app/modules/routing/`, `infra/`, `.github/workflows/` |
 
 **Shared contract:** TV3 giữ chuẩn OpenAPI và DB migrations; TV1 giữ Android app shell/navigation; TV2 giữ Android network/DTO; TV4/TV5 thống nhất AI/route schemas với TV3 và Android. Không tạo bản trùng của MainActivity, Retrofit client, API DTO hay database schema.

@@ -68,7 +68,7 @@ model outputs explicitly instead of expecting filename-based heuristic detection
 No regression is hidden by xfail or removed to obtain green results.
 
 Android DTOs inspected read-only: AuthDto, DetectionDto, ReportDto, Route,
-RouteComparison and Tv1DataSource. TV1 boundary is a UI interface, not an existing
+RouteComparison and MapRoutingDataSource. TV1 boundary is a UI interface, not an existing
 HTTP contract. No shared Retrofit implementation was found in inspected branch
 paths; integration mapping remains TV1/TV2 work, documented in handoff.
 

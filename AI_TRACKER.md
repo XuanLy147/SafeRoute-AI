@@ -182,7 +182,7 @@ Kết quả sửa các phát hiện ở mục 10: triển khai trên `local/main
 - `DONE_VERIFIED`: chỉ đổi hiển thị Android TV1/TV2. `HazardLabel` ánh xạ D00/D10/D20/D40/Repair cho tiêu đề bản đồ, danh sách/chi tiết báo cáo, kiểm duyệt và nhãn/trình sửa AI; nhãn mẫu XML cũng bỏ mã kỹ thuật.
 - Giữ trường API, mã lựa chọn, xác thực và backend.
 - 88 bài JVM đạt, 0 thất bại/lỗi; APK/lint đạt, `adb install -r` thành công.
-- Bằng chứng local được Git bỏ qua: `android/build/reports/qa-roles/hazard-labels.log` và `android/build/reports/qa-roles/hazard-labels-final.log`.
+- Bằng chứng local được Git bỏ qua: `frontend/build/reports/qa-roles/hazard-labels.log` và `frontend/build/reports/qa-roles/hazard-labels-final.log`.
 - Không chạy E2E nghiệp vụ máy thật mới cho riêng thay đổi câu chữ này; chưa commit/push.
 
 ## 16. Khung cảnh báo thu gọn trên bản đồ — 08/11/2026
@@ -191,14 +191,14 @@ Kết quả sửa các phát hiện ở mục 10: triển khai trên `local/main
 - Số cảnh báo/nút làm mới vẫn hiện; bộ lọc/danh sách ẩn cùng nhau. Giữ trạng thái qua tạo lại Activity và làm mới; danh sách cao tối đa 30% màn hình, cuộn riêng.
 - 90 bài JVM đạt, gồm 2 bài mới về tương tác/khôi phục; APK và lint đạt. Cài app thành công.
 - Ảnh `panel-check.png` xác nhận trạng thái thu gọn và bản đồ thoáng hơn. Xiaomi chặn vuốt tự động bằng `INJECT_EVENTS`; thao tác vuốt mở trên máy thật còn `NOT_VERIFIED`, kiểm thử vuốt JVM đạt.
-- Không đổi xác thực/API, chưa commit/push. Bằng chứng local được Git bỏ qua: `android/build/reports/qa-roles/hazard-panel.log` và `panel-check.png` cùng thư mục.
+- Không đổi xác thực/API, chưa commit/push. Bằng chứng local được Git bỏ qua: `frontend/build/reports/qa-roles/hazard-panel.log` và `panel-check.png` cùng thư mục.
 
 ## 17. Tinh gọn bố cục bản đồ — 08/11/2026
 
 - `DONE_VERIFIED`: bỏ ba nút lọc loại trùng lặp; màn bộ lọc hiện có vẫn giữ lựa chọn, kể cả khi bật chỉ xem cảnh báo đã xác minh.
 - Ẩn dòng chú thích khi bản đồ sẵn sàng; giữ thông báo dự phòng vị trí. Chuyển hàng nút vị trí/tìm đường lên trên khung cảnh báo thu gọn.
 - 90 bài JVM, APK/lint đạt; cài APK mới lên Xiaomi và xem ảnh khung mở với báo cáo thật.
-- Bằng chứng local được Git bỏ qua: `android/build/reports/qa-roles/map-layout-cleanup.log` và `map-layout-cleanup.png` cùng thư mục.
+- Bằng chứng local được Git bỏ qua: `frontend/build/reports/qa-roles/map-layout-cleanup.log` và `map-layout-cleanup.png` cùng thư mục.
 - Không đổi xác thực/backend, chưa commit/push.
 
 ## 18. Kiểm thử hồi quy và câu chữ UI/UX — 08/11/2026
@@ -225,7 +225,7 @@ Kết quả sửa các phát hiện ở mục 10: triển khai trên `local/main
 
 - `DONE_VERIFIED`: khi chưa có điểm risk, chỉ hiện một dòng “Chưa tính điểm rủi ro tổng hợp.”; ẩn dòng đếm bị thay bằng thông báo lặp và phần lý do chưa có đánh giá. Giữ danh sách cảnh báo thực tế độc lập.
 - Nhãn đề xuất dùng recommendation_basis từ backend: theo thời gian di chuyển, theo điểm rủi ro hoặc tuyến duy nhất; không suy luận từ số cảnh báo.
-- 92 bài JVM, APK/lint đạt; kiểm thử UI xác nhận không còn dòng lặp và đúng nhãn thời gian. Cài APK lên điện thoại thành công. Không đổi chính sách risk/backend; chưa push. Bằng chứng: android/build/reports/qa-roles/route-wording.log.
+- 92 bài JVM, APK/lint đạt; kiểm thử UI xác nhận không còn dòng lặp và đúng nhãn thời gian. Cài APK lên điện thoại thành công. Không đổi chính sách risk/backend; chưa push. Bằng chứng: frontend/build/reports/qa-roles/route-wording.log.
 
 ## 21. Chấm điểm nguy cơ thống nhất theo từng tuyến — 08/11/2026
 
@@ -236,3 +236,9 @@ Kết quả sửa các phát hiện ở mục 10: triển khai trên `local/main
 - 93 bài JVM, APK/lint; toàn bộ backend 230 bài + 12 subtests, Ruff/migration/OpenAPI PASS. Sau sửa fallback production: 48 bài mục tiêu PASS. E2E điện thoại development Maps/Routes thật đạt; bản cuối xem log scoring-device-final.log.
 - Đã cập nhật backend development và cài APK. /ready 200, compare tuyến mẫu 200, phiên bản mới EXPERIMENTAL/AVAILABLE. Không commit/push.
 - Giới hạn gộp trùng, cùng đường/làn và phê duyệt production: [báo cáo chi tiết](docs/qa/ROUTE_SCORING_2026-11-08.md).
+
+## 22. Chuẩn hóa tên thư mục và class — 08/11/2026
+
+- Đổi android → frontend, ai → model ai; đổi tên class/file TV1/TV2 theo chức năng như chủ dự án xác nhận.
+- Chỉ đổi identifier và đường dẫn; đã đối chiếu nội dung source với commit trước. Giữ API/package, logic, dữ liệu, checksum model và cấu hình local riêng tư.
+- Cập nhật CI, Docker, QA scripts và tài liệu. Kết quả kiểm chứng: [báo cáo chuẩn hóa tên](docs/integration/NAMING_STANDARDIZATION_2026-11-08.md).

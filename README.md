@@ -22,7 +22,7 @@ cd SafeRoute-AI
 git checkout integration/saferoute-full-release
 ```
 
-- Android: mở `android/` bằng Android Studio, SDK 35; Java source 17.
+- Android: mở `frontend/` bằng Android Studio, SDK 35; Java source 17.
   Cấu hình Maps key và backend origin theo [Android runbook](docs/release/ANDROID_CONFIGURATION.md).
 - Backend: Python 3.11, cài `backend/requirements.txt` và runtime AI đã pin trong
   `backend/requirements-ai.txt`; xem [local development](docs/handoff/LOCAL_DEVELOPMENT.md).
@@ -37,7 +37,7 @@ git checkout integration/saferoute-full-release
 
 ## Kiểm thử và bàn giao
 
-Android: `android/gradlew.bat -p android :app:testDebugUnitTest :app:assembleDebug
+Android: `frontend/gradlew.bat -p frontend :app:testDebugUnitTest :app:assembleDebug
 :app:assembleDebugAndroidTest :app:lintDebug --console=plain` (một dòng).
 Backend: `python scripts/qa/verify_postgis.py --backend backend --runxfail`,
 `python scripts/qa/verify_contract.py`, `python scripts/qa/verify_ai.py`,

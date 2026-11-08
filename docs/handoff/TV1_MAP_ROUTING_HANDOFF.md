@@ -72,7 +72,7 @@ duration_seconds→durationSeconds, distance_meters→distanceMeters, risk.score
 riskScore, risk verified/pending counts→counts, decoded polyline→points;
 recommended_route_id→recommendedId and reason+disclaimer→scoreDescription.
 Carry availability/basis into UI; a bare nullable score cannot explain partial
-risk. Tv1DataSource failures map 401/403/429/network/5xx separately. No Android
+risk. MapRoutingDataSource failures map 401/403/429/network/5xx separately. No Android
 source was changed. GPS denial/manual coordinate choice stays client-side.
 
 Fixtures: backend/app/modules/routing/fixtures.py is MOCK_FOR_DEV only;

@@ -61,17 +61,17 @@ inject the disconnected source explicitly because production uses HTTP.
 
 Java source files: 47; JVM test files: 6; device test files: 5; backend test files: 15.
 
-- `android/app/src/test/java/com/comeforfood/saferoute/ApiContractTest.java`
-- `android/app/src/test/java/com/comeforfood/saferoute/AuthDtoTest.java`
-- `android/app/src/test/java/com/comeforfood/saferoute/HtmlFlowTest.java`
-- `android/app/src/test/java/com/comeforfood/saferoute/RouteAndHazardTest.java`
-- `android/app/src/test/java/com/comeforfood/saferoute/Tv1UiTest.java`
-- `android/app/src/test/java/com/comeforfood/saferoute/Tv2IntegrationTest.java`
-- `android/app/src/androidTest/java/com/comeforfood/saferoute/AddressDeviceTest.java`
-- `android/app/src/androidTest/java/com/comeforfood/saferoute/HtmlFlowDeviceTest.java`
-- `android/app/src/androidTest/java/com/comeforfood/saferoute/LiveBackendDeviceTest.java`
-- `android/app/src/androidTest/java/com/comeforfood/saferoute/Tv1DeviceTest.java`
-- `android/app/src/androidTest/java/com/comeforfood/saferoute/Tv2DeviceTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/ApiContractTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/AuthDtoTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/HtmlFlowTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/RouteAndHazardTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/MapRoutingUiTest.java`
+- `frontend/app/src/test/java/com/comeforfood/saferoute/AccountReportIntegrationTest.java`
+- `frontend/app/src/androidTest/java/com/comeforfood/saferoute/AddressDeviceTest.java`
+- `frontend/app/src/androidTest/java/com/comeforfood/saferoute/HtmlFlowDeviceTest.java`
+- `frontend/app/src/androidTest/java/com/comeforfood/saferoute/LiveBackendDeviceTest.java`
+- `frontend/app/src/androidTest/java/com/comeforfood/saferoute/MapRoutingDeviceTest.java`
+- `frontend/app/src/androidTest/java/com/comeforfood/saferoute/AccountReportDeviceTest.java`
 - `backend/tests/test_ai_api.py`
 - `backend/tests/test_auth_rbac.py`
 - `backend/tests/test_health.py`

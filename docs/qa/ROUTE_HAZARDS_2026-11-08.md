@@ -26,7 +26,7 @@ Màn so sánh trước đây chỉ vẽ polyline và A/B. API chưa trả tọa 
 
 Đã cập nhật riêng container backend local và cài APK; không đổi schema hay xóa cơ sở dữ liệu. Không commit/push.
 
-Bằng chứng local: `android/build/reports/qa-roles/route-hazards-*.log`.
+Bằng chứng local: `frontend/build/reports/qa-roles/route-hazards-*.log`.
 
 ## Giới hạn
 

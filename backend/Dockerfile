@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgl1 libglib2
 COPY backend/requirements.txt backend/requirements-ai.txt ./
 RUN pip install --no-cache-dir torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu && pip install --no-cache-dir -r requirements.txt -r requirements-ai.txt
 COPY backend/ ./
-COPY ai/weights/best.pt ai/weights/best.pt.sha256 /srv/ai/weights/
+COPY ["model ai/weights/best.pt", "model ai/weights/best.pt.sha256", "/srv/ai/weights/"]
 RUN cd /srv/ai/weights && sha256sum -c best.pt.sha256 && useradd --uid 10001 --create-home saferoute && mkdir -p /srv/uploads && chown -R saferoute:saferoute /srv/uploads
 ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PORT=8000 UPLOAD_DIR=/srv/uploads YOLO_WEIGHTS_PATH=/srv/ai/weights/best.pt YOLO_CONFIG_DIR=/tmp/ultralytics
 USER saferoute

@@ -32,7 +32,7 @@ class YoloInferenceService:
 
     def __init__(self, weights_path: str | None = None):
         self.weights_path = weights_path or os.getenv(
-            "YOLO_WEIGHTS_PATH", str(Path(__file__).resolve().parents[4] / "ai" / "weights" / "best.pt")
+            "YOLO_WEIGHTS_PATH", str(Path(__file__).resolve().parents[4] / "model ai" / "weights" / "best.pt")
         )
         self.model_version = "SafeRoute-YOLOv12s-v1.1"
         self.device = "cpu"

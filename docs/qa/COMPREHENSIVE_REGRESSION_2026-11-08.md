@@ -56,7 +56,7 @@ Khóa theo thứ tự report → actor. Thao tác quản lý quyền chỉ khóa
 | Camera/photo picker qua thao tác hệ thống | Không chạy trọn luồng trong đợt này | NOT_VERIFIED |
 | Production HTTPS, nhiều thiết bị/OEM, tải lớn, pentest độc lập | Ngoài môi trường kiểm thử này | NOT_RUN |
 
-80 JVM tests gồm: ApiContractTest 18, AuthDtoTest 2, AuthFlowTest 5, HtmlFlowTest 6, RegressionSafetyTest 3, RouteAndHazardTest 16, Tv1UiTest 22, Tv2IntegrationTest 8.
+80 JVM tests gồm: ApiContractTest 18, AuthDtoTest 2, AuthFlowTest 5, HtmlFlowTest 6, RegressionSafetyTest 3, RouteAndHazardTest 16, MapRoutingUiTest 22, AccountReportIntegrationTest 8.
 
 Không dùng các lượt đầu thất bại để đếm PASS. Lượt Android toàn bộ đã chạy sau sửa production; lượt kiểm tra cuối sau bổ sung harness thiết bị dùng kết quả Gradle up-to-date cho phần không đổi và kiểm tra lại phần test thiết bị/lint thay đổi.
 
@@ -83,7 +83,7 @@ Lượt đầu dùng ActivityScenario bị kẹt trước khi gửi request nghi
 
 ## Bằng chứng và lệnh
 
-Log local trong android/build/reports/qa-roles/ (Git bỏ qua):
+Log local trong frontend/build/reports/qa-roles/ (Git bỏ qua):
 - audit2-before-android.log: 3 regression mới thất bại trước sửa.
 - audit2-before-backend.log: race thu hồi quyền thất bại trước sửa; competing decisions đã đạt.
 - audit2-android.log, audit2-final-android.log: 80 JVM tests và build/lint.
@@ -94,7 +94,7 @@ Log local trong android/build/reports/qa-roles/ (Git bỏ qua):
 - audit2_backend_runner.py: chạy bộ backend trên DB saferoute_test_audit2_* rồi xóa đúng DB được tạo.
 - audit2_device_runner.py: adapter local của scripts/qa/verify_android_e2e.py, dùng image mới, adb reverse và cờ physicalDevice/adminE2E.
 
-Bộ chuẩn: android/gradlew.bat -p android :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug; scripts/qa/verify_postgis.py --backend backend --runxfail; scripts/qa/verify_contract.py. Các lệnh cần môi trường SDK/JDK/PostGIS theo runbook; runner local trên đã dùng Docker image hiện có và không cần cài thêm dependency vào dự án.
+Bộ chuẩn: frontend/gradlew.bat -p frontend :app:testDebugUnitTest :app:assembleDebug :app:assembleDebugAndroidTest :app:lintDebug; scripts/qa/verify_postgis.py --backend backend --runxfail; scripts/qa/verify_contract.py. Các lệnh cần môi trường SDK/JDK/PostGIS theo runbook; runner local trên đã dùng Docker image hiện có và không cần cài thêm dependency vào dự án.
 
 ## Phần còn giới hạn
 

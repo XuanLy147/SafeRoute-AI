@@ -44,5 +44,5 @@ Các trang reviewer/admin kiểm tra SessionManager, không có selector tự ch
 
 - 53/53 JVM tests PASS, gồm 6 HtmlFlowTest mới: onboarding/guest, phiên quay lại, bản đồ/account/back, wizard/draft/recreate/failure, role gates/menu, giao diện lớn/night.
 - assembleDebug và assembleDebugAndroidTest PASS. Lint 0 errors, 138 warnings; phần lớn là resources cũ chưa dùng sau khi thay wizard/reviewer.
-- Log: android/build/reports/tv1/html-flow-tests.log và html-flow-build.log.
+- Log: frontend/build/reports/tv1/html-flow-tests.log và html-flow-build.log.
 - Kiểm thử thiết bị và ảnh cuối được bổ sung trong docs/qa/tv1-validation.md.

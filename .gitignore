@@ -7,7 +7,7 @@
 **/.pytest_cache/
 **/.gradle/
 **/build/
-android/local.properties
+frontend/local.properties
 **/.idea/
 *.iml
 **/captures/
@@ -18,8 +18,8 @@ android/local.properties
 *service-account*.json
 *.pt
 # Checkpoint v1.1 được owner chủ động chia sẻ với team backend.
-# Ngoại lệ duy nhất được track: ai/weights/best.pt
-!ai/weights/best.pt
+# Ngoại lệ duy nhất được track: model ai/weights/best.pt
+!model ai/weights/best.pt
 *.pth
 *.onnx
 *.tflite

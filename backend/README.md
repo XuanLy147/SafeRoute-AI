@@ -10,7 +10,7 @@ in docs/api/openapi.json; handoff documents are in docs/handoff/.
 
 From repository root, supply random POSTGRES_PASSWORD and SECRET_KEY then run:
 `docker compose -f backend/docker-compose.yml up --build`.
-Root build context is required to package ai/weights/best.pt. Alembic owns schema;
+Root build context is required to package model ai/weights/best.pt. Alembic owns schema;
 no create_all, implicit demo accounts or in-memory persistence fallback exists.
 
 Host development: install requirements.txt plus requirements-ai.txt in an isolated

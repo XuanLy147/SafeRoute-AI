@@ -19,7 +19,7 @@ Kiểm thử frontend Android sau khi ghép giao diện, Việt hóa nhãn nguy 
 | OpenAPI and supplied JSON examples | PASS | ux-regression-contract.log |
 | E2E Xiaomi Android 13 | PASS ở lượt chạy lại; lần đầu bị chặn foreground | ux-regression-device-retry.log |
 
-Log nằm trong thư mục local được Git bỏ qua `android/build/reports/qa-roles/`. Lần đầu thất bại ở điều kiện foreground được giữ nguyên trong `ux-regression-device.log`; lượt chạy lại sau khi xác nhận app foreground nằm ở `ux-regression-device-retry.log`. Không dùng kết quả lịch sử để thay cho lần này.
+Log nằm trong thư mục local được Git bỏ qua `frontend/build/reports/qa-roles/`. Lần đầu thất bại ở điều kiện foreground được giữ nguyên trong `ux-regression-device.log`; lượt chạy lại sau khi xác nhận app foreground nằm ở `ux-regression-device-retry.log`. Không dùng kết quả lịch sử để thay cho lần này.
 
 ## Độ bao phủ và giới hạn
 
@@ -79,8 +79,8 @@ Không đổi schema, nâng dependency, bỏ kiểm tra đăng nhập, tự đ�
 | HtmlFlowTest | 9 | 0 |
 | RegressionSafetyTest | 3 | 0 |
 | RouteAndHazardTest | 17 | 0 |
-| Tv1UiTest | 22 | 0 |
-| Tv2IntegrationTest | 12 | 0 |
+| MapRoutingUiTest | 22 | 0 |
+| AccountReportIntegrationTest | 12 | 0 |
 
 Lint: 0 Error/Fatal issues. Final strengthened device-test APK build and lint PASS: `ux-regression-harness.log`.
 
