@@ -1,0 +1,8 @@
+<resources>
+<string name="route_hazards_unavailable">Chưa tải được các điểm cảnh báo gần tuyến. Không có ghim không có nghĩa là không có nguy cơ.</string>
+<string name="route_nearby_scope">Cảnh báo ghi nhận trong khoảng %.0f m gần tuyến (có thể thuộc đường bên cạnh). Chọn tuyến để xem ghim; chạm thông tin ghim để mở báo cáo.</string>
+<string name="route_score_pending">Chưa đủ dữ liệu để tính điểm nguy cơ.</string>
+<string name="route_recommended_time">Đề xuất theo thời gian di chuyển</string>
+<string name="route_recommended_risk">Đề xuất theo nguy cơ và thời gian</string>
+<string name="route_only_option">Tuyến duy nhất tìm được</string>
+</resources>

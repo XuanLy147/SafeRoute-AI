@@ -23,6 +23,7 @@ public class RouteResultFragment extends Fragment {
     private Tv1ViewModel model;
     private GoogleMap map;
     private final RoutePolylineRenderer renderer = new RoutePolylineRenderer();
+    private final com.comeforfood.saferoute.feature.map.HazardMarkerRenderer hazardMarkers = new com.comeforfood.saferoute.feature.map.HazardMarkerRenderer();
     private RouteComparison comparison;
     private Route selected;
     private boolean mapAttached;
@@ -42,7 +43,7 @@ public class RouteResultFragment extends Fragment {
     }
     private void render(Tv1ViewModel.State<RouteComparison> state) {
         if (binding == null) return;
-        renderer.clear();
+        renderer.clear(); hazardMarkers.clear();
         selected = null;
         binding.retry.setText(R.string.retry);
         binding.routeList.removeAllViews();
@@ -77,6 +78,13 @@ public class RouteResultFragment extends Fragment {
                 mapAttached = true;
                 MapsSupport.attach(this, R.id.map, ready -> {
                     map = ready;
+                    map.setOnInfoWindowClickListener(marker -> {
+                        if (marker.getTag() instanceof com.comeforfood.saferoute.feature.map.Hazard) {
+                            com.comeforfood.saferoute.feature.map.Hazard h = (com.comeforfood.saferoute.feature.map.Hazard) marker.getTag();
+                            ((com.comeforfood.saferoute.MainActivity)requireActivity()).openTv2Fragment(
+                                com.comeforfood.saferoute.feature.reports.ReportDetailFragment.at(h.id));
+                        }
+                    });
                     map.setOnMapLoadedCallback(() -> { if (binding != null) binding.mapStatus.setVisibility(View.GONE); });
                     drawRoute();
                 });
@@ -91,10 +99,16 @@ public class RouteResultFragment extends Fragment {
             index++;
             item.name.setText(route.name.isEmpty() ? getString(R.string.route_name, index) : route.name);
             item.recommended.setVisibility(route.id.equals(comparison.recommendedId) ? View.VISIBLE : View.GONE);
+            item.recommended.setText("DURATION_ETA_ONLY".equals(comparison.recommendationBasis) ? R.string.route_recommended_time
+                : "SAFETY_LOWEST_RISK".equals(comparison.recommendationBasis) ? R.string.route_recommended_risk
+                : "SINGLE_ROUTE".equals(comparison.recommendationBasis) ? R.string.route_only_option : R.string.recommended);
             item.metrics.setText(getString(R.string.route_metrics, (int) Math.ceil(route.durationSeconds / 60.0), route.distanceMeters / 1000.0));
-            item.risk.setText(route.riskScore == null ? getString(R.string.risk_missing) : getString(R.string.risk_value, route.riskScore));
+            item.risk.setText(route.riskScore == null ? getString(R.string.route_score_pending) : getString(R.string.risk_value, route.riskScore));
             item.hazards.setText(route.riskScore == null ? getString(R.string.risk_missing) : route.verifiedCount + route.pendingCount == 0 ? getString(R.string.no_hazards)
                     : getString(R.string.hazard_counts, route.verifiedCount, route.pendingCount));
+            item.hazards.setVisibility(route.riskScore != null && route.nearbyHazards == null ? View.VISIBLE : View.GONE);
+            item.nearby.setText(nearbyText(route));
+            item.reason.setVisibility(route.riskScore != null ? View.VISIBLE : View.GONE);
             item.reason.setText(route.reason.isEmpty() ? getString(R.string.no_reason) : route.reason);
             boolean active = route.id.equals(selected.id);
             item.getRoot().setStrokeColor(ContextCompat.getColor(requireContext(), active ? R.color.primary : R.color.outline));
@@ -105,6 +119,21 @@ public class RouteResultFragment extends Fragment {
             binding.routeList.addView(item.getRoot());
         }
     }
+    private String nearbyText(Route route) {
+        if (route.nearbyHazards == null) return getString(R.string.route_hazards_unavailable);
+        int verified = 0;
+        java.util.Map<String,Integer> types = new java.util.LinkedHashMap<>();
+        for (com.comeforfood.saferoute.feature.map.Hazard h : route.nearbyHazards) {
+            if (h.status == com.comeforfood.saferoute.feature.map.Hazard.Status.VERIFIED) verified++;
+            types.put(h.title,types.getOrDefault(h.title,0)+1);
+        }
+        StringBuilder text = new StringBuilder(getString(R.string.route_nearby_scope,route.hazardRadiusMeters));
+        text.append("\n").append(route.nearbyHazards.isEmpty() ? getString(R.string.no_hazards)
+            : getString(R.string.hazard_counts,verified,route.nearbyHazards.size()-verified));
+        for (java.util.Map.Entry<String,Integer> entry : types.entrySet())
+            text.append("\n").append(entry.getKey()).append(": ").append(entry.getValue());
+        return text.toString();
+    }
     private void select(String id) {
         for (Route route : comparison.routes) if (route.id.equals(id)) { selected = route; model.selectRoute(id); break; }
         renderCards(); drawRoute();
@@ -114,6 +143,8 @@ public class RouteResultFragment extends Fragment {
         Point a = null, b = null;
         try { a = Point.parse(model.origin()); b = Point.parse(model.destination()); } catch (IllegalArgumentException ignored) {}
         renderer.render(requireContext(), map, comparison, selected.id, a, b, this::select);
+        hazardMarkers.render(requireContext(),map,selected.nearbyHazards == null
+            ? java.util.Collections.emptyList() : selected.nearbyHazards);
         View mapView = binding.mapContainer;
         mapView.post(() -> {
             if (binding != null && binding.mapContainer == mapView && map != null && selected != null
@@ -134,7 +165,7 @@ public class RouteResultFragment extends Fragment {
     }
     @Override public void onDestroyView() {
         if(model!=null&&!requireActivity().isChangingConfigurations())model.cancelRouteRequest();
-        renderer.clear(); map = null; selected = null; comparison = null; mapAttached = false;
+        renderer.clear(); hazardMarkers.clear(); map = null; selected = null; comparison = null; mapAttached = false;
         binding = null; super.onDestroyView();
     }
 }

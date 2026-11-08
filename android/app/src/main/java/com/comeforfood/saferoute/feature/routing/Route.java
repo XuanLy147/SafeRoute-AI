@@ -11,8 +11,17 @@ public final class Route {
     public final int durationSeconds, distanceMeters, verifiedCount, pendingCount;
     public final Double riskScore;
     public final List<Point> points;
+    public final List<com.comeforfood.saferoute.feature.map.Hazard> nearbyHazards;
+    public final Double hazardRadiusMeters;
     public Route(String id, String name, int durationSeconds, int distanceMeters, Double riskScore,
                  int verifiedCount, int pendingCount, String reason, List<Point> points) {
+        this(id,name,durationSeconds,distanceMeters,riskScore,verifiedCount,pendingCount,reason,points,null,null);
+    }
+    public Route(String id, String name, int durationSeconds, int distanceMeters, Double riskScore,
+                 int verifiedCount, int pendingCount, String reason, List<Point> points,
+                 List<com.comeforfood.saferoute.feature.map.Hazard> hazards, Double radius) {
+        nearbyHazards = hazards == null ? null : Collections.unmodifiableList(new ArrayList<>(hazards));
+        hazardRadiusMeters = radius;
         if (id == null || id.trim().isEmpty() || durationSeconds < 0 || distanceMeters < 0
                 || verifiedCount < 0 || pendingCount < 0 || (riskScore != null
                 && (!Double.isFinite(riskScore) || riskScore < 0)))

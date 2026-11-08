@@ -2633,6 +2633,69 @@
             "type": "string",
             "title": "Polyline"
           },
+          "nearby_hazards": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/RouteHazard"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nearby Hazards",
+            "description": "Nearby recorded hazards; null means unavailable, [] means none found"
+          },
+          "hazard_radius_meters": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hazard Radius Meters",
+            "description": "Proximity radius, not proof of same road/lane"
+          },
+          "severity_counts": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity Counts"
+          },
+          "verified_high_count": {
+            "type": "integer",
+            "title": "Verified High Count",
+            "default": 0
+          },
+          "unscored_hazards_count": {
+            "type": "integer",
+            "title": "Unscored Hazards Count",
+            "default": 0
+          },
+          "risk_density_per_km": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Density Per Km"
+          },
           "risk": {
             "anyOf": [
               {
@@ -3466,6 +3529,18 @@
           "travel_mode": {
             "$ref": "#/components/schemas/TravelMode"
           },
+          "assessed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assessed At"
+          },
           "risk_diagnostic": {
             "anyOf": [
               {
@@ -3583,6 +3658,85 @@
         "title": "RouteCompareResponse",
         "description": "Standardized response schema for POST /api/v1/routes/compare.\n\nConsumed by Android UI (TV1) and exposed via FastAPI (TV3)."
       },
+      "RouteHazard": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "PENDING_VERIFICATION"
+            ],
+            "title": "Status"
+          },
+          "latitude": {
+            "type": "number",
+            "title": "Latitude"
+          },
+          "longitude": {
+            "type": "number",
+            "title": "Longitude"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity"
+          },
+          "observed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed At"
+          },
+          "source_report_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Source Report Ids"
+          },
+          "score_contribution": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Contribution"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "category",
+          "status",
+          "latitude",
+          "longitude"
+        ],
+        "title": "RouteHazard"
+      },
       "RouteRiskScore": {
         "properties": {
           "score": {
@@ -3592,11 +3746,18 @@
             "description": "Calculated hazard risk score"
           },
           "level": {
-            "type": "string",
-            "enum": [
-              "LOW",
-              "MEDIUM",
-              "HIGH"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "LOW",
+                  "MEDIUM",
+                  "HIGH"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Level",
             "description": "Risk level: 'LOW', 'MEDIUM', 'HIGH'"
@@ -3630,7 +3791,6 @@
         "type": "object",
         "required": [
           "score",
-          "level",
           "hazards_count",
           "reason"
         ],

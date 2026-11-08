@@ -165,7 +165,10 @@ def test_report_confirmed_detections_audit_and_transaction(http, db, monkeypatch
 def test_http_real_postgis_keyed_routes(http, db, monkeypatch):
     insert_reports(db)
     monkeypatch.setattr(settings, "RISK_POLICY_JSON", json.dumps(DRAFT))
+    from app.modules.routing.polyline import encode_polyline
     candidates = [route("far", 106.01), route("near", 106)]
+    for candidate in candidates:
+        candidate.polyline = encode_polyline(candidate.coordinates)
     monkeypatch.setattr(GoogleRoutesAdapter, "compute_routes", lambda *a, **kw: candidates)
     result = http.post(
         "/api/v1/routes/compare",
@@ -181,7 +184,12 @@ def test_http_real_postgis_keyed_routes(http, db, monkeypatch):
         "/api/v1/routes/compare",
         json={"origin": {"latitude": 10, "longitude": 106}, "destination": {"latitude": 10.01, "longitude": 106}},
     )
-    assert result.json()["risk_assessment_status"] == "UNAVAILABLE"
+    assert result.json()["risk_assessment_status"] == "AVAILABLE"
+    assert result.json()["risk_policy_status"] == "EXPERIMENTAL"
+    near = result.json()["routes"][1]
+    assert len(near["nearby_hazards"]) == near["risk"]["hazards_count"] == 1
+    assert near["nearby_hazards"][0]["source_report_ids"]
+    assert near["severity_counts"]["HIGH"] == near["verified_high_count"] == 1
     monkeypatch.setattr(settings, "RISK_POLICY_JSON", '{"revision":"invalid"}')
     assert (
         http.post(
@@ -339,3 +347,36 @@ def test_invalid_score_cannot_become_available(value):
     )
     assert result.risk_assessment_status == "INVALID"
     assert result.routes[0].risk is None
+
+def test_http_experimental_scoring_does_not_override_production_gate(http, monkeypatch):
+    monkeypatch.setattr(settings, "ENVIRONMENT", "production")
+    monkeypatch.setattr(settings, "RISK_POLICY_JSON", None)
+    from app.modules.routing.polyline import encode_polyline
+    candidate=route("only",106)
+    candidate.polyline=encode_polyline(candidate.coordinates)
+    monkeypatch.setattr(GoogleRoutesAdapter,"compute_routes",lambda *a,**kw:[candidate])
+    result=http.post("/api/v1/routes/compare",json={
+        "origin":{"latitude":10,"longitude":106},"destination":{"latitude":10.01,"longitude":106}})
+    assert result.status_code==200
+    assert result.json()["risk_assessment_status"]=="UNAVAILABLE"
+    assert result.json()["risk_policy_revision"] is None
+
+
+def test_http_review_changes_next_assessment_consistently(http, db, monkeypatch):
+    insert_reports(db)
+    from app.models.entities import ReportStatus
+    from app.modules.routing.polyline import encode_polyline
+    candidate=route("only",106)
+    candidate.polyline=encode_polyline(candidate.coordinates)
+    monkeypatch.setattr(GoogleRoutesAdapter,"compute_routes",lambda *a,**kw:[candidate])
+    payload={"origin":{"latitude":10,"longitude":106},"destination":{"latitude":10.01,"longitude":106}}
+    first=http.post("/api/v1/routes/compare",json=payload).json()["routes"][0]
+    assert first["risk"]["score"]==6
+    for report in db.scalars(select(Report)):
+        report.status=ReportStatus.REJECTED
+    db.flush()
+    second=http.post("/api/v1/routes/compare",json=payload).json()["routes"][0]
+    assert second["nearby_hazards"]==[]
+    assert second["risk"]["score"]==0
+    assert second["risk"]["hazards_count"]==0
+    assert sum(second["severity_counts"].values())==0

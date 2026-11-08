@@ -143,3 +143,35 @@ def test_keyed_draft_policy_25m_with_boundary_reports(db):
     assert (result["near"].score, result["near"].level) == (10, "HIGH")
     assert result["near"].hazards_count == 3
     assert result["near"].pending_hazards_count == 1
+
+
+def test_route_evidence_without_scoring_policy(db):
+    from app.modules.routing.hazards import attach_route_hazards
+    from app.modules.routing.polyline import encode_polyline
+    from app.modules.routing.schemas import EvaluatedRoute
+    insert_reports(db)
+    routes = [EvaluatedRoute(id=id_, summary="fixture", distance_meters=1000,
+        duration_seconds=60, polyline=encode_polyline([(10, lon), (10.01, lon)]))
+        for id_, lon in [("near", 106), ("far", 106.01)]]
+    attach_route_hazards(routes, db)
+    assert routes[0].risk is None
+    assert {h.status for h in routes[0].nearby_hazards} == {"VERIFIED", "PENDING_VERIFICATION"}
+    assert len(routes[0].nearby_hazards) == 2
+    assert routes[0].nearby_hazards[0].latitude == pytest.approx(10.005)
+    assert routes[0].nearby_hazards[0].longitude == pytest.approx(106)
+    assert routes[1].nearby_hazards == []
+    assert routes[0].hazard_radius_meters == 30
+
+
+def test_route_evidence_query_failure_is_not_empty():
+    from app.modules.routing.hazards import attach_route_hazards
+    from app.modules.routing.polyline import encode_polyline
+    from app.modules.routing.schemas import EvaluatedRoute
+    class BrokenSession:
+        def execute(self, statement):
+            raise RuntimeError("database unavailable")
+    route = EvaluatedRoute(id="a", summary="fixture", distance_meters=1000,
+        duration_seconds=60, polyline=encode_polyline([(10, 106), (10.01, 106)]))
+    with pytest.raises(RuntimeError):
+        attach_route_hazards([route], BrokenSession())
+    assert route.nearby_hazards is None

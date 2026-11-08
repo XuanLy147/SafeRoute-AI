@@ -210,3 +210,29 @@ Kết quả sửa các phát hiện ở mục 10: triển khai trên `local/main
 - Giới hạn: thao tác camera/chọn ảnh, EXIF, cỡ chữ lớn, TalkBack, máy tính bảng và giao diện tối chưa được bao phủ đầy đủ.
 
 [Báo cáo UI/UX](docs/qa/UI_UX_REGRESSION_2026-11-08.md).
+
+
+## 19. Hiển thị cảnh báo theo từng tuyến — 08/11/2026
+
+- `DONE_VERIFIED` trong phạm vi ghi nhận: backend trả các báo cáo gần từng tuyến trong bán kính 30 m, độc lập với điểm risk; chỉ gồm đã/chưa xác minh, loại báo cáo bị từ chối.
+- Android hiện số lượng và loại cảnh báo trên thẻ tuyến, ghim cho tuyến được chọn; chạm thông tin ghim mở báo cáo. UI ghi rõ gần tuyến không đồng nghĩa đúng làn/đường.
+- 92 bài JVM, APK/lint; 210 bài backend + 12 kiểm thử con; Ruff/OpenAPI đạt. E2E Xiaomi USER/REVIEWER/ADMIN, Maps/Routes thật và lưu dữ liệu sau khởi động lại đạt. Đã cập nhật backend local và APK, giữ dữ liệu thật.
+- Không cấu hình điểm risk khi chưa có chính sách. Không commit/push. Phép thử dùng vị trí báo cáo thật bị bộ duyệt tự động chặn và không thực hiện; thay bằng dữ liệu PostGIS tổng hợp và tuyến Google mẫu.
+- Báo cáo: [Cảnh báo theo tuyến](docs/qa/ROUTE_HAZARDS_2026-11-08.md).
+
+
+## 20. Làm rõ thông tin so sánh tuyến — 08/11/2026
+
+- `DONE_VERIFIED`: khi chưa có điểm risk, chỉ hiện một dòng “Chưa tính điểm rủi ro tổng hợp.”; ẩn dòng đếm bị thay bằng thông báo lặp và phần lý do chưa có đánh giá. Giữ danh sách cảnh báo thực tế độc lập.
+- Nhãn đề xuất dùng recommendation_basis từ backend: theo thời gian di chuyển, theo điểm rủi ro hoặc tuyến duy nhất; không suy luận từ số cảnh báo.
+- 92 bài JVM, APK/lint đạt; kiểm thử UI xác nhận không còn dòng lặp và đúng nhãn thời gian. Cài APK lên điện thoại thành công. Không đổi chính sách risk/backend; chưa push. Bằng chứng: android/build/reports/qa-roles/route-wording.log.
+
+## 21. Chấm điểm nguy cơ thống nhất theo từng tuyến — 08/11/2026
+
+- `DONE_VERIFIED` trong môi trường development: chính sách `recorded-hazards-v1-2026-11-08`, trạng thái thử nghiệm, theo yêu cầu chủ dự án. Production/readiness giữ cổng phê duyệt cũ.
+- Một snapshot SQL cho tất cả tuyến; điểm, số mức độ, số xác minh và ghim cùng xuất phát từ evidence. Gộp cùng loại/tọa độ chính xác, lưu báo cáo nguồn; không sửa dữ liệu gốc.
+- Trọng số mức độ 1/1,5/2; pending 0,3; tuổi 1/0,7/0,4. Thiếu loại/mức độ/thời điểm thì điểm null; không tự cho 0. So sánh trong ngưỡng thêm 20% thời gian, ưu tiên ít HIGH đã xác minh rồi tổng điểm/thời gian.
+- Validator backend và Android từ chối tổng điểm/số lượng không khớp. Không thay login/RBAC, không có migration dữ liệu.
+- 93 bài JVM, APK/lint; toàn bộ backend 230 bài + 12 subtests, Ruff/migration/OpenAPI PASS. Sau sửa fallback production: 48 bài mục tiêu PASS. E2E điện thoại development Maps/Routes thật đạt; bản cuối xem log scoring-device-final.log.
+- Đã cập nhật backend development và cài APK. /ready 200, compare tuyến mẫu 200, phiên bản mới EXPERIMENTAL/AVAILABLE. Không commit/push.
+- Giới hạn gộp trùng, cùng đường/làn và phê duyệt production: [báo cáo chi tiết](docs/qa/ROUTE_SCORING_2026-11-08.md).

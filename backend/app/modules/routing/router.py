@@ -56,12 +56,16 @@ def compare_routes(
     request: RouteCompareRequest,
     db: Session = Depends(get_db),
 ):
-    adapter = GoogleRoutesAdapter()
+    from app.core.config import settings
+    from app.modules.risk.policy import load_policy
     try:
-        risk_scorer = get_risk_scorer(db)
+        load_policy()  # Preserve validation of any existing configured policy.
     except ValueError:
         raise HTTPException(503, "Risk policy configuration invalid") from None
-    service = RoutingService(adapter=adapter, risk_scorer=risk_scorer)
+    production = settings.ENVIRONMENT.lower() == "production"
+    scorer = get_risk_scorer(db) if production else None
+    adapter = GoogleRoutesAdapter()
+    service = RoutingService(adapter=adapter, risk_scorer=scorer)
 
     try:
         result = service.compare_routes(
@@ -69,10 +73,30 @@ def compare_routes(
             destination=request.destination,
             travel_mode=request.travel_mode,
         )
-        if risk_scorer is not None:
-            result.risk_policy_revision = risk_scorer.policy.revision
-            result.risk_policy_status = "APPROVED" if risk_scorer.policy_approved else "DEMO_UNAPPROVED"
-        return result
+        from app.modules.routing.evidence_scoring import assess_comparison
+        from app.modules.routing.hazards import attach_route_hazards
+        try:
+            attach_route_hazards(result.routes, db)
+            if not production:
+                assess_comparison(result)
+        except Exception:
+            db.rollback()
+            logger.warning("Route hazard assessment unavailable")
+            # Never publish a partially mutated or mismatched assessment.
+            for route in result.routes:
+                route.nearby_hazards = None
+                if not production:
+                    route.risk = None
+                    route.severity_counts = None
+                    route.verified_high_count = 0
+                    route.unscored_hazards_count = 0
+                    route.risk_density_per_km = None
+            if not production:
+                assess_comparison(result)
+        if production and scorer is not None:
+            result.risk_policy_revision = scorer.policy.revision
+            result.risk_policy_status = "APPROVED" if scorer.policy_approved else "DEMO_UNAPPROVED"
+        return RouteCompareResponse.model_validate(result.model_dump())
     except InvalidCoordinatesError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

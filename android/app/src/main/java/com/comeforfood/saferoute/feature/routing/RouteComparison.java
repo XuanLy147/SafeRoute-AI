@@ -9,8 +9,12 @@ import java.util.Set;
 /** The source supplies the recommendation and score description; the UI never invents either. */
 public final class RouteComparison {
     public final List<Route> routes;
-    public final String recommendedId, scoreDescription;
+    public final String recommendedId, scoreDescription, recommendationBasis;
     public RouteComparison(List<Route> routes, String recommendedId, String scoreDescription) {
+        this(routes,recommendedId,scoreDescription,"");
+    }
+    public RouteComparison(List<Route> routes, String recommendedId, String scoreDescription, String basis) {
+        recommendationBasis = basis == null ? "" : basis;
         if (routes == null) throw new IllegalArgumentException("Missing routes");
         Set<String> ids = new HashSet<>();
         for (Route route : routes)

@@ -52,6 +52,20 @@ public class ApiContractTest {
         return JsonParser.parseString("{\"risk_assessment_status\":\""+status+"\",\"recommendation_basis\":\"SINGLE_ROUTE\",\"recommended_route_id\":\"route_1\",\"routes\":[{\"id\":\"route_1\",\"summary\":\"A\",\"duration_seconds\":125,\"distance_meters\":321,\"polyline\":\"_p~iF~ps|U_ulLnnqC_mqNvxq`@\",\"risk\":"+risk+"}]}").getAsJsonObject();
     }
     private String risk="{\"score\":0,\"hazards_count\":1,\"verified_hazards_count\":0,\"pending_hazards_count\":1,\"reason\":\"Zero weighted score with pending report\"}";
+    @Test public void routeEvidenceIsIndependentOfMissingRiskScore() {
+        JsonObject payload=route("UNAVAILABLE","null");
+        JsonObject r=payload.getAsJsonArray("routes").get(0).getAsJsonObject();
+        r.addProperty("hazard_radius_meters",30);
+        r.add("nearby_hazards",JsonParser.parseString("[{\"id\":\"42\",\"category\":\"D40\",\"status\":\"VERIFIED\",\"latitude\":38.5,\"longitude\":-120.2}]"));
+        com.comeforfood.saferoute.feature.routing.Route mapped=NetworkDataSource.mapRoutes(payload).routes.get(0);
+        assertNull(mapped.riskScore);
+        assertEquals(1,mapped.nearbyHazards.size());
+        assertEquals("42",mapped.nearbyHazards.get(0).id);
+        r.add("nearby_hazards",new com.google.gson.JsonArray());
+        assertTrue(NetworkDataSource.mapRoutes(payload).routes.get(0).nearbyHazards.isEmpty());
+        r.remove("nearby_hazards");
+        assertNull(NetworkDataSource.mapRoutes(payload).routes.get(0).nearbyHazards);
+    }
     @Test public void preservesSingleRouteAndZeroScoreWithPendingHazard() {
         RouteComparison c=NetworkDataSource.mapRoutes(route("AVAILABLE",risk));assertEquals(1,c.routes.size());assertEquals("route_1",c.recommendedId);
         assertEquals(0,c.routes.get(0).riskScore,0);assertEquals(1,c.routes.get(0).pendingCount);assertEquals(125,c.routes.get(0).durationSeconds);
@@ -140,4 +154,24 @@ public class ApiContractTest {
         assertFalse(c.scoreDescription.contains(" ? "));
     }
 
+
+    @Test public void scoredEvidenceMustAgreeWithDisplayedCountsAndSum() {
+        JsonObject payload=route("AVAILABLE",risk);
+        payload.addProperty("risk_policy_revision","recorded-hazards-v1-2026-11-08");
+        JsonObject r=payload.getAsJsonArray("routes").get(0).getAsJsonObject();
+        r.addProperty("hazard_radius_meters",30);
+        JsonObject h=new JsonObject();
+        h.addProperty("id","42"); h.addProperty("category","D40");
+        h.addProperty("status","PENDING_VERIFICATION");
+        h.addProperty("latitude",38.5); h.addProperty("longitude",-120.2);
+        h.addProperty("score_contribution",1.8);
+        JsonArray hs=new JsonArray(); hs.add(h); r.add("nearby_hazards",hs);
+        r.getAsJsonObject("risk").addProperty("score",1.8);
+        assertEquals(1.8,NetworkDataSource.mapRoutes(payload).routes.get(0).riskScore,0.00001);
+        r.getAsJsonObject("risk").addProperty("score",6);
+        assertThrows(IllegalArgumentException.class,()->NetworkDataSource.mapRoutes(payload));
+        r.getAsJsonObject("risk").addProperty("score",1.8);
+        h.addProperty("status","VERIFIED");
+        assertThrows(IllegalArgumentException.class,()->NetworkDataSource.mapRoutes(payload));
+    }
 }

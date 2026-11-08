@@ -76,6 +76,25 @@ public class Tv1UiTest {
             public Request compare(Point a, Point b, Callback<RouteComparison> c) { c.success(result); return () -> {}; }
         });
     }
+    @Test public void showsRouteHazardsEvenWhenRiskScoreIsUnavailable() {
+        Hazard hazard=new Hazard("42","Pothole fixture","",new Point(10.75,106.67),Hazard.Type.D40,Hazard.Status.VERIFIED);
+        Route first=new Route("a","A",60,100,null,0,0,"",Arrays.asList(new Point(10.75,106.67),new Point(10.76,106.68)),Collections.singletonList(hazard),30.0);
+        Route second=new Route("b","B",70,120,null,0,0,"",first.points,Collections.emptyList(),30.0);
+        source(new RouteComparison(Arrays.asList(first,second),"a","fixture","DURATION_ETA_ONLY"));
+        launch();openSearch();enterPoints();compare();
+        LinearLayout list=activity.findViewById(R.id.route_list);
+        assertEquals(2,list.getChildCount());
+        assertEquals(View.GONE,list.getChildAt(0).findViewById(R.id.hazards).getVisibility());
+        assertEquals(View.GONE,list.getChildAt(0).findViewById(R.id.reason).getVisibility());
+        assertEquals(activity.getString(R.string.route_recommended_time),((TextView)list.getChildAt(0).findViewById(R.id.recommended)).getText().toString());
+
+        String firstText=((TextView)list.getChildAt(0).findViewById(R.id.nearby)).getText().toString();
+        assertTrue(firstText.contains("Pothole fixture: 1"));
+        assertTrue(firstText.contains(activity.getString(R.string.hazard_counts,1,0)));
+        assertTrue(((TextView)list.getChildAt(1).findViewById(R.id.nearby)).getText().toString().contains(activity.getString(R.string.no_hazards)));
+        list.getChildAt(1).findViewById(R.id.select).performClick();settle();
+        assertEquals("b",new ViewModelProvider(activity).get(Tv1ViewModel.class).selectedRoute());
+    }
     @Test public void startsWithoutMapsKeyAndShowsDisconnectedData() {
         launch();
         assertEquals(View.VISIBLE, activity.findViewById(R.id.map_placeholder).getVisibility());

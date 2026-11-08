@@ -6,6 +6,7 @@ android:layout_width="match_parent" android:layout_height="wrap_content" android
 <TextView android:id="@+id/metrics" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
 <TextView android:id="@+id/risk" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="@style/Text.SafeRoute.Body" android:textStyle="bold"/>
 <TextView android:id="@+id/hazards" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:textAppearance="@style/Text.SafeRoute.Note"/>
+<TextView android:id="@+id/nearby" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
 <TextView android:id="@+id/reason" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:textAppearance="@style/Text.SafeRoute.Body"/>
 <com.google.android.material.button.MaterialButton android:textAllCaps="false" android:id="@+id/select" style="@style/Widget.SafeRoute.Secondary" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:minHeight="48dp" android:text="@string/view_route" android:letterSpacing="0"/>
 </LinearLayout>

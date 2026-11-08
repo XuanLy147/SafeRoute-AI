@@ -61,15 +61,54 @@ public final class NetworkDataSource implements Tv1DataSource {
                 }
             }
 
+            List<Hazard> hazards = null;
+            Double radius = null;
+            if (r.has("nearby_hazards") && !r.get("nearby_hazards").isJsonNull()) {
+                radius = r.get("hazard_radius_meters").getAsDouble();
+                if (!Double.isFinite(radius) || radius <= 0) throw new IllegalArgumentException("Invalid radius");
+                hazards = new ArrayList<>();
+                for (JsonElement element : r.getAsJsonArray("nearby_hazards")) {
+                    JsonObject h = element.getAsJsonObject();
+                    Hazard.Status hs = Hazard.Status.valueOf(string(h,"status"));
+                    if (hs == Hazard.Status.REJECTED) continue;
+                    String category = string(h,"category");
+                    Hazard.Type ht;
+                    try { ht = Hazard.Type.valueOf(category.toUpperCase(Locale.ROOT)); }
+                    catch (IllegalArgumentException ignored) { ht = Hazard.Type.MANUAL; }
+                    hazards.add(new Hazard(string(h,"id"),com.comeforfood.saferoute.core.model.HazardLabel.display(category),"",
+                        new Point(h.get("latitude").getAsDouble(),h.get("longitude").getAsDouble()),ht,hs));
+                }
+            }
+            if ("recorded-hazards-v1-2026-11-08".equals(string(body,"risk_policy_revision"))) {
+                if (risk != null) {
+                    if (hazards == null || hazards.size() != verified+pending) throw new IllegalArgumentException("Evidence/count mismatch");
+                    int verifiedActual=0;
+                    double sum=0;
+                    Set<String> ids=new HashSet<>();
+                    for (JsonElement el : r.getAsJsonArray("nearby_hazards")) {
+                        JsonObject h=el.getAsJsonObject();
+                        if (!ids.add(string(h,"id"))) throw new IllegalArgumentException("Duplicate evidence");
+                        if ("VERIFIED".equals(string(h,"status"))) verifiedActual++;
+                        double value=h.get("score_contribution").getAsDouble();
+                        if (!Double.isFinite(value)||value<0) throw new IllegalArgumentException("Invalid contribution");
+                        sum+=value;
+                    }
+                    if (verifiedActual!=verified || Math.abs(sum-risk.get("score").getAsDouble())>0.000001)
+                        throw new IllegalArgumentException("Score/evidence mismatch");
+                    displayReason=string(risk,"reason");
+                } else {
+                    displayReason="Chưa đủ dữ liệu để tính điểm; có cảnh báo thiếu loại, mức độ hoặc thời điểm.";
+                }
+            }
             routes.add(new Route(string(r,"id"),string(r,"summary"),r.get("duration_seconds").getAsInt(),r.get("distance_meters").getAsInt(),
-                risk==null?null:risk.get("score").getAsDouble(),verified,pending,displayReason,decode(string(r,"polyline"))));
+                risk==null?null:risk.get("score").getAsDouble(),verified,pending,displayReason,decode(string(r,"polyline")),hazards,radius));
         }
         String assessment="AVAILABLE".equals(status)?"Có đánh giá nguy cơ cho các tuyến"
             :"PARTIAL".equals(status)?"Chưa đủ dữ liệu để so sánh nguy cơ giữa các tuyến"
             :"Chưa có đánh giá nguy cơ khả dụng";
         String description=assessment+"\n"+string(body,"recommendation_reason")+"\n"+string(body,"disclaimer");
         String recommended=string(body,"recommended_route_id");
-        return new RouteComparison(routes,recommended.isEmpty()?null:recommended,description);
+        return new RouteComparison(routes,recommended.isEmpty()?null:recommended,description,string(body,"recommendation_basis"));
     }
     private static String string(JsonObject o,String key) { return !o.has(key)||o.get(key).isJsonNull()?"":o.get(key).getAsString(); }
     public static List<Point> decode(String value) { return RouteGeometry.decodePolyline(value); }

@@ -132,7 +132,7 @@ public class LiveBackendDeviceTest {
                 ui(a->a.openRoutes(null));
                 ui(a->{((EditText)a.findViewById(R.id.origin)).setText("10.755, 106.678");((EditText)a.findViewById(R.id.destination)).setText("10.77, 106.69");a.findViewById(R.id.compare).performClick();});
                 waitFor(a->{Tv1ViewModel.State<com.comeforfood.saferoute.feature.routing.RouteComparison> routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue();return routes!=null&&!routes.loading&&routes.data!=null&&!routes.data.routes.isEmpty();});
-                ui(a->{com.comeforfood.saferoute.feature.routing.RouteComparison routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue().data;assertFalse(routes.scoreDescription.isEmpty());assertFalse(routes.scoreDescription.contains("UNAVAILABLE"));for(com.comeforfood.saferoute.feature.routing.Route route:routes.routes){assertTrue(route.points.size()>=2);assertNull(route.riskScore);}});
+                ui(a->{com.comeforfood.saferoute.feature.routing.RouteComparison routes=new ViewModelProvider(a).get(Tv1ViewModel.class).routes().getValue().data;assertFalse(routes.scoreDescription.isEmpty());assertFalse(routes.scoreDescription.contains("UNAVAILABLE"));for(com.comeforfood.saferoute.feature.routing.Route route:routes.routes){assertTrue(route.points.size()>=2);if("true".equals(androidx.test.platform.app.InstrumentationRegistry.getArguments().getString("experimentalScoring")))assertNotNull(route.riskScore);else assertNull(route.riskScore);assertNotNull(route.nearbyHazards);assertEquals(30.0,route.hazardRadiusMeters,0.001);}});
             }
 
             if("true".equals(args.getString("adminE2E"))) {

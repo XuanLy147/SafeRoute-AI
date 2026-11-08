@@ -4,10 +4,11 @@ Defines standard request/response models for Google Routes candidate normalizati
 route comparison, and risk score integration with TV4/TV3/TV1.
 """
 
+from datetime import datetime
 from enum import Enum
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class TravelMode(str, Enum):
@@ -59,11 +60,23 @@ class RouteRiskScore(BaseModel):
     """Risk assessment contract provided by TV4 (PostGIS risk scorer)."""
 
     score: float = Field(..., ge=0.0, allow_inf_nan=False, description="Calculated hazard risk score")
-    level: Literal["LOW", "MEDIUM", "HIGH"] = Field(..., description="Risk level: 'LOW', 'MEDIUM', 'HIGH'")
+    level: Literal["LOW", "MEDIUM", "HIGH"] | None = Field(None, description="Risk level: 'LOW', 'MEDIUM', 'HIGH'")
     hazards_count: int = Field(..., ge=0, description="Total recorded hazards near this route")
     verified_hazards_count: int = Field(0, ge=0, description="Verified hazards near route")
     pending_hazards_count: int = Field(0, ge=0, description="Pending verification hazards near route")
     reason: str = Field(..., description="Human-readable explanation of recorded hazards")
+
+
+class RouteHazard(BaseModel):
+    id: str
+    category: str
+    status: Literal["VERIFIED", "PENDING_VERIFICATION"]
+    latitude: float
+    longitude: float
+    severity: str | None = None
+    observed_at: datetime | None = None
+    source_report_ids: list[str] = Field(default_factory=list)
+    score_contribution: float | None = Field(None, ge=0, allow_inf_nan=False)
 
 
 class EvaluatedRoute(BaseModel):
@@ -74,6 +87,14 @@ class EvaluatedRoute(BaseModel):
     distance_meters: int
     duration_seconds: int
     polyline: str
+    nearby_hazards: list[RouteHazard] | None = Field(
+        default=None, description="Nearby recorded hazards; null means unavailable, [] means none found"
+    )
+    hazard_radius_meters: float | None = Field(default=None, description="Proximity radius, not proof of same road/lane")
+    severity_counts: dict[str, int] | None = None
+    verified_high_count: int = 0
+    unscored_hazards_count: int = 0
+    risk_density_per_km: float | None = Field(None, ge=0, allow_inf_nan=False)
     risk: RouteRiskScore | None = Field(
         default=None, description="Risk assessment from PostGIS hazard data; None if scoring service not configured"
     )
@@ -99,6 +120,7 @@ class RouteCompareResponse(BaseModel):
     origin: LatLng
     destination: LatLng
     travel_mode: TravelMode
+    assessed_at: datetime | None = None
     risk_diagnostic: str | None = None
     risk_policy_revision: str | None = None
     risk_policy_status: str | None = None
@@ -121,3 +143,46 @@ class RouteCompareResponse(BaseModel):
     recommendation_basis: Literal["SAFETY_LOWEST_RISK", "DURATION_ETA_ONLY", "SINGLE_ROUTE"] | None = Field(
         None, description="Basis of recommendation: 'SAFETY_LOWEST_RISK', 'DURATION_ETA_ONLY', 'SINGLE_ROUTE'"
     )
+
+    @model_validator(mode="after")
+    def consistent_evidence_assessment(self):
+        if self.risk_policy_revision != "recorded-hazards-v1-2026-11-08":
+            return self
+        from math import isclose
+        ids = [r.id for r in self.routes]
+        if len(ids) != len(set(ids)) or (self.recommended_route_id is not None and self.recommended_route_id not in ids):
+            raise ValueError("Invalid candidate IDs")
+        scored = 0
+        for r in self.routes:
+            hs = r.nearby_hazards
+            if hs is None:
+                if r.risk is not None:
+                    raise ValueError("Score without evidence")
+                continue
+            levels = {k: sum((h.severity if h.severity in ("LOW", "MEDIUM", "HIGH") else "UNKNOWN") == k for h in hs)
+                      for k in ("LOW", "MEDIUM", "HIGH", "UNKNOWN")}
+            sources = [id for h in hs for id in h.source_report_ids]
+            if len(sources) != len(set(sources)) or any(h.id not in h.source_report_ids for h in hs):
+                raise ValueError("Duplicate/missing source reports")
+            if r.severity_counts != levels or r.verified_high_count != sum(h.status == "VERIFIED" and h.severity == "HIGH" for h in hs):
+                raise ValueError("Severity/evidence mismatch")
+            if r.unscored_hazards_count != sum(h.score_contribution is None for h in hs):
+                raise ValueError("Incomplete count mismatch")
+            if r.risk is None:
+                if r.unscored_hazards_count == 0:
+                    raise ValueError("Complete evidence without score")
+                continue
+            scored += 1
+            if r.unscored_hazards_count or r.risk.hazards_count != len(hs):
+                raise ValueError("Hazard count mismatch")
+            verified = sum(h.status == "VERIFIED" for h in hs)
+            if r.risk.verified_hazards_count != verified or r.risk.pending_hazards_count != len(hs)-verified:
+                raise ValueError("Verification count mismatch")
+            if not isclose(r.risk.score, sum(h.score_contribution for h in hs), abs_tol=1e-9):
+                raise ValueError("Contribution sum mismatch")
+        expected = "AVAILABLE" if scored == len(self.routes) and self.routes else "PARTIAL" if scored else "UNAVAILABLE"
+        if self.risk_assessment_status != expected:
+            raise ValueError("Assessment availability mismatch")
+        if self.recommendation_basis == "SAFETY_LOWEST_RISK" and expected != "AVAILABLE":
+            raise ValueError("Incomplete safety comparison")
+        return self
